@@ -12,6 +12,8 @@ cc_binary(
     includes = ["include"],
     deps = [
         "@heir//lib/Conversion/BGVToPoly",
+        "@bazel_tools//tools/cpp/runfiles",
+        "@circt//:CombHWDialect",
         "@heir//lib/Conversion/MemrefToArith:ExpandCopy",
         "@heir//lib/Conversion/MemrefToArith:MemrefToArithRegistration",
         "@heir//lib/Conversion/PolyToStandard",
@@ -20,6 +22,7 @@ cc_binary(
         "@heir//lib/Dialect/Poly/IR:Dialect",
         "@heir//lib/Dialect/Secret/IR:Dialect",
         "@heir//lib/Dialect/Secret/Transforms",
+        "@heir//lib/Transforms/CombOptimizer:CombOptimizerRegistration",
         "@llvm-project//mlir:AffineDialect",
         "@llvm-project//mlir:AffineTransforms",
         "@llvm-project//mlir:AllPassesAndDialects",

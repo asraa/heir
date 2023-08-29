@@ -6,6 +6,8 @@
 #include "include/Dialect/Poly/IR/PolyDialect.h"
 #include "include/Dialect/Secret/IR/SecretDialect.h"
 #include "include/Dialect/Secret/Transforms/Passes.h"
+#include "include/Transforms/CombOptimizer/CombOptimizer.h"
+#include "include/circt/Dialect/Comb/CombDialect.h"  // from @circt
 #include "mlir/include/mlir/Conversion/TosaToLinalg/TosaToLinalg.h"  // from @llvm-project
 #include "mlir/include/mlir/Dialect/Affine/IR/AffineOps.h"  // from @llvm-project
 #include "mlir/include/mlir/Dialect/Affine/Passes.h"   // from @llvm-project
@@ -24,6 +26,9 @@
 #include "mlir/include/mlir/Pass/PassRegistry.h"           // from @llvm-project
 #include "mlir/include/mlir/Tools/mlir-opt/MlirOptMain.h"  // from @llvm-project
 #include "mlir/include/mlir/Transforms/Passes.h"           // from @llvm-project
+#include "tools/cpp/runfiles/runfiles.h"
+
+using bazel::tools::cpp::runfiles::Runfiles;
 
 void tosaPipelineBuilder(mlir::OpPassManager &manager) {
   // TOSA to linalg
@@ -73,7 +78,15 @@ void tosaPipelineBuilder(mlir::OpPassManager &manager) {
 }
 
 int main(int argc, char **argv) {
+  std::string error;
+  std::unique_ptr<Runfiles> runfiles(Runfiles::Create(argv[0], &error));
+  if (runfiles == nullptr) {
+    return EXIT_FAILURE;
+  }
+
   mlir::DialectRegistry registry;
+  registry.insert<::circt::comb::CombDialect>();
+  registry.insert<mlir::heir::poly::PolyDialect>();
   registry.insert<mlir::heir::EncryptedArithDialect>();
   registry.insert<mlir::heir::bgv::BGVDialect>();
   registry.insert<mlir::heir::poly::PolyDialect>();
@@ -96,6 +109,13 @@ int main(int argc, char **argv) {
   // Custom passes in HEIR
   mlir::heir::poly::registerPolyToStandardPasses();
   mlir::heir::bgv::registerBGVToPolyPasses();
+
+  std::string yosysRunfileDir = runfiles->Rlocation("at_clifford_yosys");
+  mlir::PassPipelineRegistration<>(
+      "yosys-optimizer", "Run passes to optimize yosys modules",
+      [yosysRunfileDir](mlir::OpPassManager &pm) {
+        pm.addPass(mlir::heir::createABCPass(yosysRunfileDir));
+      });
 
   mlir::PassPipelineRegistration<>(
       "heir-tosa-to-arith",
