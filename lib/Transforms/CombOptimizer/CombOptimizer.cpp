@@ -122,31 +122,22 @@ struct YosysABCPass
     Yosys::run_pass("dump");
 
     auto importer = RTLILImporter(getTopologicalOrder(cellOrder));
-    auto combModuleOr =
-        importer.convert(Yosys::yosys_get_design(), &getContext());
-    if (failed(combModuleOr)) {
-      return;
-    }
-
-    Yosys::yosys_shutdown();
-
     mlir::ModuleOp module = getOperation();
-    if (combModuleOr.value().getOps<func::FuncOp>().begin() ==
-        combModuleOr.value().getOps<func::FuncOp>().end()) {
-      std::cout << "no funcs?" << std::endl;
-    }
-    combModuleOr.value()->getBlock()->dump();
-    auto translatedFunc = *combModuleOr.value().getOps<func::FuncOp>().begin();
     for (auto func : module.getOps<func::FuncOp>()) {
-      func->erase();
-      module.dump();
+      func->getBlock()->erase();
+      auto block = func.addEntryBlock();
+      auto builder = mlir::OpBuilder(func.getBody());
+      auto combModuleOr = importer.convert(Yosys::yosys_get_design(), block,
+                                           builder, &getContext());
+      if (failed(combModuleOr)) {
+        return;
+      }
     }
-
-    translatedFunc.dump();
-    module.push_back(translatedFunc);
+    Yosys::yosys_shutdown();
+    module.dump();
     // module.push_back(*combModuleOr.value().getOps<func::FuncOp>().begin());
 
-    //(void)applyPartialConversion(getOperation(), target, std::move(patterns));
+    (void)applyPartialConversion(getOperation(), target, std::move(patterns));
   }
 
   mlir::StringRef getArgument() const final { return "abc-optimizer"; }

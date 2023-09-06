@@ -30,12 +30,12 @@ Value RTLILImporter::getOrCreateValue(Yosys::RTLIL::Wire *wire) {
   return wireNameToValue.at(wireName);
 }
 
-mlir::FailureOr<mlir::ModuleOp> RTLILImporter::convert(
-    Yosys::RTLIL::Design *design, mlir::MLIRContext *context) {
-  mlir::ModuleOp module =
-      mlir::ModuleOp::create(mlir::UnknownLoc::get(context));
-
-  mlir::Builder builder(context);
+mlir::LogicalResult RTLILImporter::convert(Yosys::RTLIL::Design *design,
+                                           mlir::Block *block,
+                                           mlir::OpBuilder &builder,
+                                           mlir::MLIRContext *context) {
+  // mlir::ModuleOp module =
+  //     mlir::ModuleOp::create(mlir::UnknownLoc::get(context));
 
   for (auto *rModule : design->modules()) {
     if (rModule->get_blackbox_attribute()) {
@@ -72,9 +72,7 @@ mlir::FailureOr<mlir::ModuleOp> RTLILImporter::convert(
         llvm::ArrayRef<mlir::NamedAttribute>{});
 
     // Seed the builder with an initial block.
-    auto *block = function.addEntryBlock();
-    auto builder_ = mlir::OpBuilder(function.getBody());
-    builder_.setInsertionPointToStart(block);
+    builder.setInsertionPointToStart(block);
     // Map the wires to the block arguments' mlir::Values.
     for (auto i = 0; i < args.size(); i++) {
       addWireValue(args[i], block->getArgument(i));
@@ -118,10 +116,10 @@ mlir::FailureOr<mlir::ModuleOp> RTLILImporter::convert(
             std::cout << sigSpec.as_bit().wire->name.str() << " "
                       << sigSpec.as_bit().offset << std::endl;
             auto argA = getOrCreateValue(sigSpec.as_bit().wire);
-            auto extractOp = builder_.create<circt::comb::ExtractOp>(
+            auto extractOp = builder.create<circt::comb::ExtractOp>(
                 function.getLoc(),
-                builder_.getIntegerType(argA.getType().getIntOrFloatBitWidth() -
-                                        1),
+                builder.getIntegerType(argA.getType().getIntOrFloatBitWidth() -
+                                       1),
                 argA, sigSpec.as_bit().offset);
             inputValues.push_back(extractOp->getResult(0));
           }
@@ -133,9 +131,9 @@ mlir::FailureOr<mlir::ModuleOp> RTLILImporter::convert(
       }
 
       auto lookupTable =
-          builder_.getBoolArrayAttr(llvm::ArrayRef<bool>(lutValues));
+          builder.getBoolArrayAttr(llvm::ArrayRef<bool>(lutValues));
       lookupTable.dump();
-      auto truthOp = builder_.create<circt::comb::TruthTableOp>(
+      auto truthOp = builder.create<circt::comb::TruthTableOp>(
           function.getLoc(), inputValues, lookupTable);
       // Hookup result with the \\Y connection result
       auto resultSigSpec =
@@ -171,8 +169,8 @@ mlir::FailureOr<mlir::ModuleOp> RTLILImporter::convert(
           } else if (conn.second.is_bit() && conn.second.as_bit().is_wire()) {
             // We are mapping a return wire to an input bit of a wire.
             auto arg = getOrCreateValue(conn.second.as_bit().wire);
-            auto extractOp = builder_.create<circt::comb::ExtractOp>(
-                function.getLoc(), builder_.getIntegerType(1), arg,
+            auto extractOp = builder.create<circt::comb::ExtractOp>(
+                function.getLoc(), builder.getIntegerType(1), arg,
                 conn.second.as_bit().offset);
             addWireValue(conn.first.as_wire(), extractOp->getResult(0));
           }
@@ -186,8 +184,8 @@ mlir::FailureOr<mlir::ModuleOp> RTLILImporter::convert(
           } else if (conn.second.is_bit() && conn.second.as_bit().is_wire()) {
             // Map a return bit to a bit of the input.
             auto arg = getOrCreateValue(conn.second.as_bit().wire);
-            auto extractOp = builder_.create<circt::comb::ExtractOp>(
-                function.getLoc(), builder_.getIntegerType(1), arg,
+            auto extractOp = builder.create<circt::comb::ExtractOp>(
+                function.getLoc(), builder.getIntegerType(1), arg,
                 conn.second.as_bit().offset);
             retBitValues[conn.first.as_bit().wire][conn.first.as_bit().offset] =
                 extractOp->getResult(0);
@@ -205,24 +203,20 @@ mlir::FailureOr<mlir::ModuleOp> RTLILImporter::convert(
         std::cout << "add concat op" << std::endl;
         // Insert concat op and return that
         auto concatOp =
-            builder_.create<circt::comb::ConcatOp>(function.getLoc(), retBits);
-        builder_.create<func::ReturnOp>(function.getLoc(),
-                                        concatOp.getResult());
+            builder.create<circt::comb::ConcatOp>(function.getLoc(), retBits);
+        builder.create<func::ReturnOp>(function.getLoc(), concatOp.getResult());
       } else {
         // Otherwise get ret wire from the map and return that. It must be an
         // output.
-        builder_.create<func::ReturnOp>(function.getLoc(),
-                                        getOrCreateValue(resultWire));
+        builder.create<func::ReturnOp>(function.getLoc(),
+                                       getOrCreateValue(resultWire));
       }
     }
 
     // When to add return statement?
     function.dump();
-
-    module.push_back(function);
-    module.dump();
   }
-  return module;
+  return success();
 }
 
 }  // namespace heir

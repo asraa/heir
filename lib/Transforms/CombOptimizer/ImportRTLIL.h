@@ -4,11 +4,12 @@
 #include <utility>
 
 #include "kernel/rtlil.h"
-#include "llvm/include/llvm/ADT/DenseMap.h"           // from @llvm-project
-#include "llvm/include/llvm/ADT/TypeSwitch.h"         // from @llvm-project
-#include "mlir/include/mlir/IR/BuiltinOps.h"          // from @llvm-project
-#include "mlir/include/mlir/IR/Operation.h"           // from @llvm-project
-#include "mlir/include/mlir/Support/LogicalResult.h"  // from @llvm-project
+#include "llvm/include/llvm/ADT/DenseMap.h"             // from @llvm-project
+#include "llvm/include/llvm/ADT/TypeSwitch.h"           // from @llvm-project
+#include "mlir/include/mlir/Dialect/Func/IR/FuncOps.h"  // from @llvm-project
+#include "mlir/include/mlir/IR/BuiltinOps.h"            // from @llvm-project
+#include "mlir/include/mlir/IR/Operation.h"             // from @llvm-project
+#include "mlir/include/mlir/Support/LogicalResult.h"    // from @llvm-project
 
 namespace mlir {
 namespace heir {
@@ -23,8 +24,9 @@ class RTLILImporter {
   RTLILImporter(llvm::SmallVector<std::string, 10> cellOrdering)
       : cellOrdering(cellOrdering) {}
 
-  mlir::FailureOr<mlir::ModuleOp> convert(Yosys::RTLIL::Design *design,
-                                          mlir::MLIRContext *context);
+  mlir::LogicalResult convert(Yosys::RTLIL::Design *design, mlir::Block *block,
+                              mlir::OpBuilder &builder,
+                              mlir::MLIRContext *context);
 
  private:
   llvm::StringMap<Value> wireNameToValue;

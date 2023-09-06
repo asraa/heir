@@ -174,6 +174,7 @@ gentbl_cc_library(
     deps = [
         ":dialect_inc_gen",
         ":td_files",
+        "@llvm-project//mlir:FunctionInterfacesTdFiles",
     ],
 )
 

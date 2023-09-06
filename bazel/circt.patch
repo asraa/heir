@@ -1,0 +1,65 @@
+diff --git a/include/circt/Dialect/Comb/CombOps.h b/include/circt/Dialect/Comb/CombOps.h
+index 8c64c0e2c..d3e3dc7d4 100644
+--- a/include/circt/Dialect/Comb/CombOps.h
++++ b/include/circt/Dialect/Comb/CombOps.h
+@@ -18,7 +18,7 @@
+ #include "circt/Support/LLVM.h"
+ #include "mlir/Bytecode/BytecodeOpInterface.h"
+ #include "mlir/IR/BuiltinOps.h"
+-#include "mlir/IR/FunctionInterfaces.h"
++#include "mlir/Interfaces/FunctionInterfaces.h"
+ #include "mlir/IR/OpImplementation.h"
+ #include "mlir/Interfaces/InferTypeOpInterface.h"
+ #include "mlir/Interfaces/SideEffectInterfaces.h"
+diff --git a/include/circt/Dialect/HW/HWOps.h b/include/circt/Dialect/HW/HWOps.h
+index d358879f6..f3519e1b1 100644
+--- a/include/circt/Dialect/HW/HWOps.h
++++ b/include/circt/Dialect/HW/HWOps.h
+@@ -18,7 +18,7 @@
+ #include "circt/Dialect/HW/HWTypes.h"
+ #include "circt/Support/BuilderUtils.h"
+ #include "mlir/IR/BuiltinOps.h"
+-#include "mlir/IR/FunctionInterfaces.h"
++#include "mlir/Interfaces/FunctionInterfaces.h"
+ #include "mlir/IR/ImplicitLocOpBuilder.h"
+ #include "mlir/IR/OpImplementation.h"
+ #include "mlir/IR/RegionKindInterface.h"
+diff --git a/include/circt/Dialect/HW/HWStructure.td b/include/circt/Dialect/HW/HWStructure.td
+index d2bf7c491..c32ffc3f9 100644
+--- a/include/circt/Dialect/HW/HWStructure.td
++++ b/include/circt/Dialect/HW/HWStructure.td
+@@ -17,7 +17,7 @@ include "circt/Dialect/HW/HWAttributes.td"
+ include "circt/Dialect/HW/HWDialect.td"
+ include "circt/Dialect/HW/HWOpInterfaces.td"
+ include "circt/Dialect/HW/HWTypes.td"
+-include "mlir/IR/FunctionInterfaces.td"
++include "mlir/Interfaces/FunctionInterfaces.td"
+ include "mlir/IR/OpAsmInterface.td"
+ include "mlir/IR/OpBase.td"
+ include "mlir/IR/RegionKindInterface.td"
+diff --git a/lib/Dialect/HW/HWOps.cpp b/lib/Dialect/HW/HWOps.cpp
+index 932b21bac..050e19dfb 100644
+--- a/lib/Dialect/HW/HWOps.cpp
++++ b/lib/Dialect/HW/HWOps.cpp
+@@ -21,7 +21,7 @@
+ #include "circt/Support/CustomDirectiveImpl.h"
+ #include "circt/Support/Namespace.h"
+ #include "mlir/IR/Builders.h"
+-#include "mlir/IR/FunctionImplementation.h"
++#include "mlir/Interfaces/FunctionImplementation.h"
+ #include "mlir/IR/PatternMatch.h"
+ #include "llvm/ADT/BitVector.h"
+ #include "llvm/ADT/SmallPtrSet.h"
+diff --git a/lib/Dialect/HW/ModuleImplementation.cpp b/lib/Dialect/HW/ModuleImplementation.cpp
+index 4bfa14fec..8322c6d71 100644
+--- a/lib/Dialect/HW/ModuleImplementation.cpp
++++ b/lib/Dialect/HW/ModuleImplementation.cpp
+@@ -13,7 +13,7 @@
+
+ #include "mlir/IR/Builders.h"
+ #include "mlir/IR/DialectImplementation.h"
+-#include "mlir/IR/FunctionImplementation.h"
++#include "mlir/Interfaces/FunctionImplementation.h"
+
+ using namespace circt;
+ using namespace circt::hw;

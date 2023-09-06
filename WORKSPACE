@@ -98,8 +98,10 @@ new_git_repository(
 new_git_repository(
     name = "circt",
     build_file = "//bazel:circt.BUILD",
-    # As of 2023-08-16
-    commit = "5c20f56072d0aceb92c5aa073bf8a00c3d99ecd5",
+    # As of 2023-09-05
+    commit = "37331eb48650832316aea3d9a27418f8699d8162",
+    patch_args = ["-p1"],
+    patches = ["@heir//bazel:circt.patch"],
     remote = "https://github.com/llvm/circt.git",
 )
 
