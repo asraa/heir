@@ -124,6 +124,8 @@ struct YosysABCPass
     auto importer = RTLILImporter(getTopologicalOrder(cellOrder));
     mlir::ModuleOp module = getOperation();
     for (auto func : module.getOps<func::FuncOp>()) {
+      // Erase the func block, add a new one, and build inside.
+      // TODO: Match args?
       func->getBlock()->erase();
       auto block = func.addEntryBlock();
       auto builder = mlir::OpBuilder(func.getBody());

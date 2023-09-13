@@ -117,7 +117,7 @@ mlir::LogicalResult RTLILImporter::convert(Yosys::RTLIL::Design *design,
                       << sigSpec.as_bit().offset << std::endl;
             auto argA = getOrCreateValue(sigSpec.as_bit().wire);
             auto extractOp = builder.create<circt::comb::ExtractOp>(
-                function.getLoc(),
+                block->getParent()->getLoc(),
                 builder.getIntegerType(argA.getType().getIntOrFloatBitWidth() -
                                        1),
                 argA, sigSpec.as_bit().offset);
@@ -134,7 +134,7 @@ mlir::LogicalResult RTLILImporter::convert(Yosys::RTLIL::Design *design,
           builder.getBoolArrayAttr(llvm::ArrayRef<bool>(lutValues));
       lookupTable.dump();
       auto truthOp = builder.create<circt::comb::TruthTableOp>(
-          function.getLoc(), inputValues, lookupTable);
+          block->getParent()->getLoc(), inputValues, lookupTable);
       // Hookup result with the \\Y connection result
       auto resultSigSpec =
           cell->connections().at(Yosys::RTLIL::IdString("\\Y"));
@@ -170,7 +170,7 @@ mlir::LogicalResult RTLILImporter::convert(Yosys::RTLIL::Design *design,
             // We are mapping a return wire to an input bit of a wire.
             auto arg = getOrCreateValue(conn.second.as_bit().wire);
             auto extractOp = builder.create<circt::comb::ExtractOp>(
-                function.getLoc(), builder.getIntegerType(1), arg,
+                block->getParent()->getLoc(), builder.getIntegerType(1), arg,
                 conn.second.as_bit().offset);
             addWireValue(conn.first.as_wire(), extractOp->getResult(0));
           }
@@ -185,7 +185,7 @@ mlir::LogicalResult RTLILImporter::convert(Yosys::RTLIL::Design *design,
             // Map a return bit to a bit of the input.
             auto arg = getOrCreateValue(conn.second.as_bit().wire);
             auto extractOp = builder.create<circt::comb::ExtractOp>(
-                function.getLoc(), builder.getIntegerType(1), arg,
+                block->getParent()->getLoc(), builder.getIntegerType(1), arg,
                 conn.second.as_bit().offset);
             retBitValues[conn.first.as_bit().wire][conn.first.as_bit().offset] =
                 extractOp->getResult(0);
@@ -202,19 +202,20 @@ mlir::LogicalResult RTLILImporter::convert(Yosys::RTLIL::Design *design,
         }
         std::cout << "add concat op" << std::endl;
         // Insert concat op and return that
-        auto concatOp =
-            builder.create<circt::comb::ConcatOp>(function.getLoc(), retBits);
-        builder.create<func::ReturnOp>(function.getLoc(), concatOp.getResult());
+        auto concatOp = builder.create<circt::comb::ConcatOp>(
+            block->getParent()->getLoc(), retBits);
+        builder.create<func::ReturnOp>(block->getParent()->getLoc(),
+                                       concatOp.getResult());
       } else {
         // Otherwise get ret wire from the map and return that. It must be an
         // output.
-        builder.create<func::ReturnOp>(function.getLoc(),
+        builder.create<func::ReturnOp>(block->getParent()->getLoc(),
                                        getOrCreateValue(resultWire));
       }
     }
 
     // When to add return statement?
-    function.dump();
+    block->dump();
   }
   return success();
 }
