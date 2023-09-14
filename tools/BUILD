@@ -9,7 +9,10 @@ package(
 cc_binary(
     name = "heir-opt",
     srcs = ["heir-opt.cpp"],
-    includes = ["include"],
+    # FIXME: Propagate these from deps, see why includes isn't working
+    includes = [
+        "/third_party/circt/include",
+    ],
     deps = [
         "@heir//lib/Conversion/BGVToPoly",
         "@heir//lib/Conversion/MemrefToArith:ExpandCopy",
@@ -20,6 +23,8 @@ cc_binary(
         "@heir//lib/Dialect/Poly/IR:Dialect",
         "@heir//lib/Dialect/Secret/IR:Dialect",
         "@heir//lib/Dialect/Secret/Transforms",
+        "@heir//third_party/circt/lib/Dialect/Comb:Dialect",
+        "@heir//third_party/circt/lib/Dialect/HW:Dialect",
         "@llvm-project//mlir:AffineDialect",
         "@llvm-project//mlir:AffineTransforms",
         "@llvm-project//mlir:AllPassesAndDialects",

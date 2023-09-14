@@ -24,6 +24,8 @@
 #include "mlir/include/mlir/Pass/PassRegistry.h"           // from @llvm-project
 #include "mlir/include/mlir/Tools/mlir-opt/MlirOptMain.h"  // from @llvm-project
 #include "mlir/include/mlir/Transforms/Passes.h"           // from @llvm-project
+#include "third_party/circt/include/circt/Dialect/Comb/CombDialect.h"
+#include "third_party/circt/include/circt/Dialect/HW/HWDialect.h"
 
 void tosaPipelineBuilder(mlir::OpPassManager &manager) {
   // TOSA to linalg
@@ -78,6 +80,7 @@ int main(int argc, char **argv) {
   registry.insert<mlir::heir::bgv::BGVDialect>();
   registry.insert<mlir::heir::poly::PolyDialect>();
   registry.insert<mlir::heir::secret::SecretDialect>();
+  registry.insert<circt::comb::CombDialect>();
 
   // Add expected MLIR dialects to the registry.
   registry.insert<mlir::affine::AffineDialect>();
