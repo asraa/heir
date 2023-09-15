@@ -10,6 +10,9 @@ jobs:
   # Copy Support, Dialect/HW, and Dialect/Comb.
   circt:
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      pull-requests: write
     steps:
       - uses: actions/checkout@8e5e7e5ab8b370d6c329ec480221332ada57f0ab # pin@v3
         with:
