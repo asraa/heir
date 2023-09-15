@@ -16,7 +16,7 @@ jobs:
           path: HEIR
       - uses: actions/checkout@8e5e7e5ab8b370d6c329ec480221332ada57f0ab # pin@v3
         with:
-          repository: llvm/cirt
+          repository: llvm/circt
           path: CIRCT
 
       - name: Update files from CIRCT to HEIR
