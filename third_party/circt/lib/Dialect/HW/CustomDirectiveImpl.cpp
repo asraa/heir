@@ -7,7 +7,6 @@
 //===----------------------------------------------------------------------===//
 
 #include "circt/Dialect/HW/CustomDirectiveImpl.h"
-
 #include "circt/Dialect/HW/HWAttributes.h"
 
 using namespace circt;
@@ -17,10 +16,12 @@ ParseResult circt::parseInputPortList(
     OpAsmParser &parser,
     SmallVectorImpl<OpAsmParser::UnresolvedOperand> &inputs,
     SmallVectorImpl<Type> &inputTypes, ArrayAttr &inputNames) {
+
   SmallVector<Attribute> argNames;
   auto parseInputPort = [&]() -> ParseResult {
     std::string portName;
-    if (parser.parseKeywordOrString(&portName)) return failure();
+    if (parser.parseKeywordOrString(&portName))
+      return failure();
     argNames.push_back(StringAttr::get(parser.getContext(), portName));
     inputs.push_back({});
     inputTypes.push_back({});
@@ -55,10 +56,12 @@ void circt::printInputPortList(OpAsmPrinter &p, Operation *op,
 ParseResult circt::parseOutputPortList(OpAsmParser &parser,
                                        SmallVectorImpl<Type> &resultTypes,
                                        ArrayAttr &resultNames) {
+
   SmallVector<Attribute> names;
   auto parseResultPort = [&]() -> ParseResult {
     std::string portName;
-    if (parser.parseKeywordOrString(&portName)) return failure();
+    if (parser.parseKeywordOrString(&portName))
+      return failure();
     names.push_back(StringAttr::get(parser.getContext(), portName));
     resultTypes.push_back({});
     return parser.parseColonType(resultTypes.back());
@@ -101,7 +104,8 @@ ParseResult circt::parseOptionalParameterList(OpAsmParser &parser,
 
     // Parse the default value if present.
     if (succeeded(parser.parseOptionalEqual())) {
-      if (parser.parseAttribute(value, type)) return failure();
+      if (parser.parseAttribute(value, type))
+        return failure();
     }
 
     auto &builder = parser.getBuilder();
@@ -121,7 +125,8 @@ ParseResult circt::parseOptionalParameterList(OpAsmParser &parser,
 
 void circt::printOptionalParameterList(OpAsmPrinter &p, Operation *op,
                                        ArrayAttr parameters) {
-  if (parameters.empty()) return;
+  if (parameters.empty())
+    return;
 
   p << '<';
   llvm::interleaveComma(parameters, p, [&](Attribute param) {

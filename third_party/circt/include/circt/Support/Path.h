@@ -25,6 +25,6 @@ namespace circt {
 void appendPossiblyAbsolutePath(llvm::SmallVectorImpl<char> &base,
                                 const llvm::Twine &suffix);
 
-}  // namespace circt
+} // namespace circt
 
-#endif  // CIRCT_SUPPORT_PATH_H
+#endif // CIRCT_SUPPORT_PATH_H

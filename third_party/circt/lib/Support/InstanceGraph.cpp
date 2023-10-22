@@ -7,7 +7,6 @@
 //===----------------------------------------------------------------------===//
 
 #include "circt/Support/InstanceGraph.h"
-
 #include "mlir/IR/BuiltinOps.h"
 #include "mlir/IR/Threading.h"
 
@@ -21,7 +20,8 @@ void InstanceRecord::erase() {
   else
     target->firstUse = nextUse;
   // Update the next node to point to the prev node.
-  if (nextUse) nextUse->prevUse = prevUse;
+  if (nextUse)
+    nextUse->prevUse = prevUse;
   getParent()->instances.erase(this);
 }
 
@@ -35,7 +35,8 @@ InstanceRecord *InstanceGraphNode::addInstance(InstanceOpInterface instance,
 
 void InstanceGraphNode::recordUse(InstanceRecord *record) {
   record->nextUse = firstUse;
-  if (firstUse) firstUse->prevUse = record;
+  if (firstUse)
+    firstUse->prevUse = record;
   firstUse = record;
 }
 
@@ -97,7 +98,8 @@ void InstanceGraph::erase(InstanceGraphNode *node) {
   assert(node->noUses() &&
          "all instances of this module must have been erased.");
   // Erase all instances inside this module.
-  for (auto *instance : llvm::make_early_inc_range(*node)) instance->erase();
+  for (auto *instance : llvm::make_early_inc_range(*node))
+    instance->erase();
   nodeMap.erase(node->getModule().getModuleNameAttr());
   nodes.erase(node);
 }
@@ -112,8 +114,8 @@ InstanceGraphNode *InstanceGraph::lookup(ModuleOpInterface op) {
   return lookup(cast<ModuleOpInterface>(op).getModuleNameAttr());
 }
 
-ModuleOpInterface InstanceGraph::getReferencedModuleImpl(
-    InstanceOpInterface op) {
+ModuleOpInterface
+InstanceGraph::getReferencedModuleImpl(InstanceOpInterface op) {
   return lookup(op.getReferencedModuleNameAttr())->getModule();
 }
 
@@ -144,7 +146,8 @@ bool InstanceGraph::isAncestor(ModuleOpInterface child,
   while (!worklist.empty()) {
     auto *node = worklist.back();
     worklist.pop_back();
-    if (node->getModule() == parent) return true;
+    if (node->getModule() == parent)
+      return true;
     for (auto *use : node->uses()) {
       auto *mod = use->getParent();
       if (!seen.count(mod)) {
@@ -158,7 +161,8 @@ bool InstanceGraph::isAncestor(ModuleOpInterface child,
 
 FailureOr<llvm::ArrayRef<InstanceGraphNode *>>
 InstanceGraph::getInferredTopLevelNodes() {
-  if (!inferredTopLevelNodes.empty()) return {inferredTopLevelNodes};
+  if (!inferredTopLevelNodes.empty())
+    return {inferredTopLevelNodes};
 
   /// Topologically sort the instance graph.
   llvm::SetVector<InstanceGraphNode *> visited, marked;
@@ -170,7 +174,8 @@ InstanceGraph::getInferredTopLevelNodes() {
   std::function<bool(InstanceGraphNode *, SmallVector<InstanceGraphNode *>)>
       cycleUtil =
           [&](InstanceGraphNode *node, SmallVector<InstanceGraphNode *> trace) {
-            if (visited.contains(node)) return false;
+            if (visited.contains(node))
+              return false;
             trace.push_back(node);
             if (marked.contains(node)) {
               // Cycle detected.
@@ -182,7 +187,7 @@ InstanceGraph::getInferredTopLevelNodes() {
               InstanceGraphNode *targetModule = use->getTarget();
               candidateTopLevels.remove(targetModule);
               if (cycleUtil(targetModule, trace))
-                return true;  // Cycle detected.
+                return true; // Cycle detected.
             }
             marked.remove(node);
             visited.insert(node);
@@ -191,10 +196,12 @@ InstanceGraph::getInferredTopLevelNodes() {
 
   bool cyclic = false;
   for (auto moduleIt : *this) {
-    if (visited.contains(moduleIt)) continue;
+    if (visited.contains(moduleIt))
+      continue;
 
     cyclic |= cycleUtil(moduleIt, {});
-    if (cyclic) break;
+    if (cyclic)
+      break;
   }
 
   if (cyclic) {
@@ -218,8 +225,8 @@ InstanceGraph::getInferredTopLevelNodes() {
 static InstancePath empty{};
 
 // NOLINTBEGIN(misc-no-recursion)
-ArrayRef<InstancePath> InstancePathCache::getAbsolutePaths(
-    ModuleOpInterface op) {
+ArrayRef<InstancePath>
+InstancePathCache::getAbsolutePaths(ModuleOpInterface op) {
   InstanceGraphNode *node = instanceGraph[op];
 
   if (node == instanceGraph.getTopLevelNode()) {
@@ -228,7 +235,8 @@ ArrayRef<InstancePath> InstancePathCache::getAbsolutePaths(
 
   // Fast path: hit the cache.
   auto cached = absolutePathsCache.find(op);
-  if (cached != absolutePathsCache.end()) return cached->second;
+  if (cached != absolutePathsCache.end())
+    return cached->second;
 
   // For each instance, collect the instance paths to its parent and append the
   // instance itself to each.
@@ -278,6 +286,7 @@ InstancePath InstancePathCache::prependInstance(InstanceOpInterface inst,
 
 void InstancePathCache::replaceInstance(InstanceOpInterface oldOp,
                                         InstanceOpInterface newOp) {
+
   instanceGraph.replaceInstance(oldOp, newOp);
 
   // Iterate over all the paths, and search for the old InstanceOpInterface. If
@@ -289,7 +298,8 @@ void InstancePathCache::replaceInstance(InstanceOpInterface oldOp,
   };
 
   for (auto &iter : absolutePathsCache) {
-    if (!instanceExists(iter.getSecond())) continue;
+    if (!instanceExists(iter.getSecond()))
+      continue;
     SmallVector<InstancePath, 8> updatedPaths;
     for (auto path : iter.getSecond()) {
       const auto *iter = llvm::find(path, oldOp);

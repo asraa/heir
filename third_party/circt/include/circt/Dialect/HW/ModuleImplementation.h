@@ -26,6 +26,7 @@ namespace module_like_impl {
 
 struct PortParse : OpAsmParser::Argument {
   ModulePort::Direction direction;
+  std::string rawName;
 };
 
 /// This is a variant of mlir::parseFunctionSignature that allows names on
@@ -49,8 +50,8 @@ ParseResult parseModuleSignature(OpAsmParser &parser,
                                  TypeAttr &modType);
 void printModuleSignatureNew(OpAsmPrinter &p, Operation *op);
 
-}  // namespace module_like_impl
-}  // namespace hw
-}  // namespace circt
+} // namespace module_like_impl
+} // namespace hw
+} // namespace circt
 
-#endif  // CIRCT_DIALECT_HW_MODULEIMPLEMENTATION_H
+#endif // CIRCT_DIALECT_HW_MODULEIMPLEMENTATION_H

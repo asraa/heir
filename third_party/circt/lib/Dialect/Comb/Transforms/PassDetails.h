@@ -21,7 +21,7 @@ namespace comb {
 #define GEN_PASS_CLASSES
 #include "circt/Dialect/Comb/Passes.h.inc"
 
-}  // namespace comb
-}  // namespace circt
+} // namespace comb
+} // namespace circt
 
-#endif  // DIALECT_COMB_TRANSFORMS_PASSDETAILS_H
+#endif // DIALECT_COMB_TRANSFORMS_PASSDETAILS_H

@@ -15,15 +15,15 @@
 #ifndef CIRCT_SUPPORT_BACKEDGEBUILDER_H
 #define CIRCT_SUPPORT_BACKEDGEBUILDER_H
 
-#include "llvm/ADT/SmallVector.h"
 #include "mlir/IR/Location.h"
 #include "mlir/IR/Value.h"
+#include "llvm/ADT/SmallVector.h"
 
 namespace mlir {
 class OpBuilder;
 class PatternRewriter;
 class Operation;
-}  // namespace mlir
+} // namespace mlir
 
 namespace circt {
 
@@ -46,7 +46,7 @@ class Backedge;
 class BackedgeBuilder {
   friend class Backedge;
 
- public:
+public:
   /// To build a backedge op and manipulate it, we need a `PatternRewriter` and
   /// a `Location`. Store them during construct of this instance and use them
   /// when building.
@@ -67,7 +67,7 @@ class BackedgeBuilder {
   /// existing cursor ops will be abandoned.
   void abandon();
 
- private:
+private:
   mlir::OpBuilder &builder;
   mlir::PatternRewriter *rewriter;
   mlir::Location loc;
@@ -83,18 +83,18 @@ class Backedge {
   /// `Backedge` is constructed exclusively by `BackedgeBuilder`.
   Backedge(mlir::Operation *op);
 
- public:
+public:
   Backedge() {}
 
   explicit operator bool() const { return !!value; }
   operator mlir::Value() const { return value; }
   void setValue(mlir::Value);
 
- private:
+private:
   mlir::Value value;
   bool set = false;
 };
 
-}  // namespace circt
+} // namespace circt
 
-#endif  // CIRCT_SUPPORT_BACKEDGEBUILDER_H
+#endif // CIRCT_SUPPORT_BACKEDGEBUILDER_H

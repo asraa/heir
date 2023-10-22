@@ -11,8 +11,8 @@
 //===----------------------------------------------------------------------===//
 
 #include "circt/Support/BackedgeBuilder.h"
-
 #include "circt/Support/LLVM.h"
+
 #include "mlir/IR/BuiltinOps.h"
 #include "mlir/IR/PatternMatch.h"
 
@@ -24,7 +24,7 @@ void Backedge::setValue(mlir::Value newValue) {
   assert(value.getType() == newValue.getType());
   assert(!set && "backedge already set to a value!");
   value.replaceAllUsesWith(newValue);
-  value = newValue;  // In case the backedge is still referred to after setting.
+  value = newValue; // In case the backedge is still referred to after setting.
   set = true;
 
   // If the backedge is referenced again, it should now point to the updated
@@ -38,8 +38,8 @@ LogicalResult BackedgeBuilder::clearOrEmitError() {
   unsigned numInUse = 0;
   for (Operation *op : edges) {
     if (!op->use_empty()) {
-      auto diag = op->emitError("backedge of type `")
-                  << op->getResult(0).getType() << "`still in use";
+      auto diag = op->emitError("backedge of type ")
+                  << op->getResult(0).getType() << " still in use";
       for (auto user : op->getUsers())
         diag.attachNote(user->getLoc()) << "used by " << *user;
       ++numInUse;
@@ -63,7 +63,8 @@ BackedgeBuilder::BackedgeBuilder(OpBuilder &builder, Location loc)
 BackedgeBuilder::BackedgeBuilder(PatternRewriter &rewriter, Location loc)
     : builder(rewriter), rewriter(&rewriter), loc(loc) {}
 Backedge BackedgeBuilder::get(Type t, mlir::LocationAttr optionalLoc) {
-  if (!optionalLoc) optionalLoc = loc;
+  if (!optionalLoc)
+    optionalLoc = loc;
   Operation *op = builder.create<mlir::UnrealizedConversionCastOp>(
       optionalLoc, t, ValueRange{});
   edges.push_back(op);

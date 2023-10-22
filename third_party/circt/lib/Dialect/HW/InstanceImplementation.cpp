@@ -7,21 +7,21 @@
 //===----------------------------------------------------------------------===//
 
 #include "circt/Dialect/HW/InstanceImplementation.h"
-
 #include "circt/Dialect/HW/HWOps.h"
 #include "circt/Dialect/HW/HWSymCache.h"
 
 using namespace circt;
 using namespace circt::hw;
 
-Operation *instance_like_impl::getReferencedModule(
-    const HWSymbolCache *cache, Operation *instanceOp,
-    mlir::FlatSymbolRefAttr moduleName) {
+Operation *
+instance_like_impl::getReferencedModule(const HWSymbolCache *cache,
+                                        Operation *instanceOp,
+                                        mlir::FlatSymbolRefAttr moduleName) {
   if (cache)
-    if (auto *result = cache->getDefinition(moduleName)) return result;
+    if (auto *result = cache->getDefinition(moduleName))
+      return result;
 
-  auto topLevelModuleOp = instanceOp->getParentOfType<ModuleOp>();
-  return topLevelModuleOp.lookupSymbol(moduleName.getValue());
+  return SymbolTable::lookupNearestSymbolFrom(instanceOp, moduleName);
 }
 
 LogicalResult instance_like_impl::verifyReferencedModule(
@@ -157,9 +157,10 @@ LogicalResult instance_like_impl::verifyOutputs(
   return success();
 }
 
-LogicalResult instance_like_impl::verifyParameters(
-    ArrayAttr parameters, ArrayAttr moduleParameters,
-    const EmitErrorFn &emitError) {
+LogicalResult
+instance_like_impl::verifyParameters(ArrayAttr parameters,
+                                     ArrayAttr moduleParameters,
+                                     const EmitErrorFn &emitError) {
   // Check parameters match up.
   auto numParameters = parameters.size();
   if (numParameters != moduleParameters.size()) {
@@ -276,9 +277,10 @@ LogicalResult instance_like_impl::verifyInstanceOfHWModule(
   return success();
 }
 
-LogicalResult instance_like_impl::verifyParameterStructure(
-    ArrayAttr parameters, ArrayAttr moduleParameters,
-    const EmitErrorFn &emitError) {
+LogicalResult
+instance_like_impl::verifyParameterStructure(ArrayAttr parameters,
+                                             ArrayAttr moduleParameters,
+                                             const EmitErrorFn &emitError) {
   // Check that all the parameter values specified to the instance are
   // structurally valid.
   for (auto param : parameters) {
@@ -286,7 +288,8 @@ LogicalResult instance_like_impl::verifyParameterStructure(
     auto value = paramAttr.getValue();
     // The SymbolUses verifier which checks that this exists may not have been
     // run yet. Let it issue the error.
-    if (!value) continue;
+    if (!value)
+      continue;
 
     auto typedValue = value.dyn_cast<mlir::TypedAttr>();
     if (!typedValue) {
@@ -315,14 +318,16 @@ LogicalResult instance_like_impl::verifyParameterStructure(
 
 StringAttr instance_like_impl::getName(ArrayAttr names, size_t idx) {
   // Tolerate malformed IR here to enable debug printing etc.
-  if (names && idx < names.size()) return names[idx].cast<StringAttr>();
+  if (names && idx < names.size())
+    return names[idx].cast<StringAttr>();
   return StringAttr();
 }
 
 ArrayAttr instance_like_impl::updateName(ArrayAttr oldNames, size_t i,
                                          StringAttr name) {
   SmallVector<Attribute> newNames(oldNames.begin(), oldNames.end());
-  if (newNames[i] == name) return oldNames;
+  if (newNames[i] == name)
+    return oldNames;
   newNames[i] = name;
   return ArrayAttr::get(oldNames.getContext(), oldNames);
 }

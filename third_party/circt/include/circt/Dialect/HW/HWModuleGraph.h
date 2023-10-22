@@ -33,9 +33,9 @@ namespace detail {
 // graph traits for mlir::Operation.
 using HWOperation = mlir::Operation;
 
-}  // namespace detail
-}  // namespace hw
-}  // namespace circt
+} // namespace detail
+} // namespace hw
+} // namespace circt
 
 template <>
 struct llvm::GraphTraits<circt::hw::detail::HWOperation *> {
@@ -86,31 +86,35 @@ struct llvm::DOTGraphTraits<circt::hw::HWModuleOp>
         .Case<circt::comb::ShlOp>([&](auto) { return "<<"; })
         .Case<circt::comb::ICmpOp>([&](auto op) {
           switch (op.getPredicate()) {
-            case circt::comb::ICmpPredicate::eq:
-            case circt::comb::ICmpPredicate::ceq:
-            case circt::comb::ICmpPredicate::weq:
-              return "==";
-            case circt::comb::ICmpPredicate::wne:
-            case circt::comb::ICmpPredicate::cne:
-            case circt::comb::ICmpPredicate::ne:
-              return "!=";
-            case circt::comb::ICmpPredicate::uge:
-            case circt::comb::ICmpPredicate::sge:
-              return ">=";
-            case circt::comb::ICmpPredicate::ugt:
-            case circt::comb::ICmpPredicate::sgt:
-              return ">";
-            case circt::comb::ICmpPredicate::ule:
-            case circt::comb::ICmpPredicate::sle:
-              return "<=";
-            case circt::comb::ICmpPredicate::ult:
-            case circt::comb::ICmpPredicate::slt:
-              return "<";
+          case circt::comb::ICmpPredicate::eq:
+          case circt::comb::ICmpPredicate::ceq:
+          case circt::comb::ICmpPredicate::weq:
+            return "==";
+          case circt::comb::ICmpPredicate::wne:
+          case circt::comb::ICmpPredicate::cne:
+          case circt::comb::ICmpPredicate::ne:
+            return "!=";
+          case circt::comb::ICmpPredicate::uge:
+          case circt::comb::ICmpPredicate::sge:
+            return ">=";
+          case circt::comb::ICmpPredicate::ugt:
+          case circt::comb::ICmpPredicate::sgt:
+            return ">";
+          case circt::comb::ICmpPredicate::ule:
+          case circt::comb::ICmpPredicate::sle:
+            return "<=";
+          case circt::comb::ICmpPredicate::ult:
+          case circt::comb::ICmpPredicate::slt:
+            return "<";
           }
           llvm_unreachable("unhandled ICmp predicate");
         })
-        .Case<circt::seq::CompRegOp, circt::seq::FirRegOp>(
-            [&](auto op) { return op.getName().str(); })
+        .Case<circt::seq::FirRegOp>([&](auto op) { return op.getName().str(); })
+        .Case<circt::seq::CompRegOp>([&](auto op) -> std::string {
+          if (auto name = op.getName())
+            return name->str();
+          return "reg";
+        })
         .Case<circt::hw::ConstantOp>([&](auto op) {
           llvm::SmallString<64> valueString;
           op.getValue().toString(valueString, 10, false);
@@ -142,13 +146,15 @@ struct llvm::DOTGraphTraits<circt::hw::HWModuleOp>
         });
   }
 
-  static void addCustomGraphFeatures(
-      circt::hw::HWModuleOp mod, llvm::GraphWriter<circt::hw::HWModuleOp> &g) {
+  static void
+  addCustomGraphFeatures(circt::hw::HWModuleOp mod,
+                         llvm::GraphWriter<circt::hw::HWModuleOp> &g) {
+
     // Add module input args.
     auto &os = g.getOStream();
     os << "subgraph cluster_entry_args {\n";
     os << "label=\"Input arguments\";\n";
-    auto iports = mod.getPortList();
+    circt::hw::ModulePortInfo iports(mod.getPortList());
     for (auto [info, arg] :
          llvm::zip(iports.getInputs(), mod.getBodyBlock()->getArguments())) {
       g.emitSimpleNode(reinterpret_cast<void *>(&arg), "",
@@ -166,6 +172,7 @@ struct llvm::DOTGraphTraits<circt::hw::HWModuleOp>
   template <typename Iterator>
   static std::string getEdgeAttributes(circt::hw::detail::HWOperation *node,
                                        Iterator it, circt::hw::HWModuleOp mod) {
+
     mlir::OpOperand &operand = *it.getCurrent();
     mlir::Value v = operand.get();
     std::string str;
@@ -177,10 +184,11 @@ struct llvm::DOTGraphTraits<circt::hw::HWModuleOp>
     }
 
     int64_t width = circt::hw::getBitWidth(v.getType());
-    if (width > 1) os << " style=bold";
+    if (width > 1)
+      os << " style=bold";
 
     return os.str();
   }
 };
 
-#endif  // CIRCT_DIALECT_HW_HWMODULEGRAPH_H
+#endif // CIRCT_DIALECT_HW_HWMODULEGRAPH_H

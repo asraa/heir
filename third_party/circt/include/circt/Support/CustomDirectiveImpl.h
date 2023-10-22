@@ -86,6 +86,6 @@ ParseResult parseKeywordBool(OpAsmParser &parser, BoolAttr &attr,
 void printKeywordBool(OpAsmPrinter &printer, Operation *op, BoolAttr attr,
                       StringRef trueKeyword, StringRef falseKeyword);
 
-}  // namespace circt
+} // namespace circt
 
-#endif  // CIRCT_SUPPORT_CUSTOMDIRECTIVEIMPL_H
+#endif // CIRCT_SUPPORT_CUSTOMDIRECTIVEIMPL_H

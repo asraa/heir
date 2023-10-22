@@ -47,7 +47,11 @@ def InstanceGraphInstanceOpInterface : OpInterface<"InstanceOpInterface"> {
     "::mlir::Operation *", "getReferencedModuleSlow", (ins)>,
 
     InterfaceMethod<"Get the referenced module via a symbol table.",
-    "::mlir::Operation *", "getReferencedModule", (ins "SymbolTable&":$symtbl)>,
+    "::mlir::Operation *", "getReferencedModule", (ins "SymbolTable&":$symtbl),
+    /*methodBody=*/[{}],
+    /*defaultImplementation=*/[{
+      return symtbl.lookup(getReferencedModuleName());
+    }]>,
   ];
 }
 

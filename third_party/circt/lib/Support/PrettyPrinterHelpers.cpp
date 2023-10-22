@@ -12,10 +12,9 @@
 
 #include "circt/Support/PrettyPrinterHelpers.h"
 
-#include <array>
-
 #include "llvm/ADT/SmallString.h"
 #include "llvm/Support/raw_ostream.h"
+#include <array>
 
 namespace circt {
 namespace pretty {
@@ -30,13 +29,15 @@ void TokenStringSaver::clear() { alloc.Reset(); }
 void detail::emitNBSP(unsigned n, llvm::function_ref<void(Token)> add) {
   static const std::array<char, 128> spaces = ([]() constexpr {
     std::array<char, 128> s = {};
-    for (auto &c : s) c = ' ';
+    for (auto &c : s)
+      c = ' ';
     return s;
   })();
 
   const auto size = spaces.size();
   if (n <= size) {
-    if (n != 0) add(StringToken({spaces.data(), n}));
+    if (n != 0)
+      add(StringToken({spaces.data(), n}));
     return;
   }
   while (n) {
@@ -46,5 +47,5 @@ void detail::emitNBSP(unsigned n, llvm::function_ref<void(Token)> add) {
   }
 }
 
-}  // end namespace pretty
-}  // end namespace circt
+} // end namespace pretty
+} // end namespace circt

@@ -27,8 +27,12 @@ namespace circt {
 /// SymbolTables. This acts as a base class providing facilities common to all
 /// namespaces implementations.
 class Namespace {
- public:
-  Namespace() {}
+public:
+  Namespace() {
+    // This fills an entry for an empty string beforehand so that `newName`
+    // doesn't return an empty string.
+    nextIndex.insert({"", 0});
+  }
   Namespace(const Namespace &other) = default;
   Namespace(Namespace &&other) : nextIndex(std::move(other.nextIndex)) {}
 
@@ -61,11 +65,12 @@ class Namespace {
     // messing with the SmallString allocation below.
     llvm::SmallString<64> tryName;
     auto inserted = nextIndex.insert({name.toStringRef(tryName), 0});
-    if (inserted.second) return inserted.first->getKey();
+    if (inserted.second)
+      return inserted.first->getKey();
 
     // Try different suffixes until we get a collision-free one.
     if (tryName.empty())
-      name.toVector(tryName);  // toStringRef may leave tryName unfilled
+      name.toVector(tryName); // toStringRef may leave tryName unfilled
 
     // Indexes less than nextIndex[tryName] are lready used, so skip them.
     // Indexes larger than nextIndex[tryName] may be used in another name.
@@ -74,7 +79,7 @@ class Namespace {
     size_t baseLength = tryName.size();
     do {
       tryName.resize(baseLength);
-      Twine(i++).toVector(tryName);  // append integer to tryName
+      Twine(i++).toVector(tryName); // append integer to tryName
       inserted = nextIndex.insert({tryName, 0});
     } while (!inserted.second);
 
@@ -94,11 +99,12 @@ class Namespace {
     llvm::SmallString<64> tryName;
     auto inserted = nextIndex.insert(
         {name.concat("_").concat(suffix).toStringRef(tryName), 0});
-    if (inserted.second) return inserted.first->getKey();
+    if (inserted.second)
+      return inserted.first->getKey();
 
     // Try different suffixes until we get a collision-free one.
     tryName.clear();
-    name.toVector(tryName);  // toStringRef may leave tryName unfilled
+    name.toVector(tryName); // toStringRef may leave tryName unfilled
     tryName.push_back('_');
     size_t baseLength = tryName.size();
 
@@ -113,7 +119,7 @@ class Namespace {
     size_t &i = nextIndex[tryName];
     do {
       tryName.resize(baseLength);
-      Twine(i++).toVector(tryName);  // append integer to tryName
+      Twine(i++).toVector(tryName); // append integer to tryName
       tryName.push_back('_');
       suffix.toVector(tryName);
       inserted = nextIndex.insert({tryName, 0});
@@ -122,13 +128,13 @@ class Namespace {
     return inserted.first->getKey();
   }
 
- protected:
+protected:
   // The "next index" that will be tried when trying to unique a string within a
   // namespace.  It follows that all values less than the "next index" value are
   // already used.
   llvm::StringMap<size_t> nextIndex;
 };
 
-}  // namespace circt
+} // namespace circt
 
-#endif  // CIRCT_SUPPORT_NAMESPACE_H
+#endif // CIRCT_SUPPORT_NAMESPACE_H

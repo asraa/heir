@@ -14,11 +14,11 @@
 #define CIRCT_SUPPORT_INSTANCEGRAPH_H
 
 #include "circt/Support/LLVM.h"
+#include "mlir/IR/OpDefinition.h"
 #include "llvm/ADT/GraphTraits.h"
 #include "llvm/ADT/STLExtras.h"
 #include "llvm/ADT/iterator.h"
 #include "llvm/Support/DOTGraphTraits.h"
-#include "mlir/IR/OpDefinition.h"
 
 /// The InstanceGraph op interface, see InstanceGraphInterface.td for more
 /// details.
@@ -36,8 +36,8 @@ struct AddressIterator
   // This using statement is to get around a bug in MSVC.  Without it, it
   // tries to look up "It" as a member type of the parent class.
   using Iterator = It;
-  static typename Iterator::value_type *addrOf(
-      typename Iterator::value_type &v) noexcept {
+  static typename Iterator::value_type *
+  addrOf(typename Iterator::value_type &v) noexcept {
     return std::addressof(v);
   }
   /* implicit */ AddressIterator(Iterator iterator)
@@ -45,7 +45,7 @@ struct AddressIterator
                                       typename Iterator::reference)>(iterator,
                                                                      addrOf) {}
 };
-}  // namespace detail
+} // namespace detail
 
 class InstanceGraphNode;
 
@@ -53,7 +53,7 @@ class InstanceGraphNode;
 /// of a module.
 class InstanceRecord
     : public llvm::ilist_node_with_parent<InstanceRecord, InstanceGraphNode> {
- public:
+public:
   /// Get the instance-like op that this is tracking.
   template <typename TTarget = InstanceOpInterface>
   auto getInstance() {
@@ -72,7 +72,7 @@ class InstanceRecord
   /// target's use-list.
   void erase();
 
- private:
+private:
   friend class InstanceGraph;
   friend class InstanceGraphNode;
 
@@ -101,7 +101,7 @@ class InstanceRecord
 class InstanceGraphNode : public llvm::ilist_node<InstanceGraphNode> {
   using InstanceList = llvm::iplist<InstanceRecord>;
 
- public:
+public:
   InstanceGraphNode() : module(nullptr) {}
 
   /// Get the module that this node is tracking.
@@ -144,7 +144,7 @@ class InstanceGraphNode : public llvm::ilist_node<InstanceGraphNode> {
       return current == other.current;
     }
 
-   private:
+  private:
     InstanceRecord *current;
   };
 
@@ -160,7 +160,7 @@ class InstanceGraphNode : public llvm::ilist_node<InstanceGraphNode> {
   InstanceRecord *addInstance(InstanceOpInterface instance,
                               InstanceGraphNode *target);
 
- private:
+private:
   friend class InstanceRecord;
 
   InstanceGraphNode(const InstanceGraphNode &) = delete;
@@ -193,7 +193,7 @@ class InstanceGraph {
   /// This is the list of InstanceGraphNodes in the graph.
   using NodeList = llvm::iplist<InstanceGraphNode>;
 
- public:
+public:
   /// Create a new module graph of a circuit.  Must be called on the parent
   /// operation of ModuleOpInterface ops.
   InstanceGraph(Operation *parent);
@@ -261,7 +261,7 @@ class InstanceGraph {
   virtual void replaceInstance(InstanceOpInterface inst,
                                InstanceOpInterface newInst);
 
- protected:
+protected:
   ModuleOpInterface getReferencedModuleImpl(InstanceOpInterface op);
 
   /// Get the node corresponding to the module.  If the node has does not exist
@@ -287,7 +287,7 @@ struct InstancePathCache;
  * An instance path composed of a series of instances.
  */
 class InstancePath final {
- public:
+public:
   InstancePath() = default;
 
   InstanceOpInterface top() const {
@@ -317,7 +317,7 @@ class InstancePath final {
            << inst.getReferencedModuleName();
   }
 
- private:
+private:
   // Only the path cache is allowed to create paths.
   friend struct InstancePathCache;
   InstancePath(ArrayRef<InstanceOpInterface> path) : path(path) {}
@@ -349,7 +349,7 @@ struct InstancePathCache {
   /// Prepend an instance to a path.
   InstancePath prependInstance(InstanceOpInterface inst, InstancePath path);
 
- private:
+private:
   /// An allocator for individual instance paths and entire path lists.
   llvm::BumpPtrAllocator allocator;
 
@@ -357,8 +357,8 @@ struct InstancePathCache {
   DenseMap<Operation *, ArrayRef<InstancePath>> absolutePathsCache;
 };
 
-}  // namespace igraph
-}  // namespace circt
+} // namespace igraph
+} // namespace circt
 
 // Graph traits for modules.
 template <>
@@ -440,9 +440,9 @@ struct llvm::DOTGraphTraits<circt::igraph::InstanceGraph *>
   }
 
   template <typename Iterator>
-  static std::string getEdgeAttributes(
-      const circt::igraph::InstanceGraphNode *node, Iterator it,
-      circt::igraph::InstanceGraph *) {
+  static std::string
+  getEdgeAttributes(const circt::igraph::InstanceGraphNode *node, Iterator it,
+                    circt::igraph::InstanceGraph *) {
     // Set an edge label that is the name of the instance.
     auto *instanceRecord = *it.getCurrent();
     auto instanceOp = instanceRecord->getInstance();
@@ -450,4 +450,4 @@ struct llvm::DOTGraphTraits<circt::igraph::InstanceGraph *>
   }
 };
 
-#endif  // CIRCT_SUPPORT_INSTANCEGRAPH_H
+#endif // CIRCT_SUPPORT_INSTANCEGRAPH_H

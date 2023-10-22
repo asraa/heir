@@ -13,11 +13,10 @@
 #ifndef CIRCT_DIALECT_HW_HWPASSES_H
 #define CIRCT_DIALECT_HW_HWPASSES_H
 
-#include <memory>
-#include <optional>
-
 #include "mlir/Pass/Pass.h"
 #include "mlir/Pass/PassRegistry.h"
+#include <memory>
+#include <optional>
 
 namespace circt {
 namespace hw {
@@ -32,7 +31,7 @@ std::unique_ptr<mlir::Pass> createVerifyInnerRefNamespacePass();
 #define GEN_PASS_REGISTRATION
 #include "circt/Dialect/HW/Passes.h.inc"
 
-}  // namespace hw
-}  // namespace circt
+} // namespace hw
+} // namespace circt
 
-#endif  // CIRCT_DIALECT_HW_HWPASSES_H
+#endif // CIRCT_DIALECT_HW_HWPASSES_H

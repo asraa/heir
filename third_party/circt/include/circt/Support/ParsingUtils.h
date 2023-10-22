@@ -51,7 +51,7 @@ ParseResult parseInitializerList(
 void printInitializerList(OpAsmPrinter &p, ValueRange ins,
                           ArrayRef<BlockArgument> args);
 
-}  // namespace parsing_util
-}  // namespace circt
+} // namespace parsing_util
+} // namespace circt
 
-#endif  // CIRCT_SUPPORT_PARSINGUTILS_H
+#endif // CIRCT_SUPPORT_PARSINGUTILS_H

@@ -282,7 +282,7 @@ def UnionCreateOp : HWOp<"union_create", [Pure]> {
   let hasCustomAssemblyFormat = 1;
 }
 
-def UnionExtractOp : HWOp<"union_extract", [Pure,
+def UnionExtractOp : HWOp<"union_extract", [Pure, 
     DeclareOpInterfaceMethods<InferTypeOpInterface, ["inferReturnTypes"]>,
   ]> {
   let summary = "Get a union member.";

@@ -25,6 +25,6 @@ APInt sextZeroWidth(APInt value, unsigned width);
 /// signed APSInts.  Instead of asserting, this will zero extend.
 APSInt extOrTruncZeroWidth(APSInt value, unsigned width);
 
-}  // namespace circt
+} // namespace circt
 
-#endif  // CIRCT_SUPPORT_APINT_H
+#endif // CIRCT_SUPPORT_APINT_H

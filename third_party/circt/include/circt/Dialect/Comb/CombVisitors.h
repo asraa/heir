@@ -23,7 +23,7 @@ namespace comb {
 template <typename ConcreteType, typename ResultType = void,
           typename... ExtraArgs>
 class CombinationalVisitor {
- public:
+public:
   ResultType dispatchCombinationalVisitor(Operation *op, ExtraArgs... args) {
     auto *thisCast = static_cast<ConcreteType *>(this);
     return TypeSwitch<Operation *, ResultType>(op)
@@ -73,10 +73,10 @@ class CombinationalVisitor {
     return static_cast<ConcreteType *>(this)->visitUnhandledComb(op, args...);
   }
 
-#define HANDLE(OPTYPE, OPKIND)                                              \
-  ResultType visitComb(OPTYPE op, ExtraArgs... args) {                      \
-    return static_cast<ConcreteType *>(this)->visit##OPKIND##Comb(op,       \
-                                                                  args...); \
+#define HANDLE(OPTYPE, OPKIND)                                                 \
+  ResultType visitComb(OPTYPE op, ExtraArgs... args) {                         \
+    return static_cast<ConcreteType *>(this)->visit##OPKIND##Comb(op,          \
+                                                                  args...);    \
   }
 
   // Arithmetic and Logical Binary Operations.
@@ -107,7 +107,7 @@ class CombinationalVisitor {
 #undef HANDLE
 };
 
-}  // namespace comb
-}  // namespace circt
+} // namespace comb
+} // namespace circt
 
-#endif  // CIRCT_DIALECT_COMB_COMBVISITORS_H
+#endif // CIRCT_DIALECT_COMB_COMBVISITORS_H

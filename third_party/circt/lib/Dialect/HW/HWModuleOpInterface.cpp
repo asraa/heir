@@ -24,7 +24,8 @@ static LogicalResult convertModuleOpTypes(HWModuleLike modOp,
                                           const TypeConverter &typeConverter,
                                           ConversionPatternRewriter &rewriter) {
   ModuleType type = modOp.getHWModuleType();
-  if (!type) return failure();
+  if (!type)
+    return failure();
 
   // Convert the original port types.
   // Update the module signature in-place.
@@ -37,7 +38,8 @@ static LogicalResult convertModuleOpTypes(HWModuleLike modOp,
       SmallVector<Type, 1> newResults;
       if (failed(typeConverter.convertType(p.type, newResults)))
         return failure();
-      for (auto np : newResults) newPorts.push_back({p.name, np, p.dir});
+      for (auto np : newResults)
+        newPorts.push_back({p.name, np, p.dir});
     } else {
       if (failed(typeConverter.convertSignatureArg(
               atInput++,
@@ -71,14 +73,14 @@ struct HWModuleLikeSignatureConversion : public ConversionPattern {
                                   const TypeConverter &converter)
       : ConversionPattern(converter, moduleLikeOpName, /*benefit=*/1, ctx) {}
 
-  LogicalResult matchAndRewrite(
-      Operation *op, ArrayRef<Value> /*operands*/,
-      ConversionPatternRewriter &rewriter) const override {
+  LogicalResult
+  matchAndRewrite(Operation *op, ArrayRef<Value> /*operands*/,
+                  ConversionPatternRewriter &rewriter) const override {
     HWModuleLike modOp = cast<HWModuleLike>(op);
     return convertModuleOpTypes(modOp, *typeConverter, rewriter);
   }
 };
-}  // namespace
+} // namespace
 
 void circt::hw::populateHWModuleLikeTypeConversionPattern(
     StringRef moduleLikeOpName, RewritePatternSet &patterns,

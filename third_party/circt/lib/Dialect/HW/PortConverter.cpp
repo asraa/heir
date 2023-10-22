@@ -15,7 +15,8 @@ using namespace hw;
 
 /// Return a attribute with the specified suffix appended.
 static StringAttr append(StringAttr base, const Twine &suffix) {
-  if (suffix.isTriviallyEmpty()) return base;
+  if (suffix.isTriviallyEmpty())
+    return base;
   auto *context = base.getContext();
   return StringAttr::get(context, base.getValue() + suffix);
 }
@@ -26,7 +27,7 @@ namespace {
 /// counts as a signaling protocol if one squints pretty hard). We mostly do
 /// this since it allows us a more consistent internal API.
 class UntouchedPortConversion : public PortConversion {
- public:
+public:
   UntouchedPortConversion(PortConverterImpl &converter, hw::PortInfo origPort)
       : PortConversion(converter, origPort) {
     // Set the "RTTI flag" to true (see comment in header for this variable).
@@ -44,26 +45,28 @@ class UntouchedPortConversion : public PortConversion {
     instValue.replaceAllUsesWith(newResults[portInfo.argNum]);
   }
 
- private:
+private:
   void buildInputSignals() override {
     Value newValue =
         converter.createNewInput(origPort, "", origPort.type, portInfo);
-    if (body) body->getArgument(origPort.argNum).replaceAllUsesWith(newValue);
+    if (body)
+      body->getArgument(origPort.argNum).replaceAllUsesWith(newValue);
   }
 
   void buildOutputSignals() override {
     Value output;
-    if (body) output = body->getTerminator()->getOperand(origPort.argNum);
+    if (body)
+      output = body->getTerminator()->getOperand(origPort.argNum);
     converter.createNewOutput(origPort, "", origPort.type, output, portInfo);
   }
 
   hw::PortInfo portInfo;
 };
 
-}  // namespace
+} // namespace
 
-FailureOr<std::unique_ptr<PortConversion>> PortConversionBuilder::build(
-    hw::PortInfo port) {
+FailureOr<std::unique_ptr<PortConversion>>
+PortConversionBuilder::build(hw::PortInfo port) {
   // Default builder is the 'untouched' port conversion which will simply
   // pass ports through unmodified.
   return {std::make_unique<UntouchedPortConversion>(converter, port)};
@@ -86,11 +89,11 @@ Value PortConverterImpl::createNewInput(PortInfo origPort, const Twine &suffix,
       {append(origPort.name, suffix), type, ModulePort::Direction::Input},
       newInputs.size(),
       {},
-      {},
       origPort.loc};
   newInputs.emplace_back(0, newPort);
 
-  if (!body) return {};
+  if (!body)
+    return {};
   return body->addArgument(type, origPort.loc);
 }
 
@@ -101,11 +104,11 @@ void PortConverterImpl::createNewOutput(PortInfo origPort, const Twine &suffix,
       {append(origPort.name, suffix), type, ModulePort::Direction::Output},
       newOutputs.size(),
       {},
-      {},
       origPort.loc};
   newOutputs.emplace_back(0, newPort);
 
-  if (!body) return;
+  if (!body)
+    return;
 
   OpBuilder::InsertionGuard g(b);
   b.setInsertionPointToStart(body);
@@ -113,7 +116,7 @@ void PortConverterImpl::createNewOutput(PortInfo origPort, const Twine &suffix,
 }
 
 LogicalResult PortConverterImpl::run() {
-  ModulePortInfo ports = mod.getPortList();
+  ModulePortInfo ports(mod.getPortList());
 
   bool foundLoweredPorts = false;
 
@@ -123,19 +126,22 @@ LogicalResult PortConverterImpl::run() {
                              : loweredInputs;
 
     auto loweredPort = ssb->build(port);
-    if (failed(loweredPort)) return failure();
+    if (failed(loweredPort))
+      return failure();
 
     foundLoweredPorts |= !(*loweredPort)->isUntouched();
     loweredPorts.emplace_back(std::move(*loweredPort));
 
-    if (failed(loweredPorts.back()->init())) return failure();
+    if (failed(loweredPorts.back()->init()))
+      return failure();
 
     return success();
   };
 
   // Dispatch the port conversion builder on the I/O of the module.
   for (PortInfo port : ports)
-    if (failed(createPortLowering(port))) return failure();
+    if (failed(createPortLowering(port)))
+      return failure();
 
   // Bail early if we didn't find anything to convert.
   if (!foundLoweredPorts) {
@@ -147,8 +153,10 @@ LogicalResult PortConverterImpl::run() {
 
   // Lower the ports -- this mutates the body directly and builds the port
   // lists.
-  for (auto &lowering : loweredInputs) lowering->lowerPort();
-  for (auto &lowering : loweredOutputs) lowering->lowerPort();
+  for (auto &lowering : loweredInputs)
+    lowering->lowerPort();
+  for (auto &lowering : loweredOutputs)
+    lowering->lowerPort();
 
   // Set up vectors to erase _all_ the ports. It's easier to rebuild everything
   // than reason about interleaving the newly lowered ports with the non lowered
@@ -175,7 +183,8 @@ LogicalResult PortConverterImpl::run() {
   // Rewrite instances pointing to this module.
   for (auto *instance : moduleNode->uses()) {
     auto instanceLike = instance->getInstance<hw::HWInstanceLike>();
-    if (!instanceLike) continue;
+    if (!instanceLike)
+      continue;
     hw::InstanceOp hwInstance = dyn_cast_or_null<hw::InstanceOp>(*instanceLike);
     if (!hwInstance) {
       return instanceLike->emitOpError(
@@ -195,7 +204,7 @@ LogicalResult PortConverterImpl::run() {
 void PortConverterImpl::updateInstance(hw::InstanceOp inst) {
   ImplicitLocOpBuilder b(inst.getLoc(), inst);
   BackedgeBuilder beb(b, inst.getLoc());
-  ModulePortInfo ports = mod.getPortList();
+  ModulePortInfo ports(mod.getPortList());
 
   // Create backedges for the future instance results so the signal mappers can
   // use the future results as values.

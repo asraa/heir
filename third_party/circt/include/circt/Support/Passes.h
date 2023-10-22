@@ -10,10 +10,10 @@
 #define CIRCT_SUPPORT_PASSES_H
 
 #include "circt/Support/LLVM.h"
-#include "llvm/Support/Chrono.h"
-#include "llvm/Support/Format.h"
 #include "mlir/Pass/Pass.h"
 #include "mlir/Pass/PassInstrumentation.h"
+#include "llvm/Support/Chrono.h"
+#include "llvm/Support/Format.h"
 
 namespace circt {
 // This class prints logs before and after of pass executions when its pass
@@ -28,7 +28,7 @@ class VerbosePassInstrumentation : public mlir::PassInstrumentation {
   int level = 0;
   const char *toolName;
 
- public:
+public:
   VerbosePassInstrumentation(const char *toolName) : toolName(toolName){};
   void runBeforePass(Pass *pass, Operation *op) override {
     if (isa<LoggedOpTypes...>(op)) {
@@ -59,6 +59,6 @@ class VerbosePassInstrumentation : public mlir::PassInstrumentation {
 /// Create a simple canonicalizer pass.
 std::unique_ptr<Pass> createSimpleCanonicalizerPass();
 
-}  // namespace circt
+} // namespace circt
 
-#endif  // CIRCT_SUPPORT_PASSES_H
+#endif // CIRCT_SUPPORT_PASSES_H

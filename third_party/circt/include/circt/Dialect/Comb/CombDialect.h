@@ -22,4 +22,4 @@
 // Pull in all enum type definitions and utility function declarations.
 #include "circt/Dialect/Comb/CombEnums.h.inc"
 
-#endif  // CIRCT_DIALECT_COMB_COMBDIALECT_H
+#endif // CIRCT_DIALECT_COMB_COMBDIALECT_H

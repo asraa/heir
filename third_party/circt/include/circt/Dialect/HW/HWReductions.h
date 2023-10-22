@@ -23,7 +23,7 @@ struct HWReducePatternDialectInterface : public ReducePatternDialectInterface {
 /// Register the HW Reduction pattern dialect interface to the given registry.
 void registerReducePatternDialectInterface(mlir::DialectRegistry &registry);
 
-}  // namespace hw
-}  // namespace circt
+} // namespace hw
+} // namespace circt
 
-#endif  // CIRCT_DIALECT_HW_HWREDUCTIONS_H
+#endif // CIRCT_DIALECT_HW_HWREDUCTIONS_H

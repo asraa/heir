@@ -16,16 +16,16 @@
 
 #include "circt/Dialect/HW/HWAttributes.h"
 #include "circt/Support/LLVM.h"
-#include "llvm/ADT/StringRef.h"
 #include "mlir/IR/BuiltinAttributes.h"
 #include "mlir/IR/SymbolTable.h"
+#include "llvm/ADT/StringRef.h"
 
 namespace circt {
 namespace hw {
 
 /// The target of an inner symbol, the entity the symbol is a handle for.
 class InnerSymTarget {
- public:
+public:
   /// Default constructor, invalid.
   InnerSymTarget() { assert(!*this); }
 
@@ -77,14 +77,14 @@ class InnerSymTarget {
     return InnerSymTarget(base.op, base.fieldID + fieldID);
   }
 
- private:
+private:
   auto asTuple() const { return std::tie(op, portIdx, fieldID); }
   Operation *op = nullptr;
   size_t portIdx = 0;
   size_t fieldID = 0;
   static constexpr size_t invalidPort = ~size_t{0};
 
- public:
+public:
   // Operators are defined below.
 
   // Comparison operators:
@@ -102,7 +102,7 @@ class InnerSymTarget {
 
 /// A table of inner symbols and their resolutions.
 class InnerSymbolTable {
- public:
+public:
   /// Build an inner symbol table for the given operation.  The operation must
   /// have the InnerSymbolTable trait.
   explicit InnerSymbolTable(Operation *op);
@@ -181,7 +181,7 @@ class InnerSymbolTable {
   /// A successful walk with no failures returns success.
   static LogicalResult walkSymbols(Operation *op, InnerSymCallbackFn callback);
 
- private:
+private:
   using TableTy = DenseMap<StringAttr, InnerSymTarget>;
   /// Construct an inner symbol table for the given operation,
   /// with pre-populated table contents.
@@ -198,7 +198,7 @@ class InnerSymbolTable {
 
 /// This class represents a collection of InnerSymbolTable's.
 class InnerSymbolTableCollection {
- public:
+public:
   /// Get or create the InnerSymbolTable for the specified operation.
   InnerSymbolTable &getInnerSymbolTable(Operation *op);
 
@@ -215,10 +215,10 @@ class InnerSymbolTableCollection {
     assert(succeeded(result));
   }
   InnerSymbolTableCollection(const InnerSymbolTableCollection &) = delete;
-  InnerSymbolTableCollection &operator=(const InnerSymbolTableCollection &) =
-      delete;
+  InnerSymbolTableCollection &
+  operator=(const InnerSymbolTableCollection &) = delete;
 
- private:
+private:
   /// This maps Operations to their InnnerSymbolTable's.
   DenseMap<Operation *, std::unique_ptr<InnerSymbolTable>> symbolTables;
 };
@@ -245,9 +245,11 @@ struct InnerRefNamespace {
 /// Printing InnerSymTarget's.
 template <typename OS>
 OS &operator<<(OS &os, const InnerSymTarget &target) {
-  if (!target) return os << "<invalid target>";
+  if (!target)
+    return os << "<invalid target>";
 
-  if (target.isField()) os << "field " << target.getField() << " of ";
+  if (target.isField())
+    os << "field " << target.getField() << " of ";
 
   if (target.isPort())
     os << "port " << target.getPort() << " on @"
@@ -258,7 +260,7 @@ OS &operator<<(OS &os, const InnerSymTarget &target) {
   return os;
 }
 
-}  // namespace hw
-}  // namespace circt
+} // namespace hw
+} // namespace circt
 
-#endif  // CIRCT_DIALECT_FIRRTL_INNERSYMBOLTABLE_H
+#endif // CIRCT_DIALECT_FIRRTL_INNERSYMBOLTABLE_H

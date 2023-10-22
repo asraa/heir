@@ -29,9 +29,10 @@ Type circt::hw::FieldIdImpl::getFinalTypeByFieldID(Type type,
   return pair.first;
 }
 
-std::pair<Type, uint64_t> circt::hw::FieldIdImpl::getSubTypeByFieldID(
-    Type type, uint64_t fieldID) {
-  if (!fieldID) return {type, 0};
+std::pair<Type, uint64_t>
+circt::hw::FieldIdImpl::getSubTypeByFieldID(Type type, uint64_t fieldID) {
+  if (!fieldID)
+    return {type, 0};
   if (auto ftype = dyn_cast<FieldIDTypeInterface>(type))
     return ftype.getSubTypeByFieldID(fieldID);
 
@@ -44,8 +45,9 @@ uint64_t circt::hw::FieldIdImpl::getMaxFieldID(Type type) {
   return 0;
 }
 
-std::pair<uint64_t, bool> circt::hw::FieldIdImpl::projectToChildFieldID(
-    Type type, uint64_t fieldID, uint64_t index) {
+std::pair<uint64_t, bool>
+circt::hw::FieldIdImpl::projectToChildFieldID(Type type, uint64_t fieldID,
+                                              uint64_t index) {
   if (auto ftype = dyn_cast<FieldIDTypeInterface>(type))
     return ftype.projectToChildFieldID(fieldID, index);
   return {0, fieldID == 0};
@@ -64,8 +66,8 @@ uint64_t circt::hw::FieldIdImpl::getFieldID(Type type, uint64_t fieldID) {
   return 0;
 }
 
-std::pair<uint64_t, uint64_t> circt::hw::FieldIdImpl::getIndexAndSubfieldID(
-    Type type, uint64_t fieldID) {
+std::pair<uint64_t, uint64_t>
+circt::hw::FieldIdImpl::getIndexAndSubfieldID(Type type, uint64_t fieldID) {
   if (auto ftype = dyn_cast<FieldIDTypeInterface>(type))
     return ftype.getIndexAndSubfieldID(fieldID);
   return {0, fieldID == 0};

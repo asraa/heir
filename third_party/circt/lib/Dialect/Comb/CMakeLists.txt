@@ -11,7 +11,7 @@ add_circt_dialect_library(CIRCTComb
   CIRCTHW
   MLIRCombIncGen
   MLIRCombEnumsIncGen
-
+  
   LINK_COMPONENTS
   Support
 

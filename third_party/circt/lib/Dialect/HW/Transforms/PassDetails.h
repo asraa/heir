@@ -25,7 +25,7 @@ namespace hw {
 #define GEN_PASS_CLASSES
 #include "circt/Dialect/HW/Passes.h.inc"
 
-}  // namespace hw
-}  // namespace circt
+} // namespace hw
+} // namespace circt
 
-#endif  // DIALECT_HW_TRANSFORMS_PASSDETAILS_H
+#endif // DIALECT_HW_TRANSFORMS_PASSDETAILS_H

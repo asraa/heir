@@ -22,7 +22,7 @@ namespace hw {
 /// HW-specific instance graph with a virtual entry node linking to
 /// all publicly visible modules.
 class InstanceGraph : public igraph::InstanceGraph {
- public:
+public:
   InstanceGraph(Operation *operation);
 
   /// Return the entry node linking to all public modules.
@@ -34,13 +34,13 @@ class InstanceGraph : public igraph::InstanceGraph {
   /// Erases a module, updating links to entry.
   void erase(igraph::InstanceGraphNode *node) override;
 
- private:
+private:
   using igraph::InstanceGraph::addModule;
   igraph::InstanceGraphNode entry;
 };
 
-}  // namespace hw
-}  // namespace circt
+} // namespace hw
+} // namespace circt
 
 // Specialisation for the HW instance graph.
 template <>
@@ -53,4 +53,4 @@ struct llvm::DOTGraphTraits<circt::hw::InstanceGraph *>
   using llvm::DOTGraphTraits<circt::igraph::InstanceGraph *>::DOTGraphTraits;
 };
 
-#endif  // CIRCT_DIALECT_HW_HWINSTANCEGRAPH_H
+#endif // CIRCT_DIALECT_HW_HWINSTANCEGRAPH_H

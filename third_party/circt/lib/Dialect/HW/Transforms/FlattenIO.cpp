@@ -9,8 +9,8 @@
 #include "PassDetails.h"
 #include "circt/Dialect/HW/HWOps.h"
 #include "circt/Dialect/HW/HWPasses.h"
-#include "llvm/ADT/TypeSwitch.h"
 #include "mlir/Transforms/DialectConversion.h"
+#include "llvm/ADT/TypeSwitch.h"
 
 using namespace mlir;
 using namespace circt;
@@ -45,9 +45,9 @@ struct OutputOpConversion : public OpConversionPattern<hw::OutputOp> {
                      DenseSet<Operation *> *opVisited)
       : OpConversionPattern(typeConverter, context), opVisited(opVisited) {}
 
-  LogicalResult matchAndRewrite(
-      hw::OutputOp op, OpAdaptor adaptor,
-      ConversionPatternRewriter &rewriter) const override {
+  LogicalResult
+  matchAndRewrite(hw::OutputOp op, OpAdaptor adaptor,
+                  ConversionPatternRewriter &rewriter) const override {
     llvm::SmallVector<Value> convOperands;
 
     // Flatten the operands.
@@ -76,9 +76,9 @@ struct InstanceOpConversion : public OpConversionPattern<hw::InstanceOp> {
       : OpConversionPattern(typeConverter, context),
         convertedOps(convertedOps) {}
 
-  LogicalResult matchAndRewrite(
-      hw::InstanceOp op, OpAdaptor adaptor,
-      ConversionPatternRewriter &rewriter) const override {
+  LogicalResult
+  matchAndRewrite(hw::InstanceOp op, OpAdaptor adaptor,
+                  ConversionPatternRewriter &rewriter) const override {
     auto loc = op.getLoc();
     // Flatten the operands.
     llvm::SmallVector<Value> convOperands;
@@ -134,7 +134,7 @@ struct IOInfo {
 };
 
 class FlattenIOTypeConverter : public TypeConverter {
- public:
+public:
   FlattenIOTypeConverter() {
     addConversion([](Type type, SmallVectorImpl<Type> &results) {
       auto structType = getStructType(type);
@@ -163,7 +163,7 @@ class FlattenIOTypeConverter : public TypeConverter {
   }
 };
 
-}  // namespace
+} // namespace
 
 template <typename... TOp>
 static void addSignatureConversion(DenseMap<Operation *, IOInfo> &ioMap,
@@ -185,7 +185,8 @@ static void addSignatureConversion(DenseMap<Operation *, IOInfo> &ioMap,
   // processed during signature conversion, which then allows us to use the
   // signature conversion in a recursive manner.
   target.addDynamicallyLegalOp<TOp...>([&](hw::HWModuleLike moduleLikeOp) {
-    if (isLegalModLikeOp(moduleLikeOp)) return true;
+    if (isLegalModLikeOp(moduleLikeOp))
+      return true;
 
     // This op is involved in conversion. Check if the signature has changed.
     auto ioInfoIt = ioMap.find(moduleLikeOp);
@@ -229,9 +230,9 @@ static DenseMap<Operation *, IOTypes> populateIOMap(mlir::ModuleOp module) {
 }
 
 template <typename ModTy, typename T>
-static llvm::SmallVector<Attribute> updateNameAttribute(
-    ModTy op, StringRef attrName, DenseMap<unsigned, hw::StructType> &structMap,
-    T oldNames) {
+static llvm::SmallVector<Attribute>
+updateNameAttribute(ModTy op, StringRef attrName,
+                    DenseMap<unsigned, hw::StructType> &structMap, T oldNames) {
   llvm::SmallVector<Attribute> newNames;
   for (auto [i, oldName] : llvm::enumerate(oldNames)) {
     // Was this arg/res index a struct?
@@ -252,10 +253,12 @@ static llvm::SmallVector<Attribute> updateNameAttribute(
   return newNames;
 }
 
-static llvm::SmallVector<Location> updateLocAttribute(
-    DenseMap<unsigned, hw::StructType> &structMap, ArrayAttr oldLocs) {
-  llvm::SmallVector<Location> newLocs;
-  if (!oldLocs) return newLocs;
+static llvm::SmallVector<Attribute>
+updateLocAttribute(DenseMap<unsigned, hw::StructType> &structMap,
+                   ArrayAttr oldLocs) {
+  llvm::SmallVector<Attribute> newLocs;
+  if (!oldLocs)
+    return newLocs;
   for (auto [i, oldLoc] : llvm::enumerate(oldLocs.getAsRange<Location>())) {
     // Was this arg/res index a struct?
     auto it = structMap.find(i);
@@ -275,13 +278,13 @@ static llvm::SmallVector<Location> updateLocAttribute(
 /// The conversion framework seems to throw away block argument locations.  We
 /// use this function to copy the location from the original argument to the
 /// set of flattened arguments.
-static void updateBlockLocations(
-    hw::HWModuleLike op, StringRef attrName,
-    DenseMap<unsigned, hw::StructType> &structMap) {
-  auto locs = op.getOperation()->getAttrOfType<ArrayAttr>(attrName);
-  if (!locs || op.getModuleBody().empty()) return;
-  for (auto [arg, loc] : llvm::zip(op.getBodyBlock()->getArguments(),
-                                   locs.getAsRange<LocationAttr>()))
+static void
+updateBlockLocations(hw::HWModuleLike op,
+                     DenseMap<unsigned, hw::StructType> &structMap) {
+  auto locs = op.getInputLocs();
+  if (locs.empty() || op.getModuleBody().empty())
+    return;
+  for (auto [arg, loc] : llvm::zip(op.getBodyBlock()->getArguments(), locs))
     arg.setLoc(loc);
 }
 
@@ -369,9 +372,11 @@ static LogicalResult flattenOpsOfType(ModuleOp module, bool recursive) {
           oldResNames[op].template getAsValueRange<StringAttr>());
       newArgNames.append(newResNames.begin(), newResNames.end());
       op.setAllPortNames(newArgNames);
-      op.setInputLocs(updateLocAttribute(ioInfo.argStructs, oldArgLocs[op]));
-      op.setOutputLocs(updateLocAttribute(ioInfo.resStructs, oldResLocs[op]));
-      updateBlockLocations(op, "argLocs", ioInfo.argStructs);
+      auto newArgLocs = updateLocAttribute(ioInfo.argStructs, oldArgLocs[op]);
+      auto newResLocs = updateLocAttribute(ioInfo.resStructs, oldResLocs[op]);
+      newArgLocs.append(newResLocs.begin(), newResLocs.end());
+      op.setPortLocsAttr(ArrayAttr::get(op.getContext(), newArgLocs));
+      updateBlockLocations(op, ioInfo.argStructs);
     }
 
     // And likewise with the converted instance ops.
@@ -392,7 +397,8 @@ static LogicalResult flattenOpsOfType(ModuleOp module, bool recursive) {
     }
 
     // Break if we've only lowering a single level of structs.
-    if (!recursive) break;
+    if (!recursive)
+      break;
   }
   return success();
 }
@@ -409,7 +415,7 @@ static bool flattenIO(ModuleOp module, bool recursive) {
 namespace {
 
 class FlattenIOPass : public circt::hw::FlattenIOBase<FlattenIOPass> {
- public:
+public:
   void runOnOperation() override {
     ModuleOp module = getOperation();
     if (flattenIO<hw::HWModuleOp, hw::HWModuleExternOp,
@@ -418,7 +424,7 @@ class FlattenIOPass : public circt::hw::FlattenIOBase<FlattenIOPass> {
   };
 };
 
-}  // namespace
+} // namespace
 
 //===----------------------------------------------------------------------===//
 // Pass initialization

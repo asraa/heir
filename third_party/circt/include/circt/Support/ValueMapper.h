@@ -16,15 +16,15 @@
 #ifndef CIRCT_SUPPORT_VALUEMAPPER_H
 #define CIRCT_SUPPORT_VALUEMAPPER_H
 
-#include <functional>
-#include <variant>
-
 #include "circt/Support/BackedgeBuilder.h"
-#include "llvm/ADT/DenseMap.h"
-#include "llvm/ADT/SmallVector.h"
 #include "mlir/IR/Location.h"
 #include "mlir/IR/OperationSupport.h"
 #include "mlir/IR/Value.h"
+#include "llvm/ADT/DenseMap.h"
+#include "llvm/ADT/SmallVector.h"
+
+#include <functional>
+#include <variant>
 
 namespace circt {
 
@@ -33,7 +33,7 @@ namespace circt {
 /// use-def chains) and a 'to' location (where new operations are created based
 /// on the 'from' location).´
 class ValueMapper {
- public:
+public:
   using TypeTransformer = llvm::function_ref<mlir::Type(mlir::Type)>;
   static mlir::Type identity(mlir::Type t) { return t; };
   explicit ValueMapper(BackedgeBuilder *bb = nullptr) : bb(bb) {}
@@ -43,8 +43,8 @@ class ValueMapper {
   // modified through the 'typeTransformer'.
   mlir::Value get(mlir::Value from,
                   TypeTransformer typeTransformer = ValueMapper::identity);
-  llvm::SmallVector<mlir::Value> get(
-      mlir::ValueRange from,
+  llvm::SmallVector<mlir::Value>
+  get(mlir::ValueRange from,
       TypeTransformer typeTransformer = ValueMapper::identity);
 
   // Set the mapped value of 'from' to 'to'. If 'from' is already mapped to a
@@ -53,11 +53,11 @@ class ValueMapper {
   void set(mlir::Value from, mlir::Value to, bool replace = false);
   void set(mlir::ValueRange from, mlir::ValueRange to, bool replace = false);
 
- private:
+private:
   BackedgeBuilder *bb = nullptr;
   llvm::DenseMap<mlir::Value, std::variant<mlir::Value, Backedge>> mapping;
 };
 
-}  // namespace circt
+} // namespace circt
 
-#endif  // CIRCT_SUPPORT_VALUEMAPPER_H
+#endif // CIRCT_SUPPORT_VALUEMAPPER_H

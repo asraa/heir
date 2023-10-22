@@ -34,7 +34,7 @@ class PortConversionBuilder;
 class PortConversion;
 
 class PortConverterImpl {
- public:
+public:
   /// Run port conversion.
   LogicalResult run();
   Block *getBody() const { return body; }
@@ -54,12 +54,12 @@ class PortConverterImpl {
   void createNewOutput(hw::PortInfo origPort, const Twine &suffix, Type type,
                        Value output, hw::PortInfo &newPort);
 
- protected:
+protected:
   PortConverterImpl(igraph::InstanceGraphNode *moduleNode);
 
   std::unique_ptr<PortConversionBuilder> ssb;
 
- private:
+private:
   /// Updates an instance of the module. This is called after the module has
   /// been updated. It will update the instance to match the new port
   void updateInstance(hw::InstanceOp);
@@ -95,7 +95,7 @@ class PortConverterImpl {
 /// details of a particular port conversion from the port layout. Subclasses
 /// keep around port mapping information to use when updating instances.
 class PortConversion {
- public:
+public:
   PortConversion(PortConverterImpl &converter, hw::PortInfo origPort)
       : converter(converter), body(converter.getBody()), origPort(origPort) {}
   virtual ~PortConversion() = default;
@@ -127,7 +127,7 @@ class PortConversion {
   MLIRContext *getContext() { return getModule()->getContext(); }
   bool isUntouched() const { return isUntouchedFlag; }
 
- protected:
+protected:
   // Build the input and output signals for the port. This pertains to modifying
   // the module itself.
   virtual void buildInputSignals() = 0;
@@ -144,12 +144,12 @@ class PortConversion {
   // classes), we only need to dynamically tell whether any given PortConversion
   // is the UntouchedPortConversion.
   bool isUntouchedFlag = false;
-};  // namespace hw
+}; // namespace hw
 
 // A PortConversionBuilder will, given an input type, build the appropriate
 // port conversion for that type.
 class PortConversionBuilder {
- public:
+public:
   PortConversionBuilder(PortConverterImpl &converter) : converter(converter) {}
   virtual ~PortConversionBuilder() = default;
 
@@ -167,7 +167,7 @@ class PortConversionBuilder {
 // port conversion for each port type.
 template <typename PortConversionBuilderImpl>
 class PortConverter : public PortConverterImpl {
- public:
+public:
   template <typename... Args>
   PortConverter(hw::InstanceGraph &graph, hw::HWMutableModuleLike mod,
                 Args &&...args)
@@ -176,7 +176,7 @@ class PortConverter : public PortConverterImpl {
   }
 };
 
-}  // namespace hw
-}  // namespace circt
+} // namespace hw
+} // namespace circt
 
-#endif  // CIRCT_DIALECT_HW_PORTCONVERTER_H
+#endif // CIRCT_DIALECT_HW_PORTCONVERTER_H

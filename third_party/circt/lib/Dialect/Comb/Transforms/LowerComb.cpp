@@ -9,8 +9,8 @@
 #include "PassDetails.h"
 #include "circt/Dialect/Comb/CombOps.h"
 #include "circt/Dialect/Comb/CombPasses.h"
-#include "llvm/ADT/TypeSwitch.h"
 #include "mlir/Transforms/DialectConversion.h"
+#include "llvm/ADT/TypeSwitch.h"
 
 using namespace circt;
 using namespace circt::comb;
@@ -19,22 +19,23 @@ namespace circt {
 namespace comb {
 #define GEN_PASS_DEF_LOWERCOMB
 #include "circt/Dialect/Comb/Passes.h.inc"
-}  // namespace comb
-}  // namespace circt
+} // namespace comb
+} // namespace circt
 
 namespace {
 /// Lower truth tables to mux trees.
 struct TruthTableToMuxTree : public OpConversionPattern<TruthTableOp> {
   using OpConversionPattern::OpConversionPattern;
 
- private:
+private:
   /// Get a mux tree for `inputs` corresponding to the given truth table. Do
   /// this recursively by dividing the table in half for each input.
   // NOLINTNEXTLINE(misc-no-recursion)
   Value getMux(Location loc, OpBuilder &b, Value t, Value f,
                ArrayRef<bool> table, Operation::operand_range inputs) const {
     assert(table.size() == (1ull << inputs.size()));
-    if (table.size() == 1) return table.front() ? t : f;
+    if (table.size() == 1)
+      return table.front() ? t : f;
 
     size_t half = table.size() / 2;
     Value if1 =
@@ -44,7 +45,7 @@ struct TruthTableToMuxTree : public OpConversionPattern<TruthTableOp> {
     return b.create<MuxOp>(loc, inputs.front(), if1, if0, false);
   }
 
- public:
+public:
   LogicalResult matchAndRewrite(TruthTableOp op, OpAdaptor adaptor,
                                 ConversionPatternRewriter &b) const override {
     Location loc = op.getLoc();
@@ -62,16 +63,16 @@ struct TruthTableToMuxTree : public OpConversionPattern<TruthTableOp> {
     return success();
   }
 };
-}  // namespace
+} // namespace
 
 namespace {
 class LowerCombPass : public impl::LowerCombBase<LowerCombPass> {
- public:
+public:
   using LowerCombBase::LowerCombBase;
 
   void runOnOperation() override;
 };
-}  // namespace
+} // namespace
 
 void LowerCombPass::runOnOperation() {
   ModuleOp module = getOperation();

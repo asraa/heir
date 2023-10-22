@@ -11,13 +11,14 @@
 //===----------------------------------------------------------------------===//
 
 #include "circt/Support/FieldRef.h"
-
 #include "mlir/IR/Block.h"
 #include "mlir/IR/Value.h"
 
 using namespace circt;
 
 Operation *FieldRef::getDefiningOp() const {
-  if (auto *op = value.getDefiningOp()) return op;
+  if (auto *op = value.getDefiningOp())
+    return op;
   return value.cast<BlockArgument>().getOwner()->getParentOp();
 }
+

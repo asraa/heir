@@ -13,9 +13,9 @@
 #ifndef CIRCT_SUPPORT_LOWERINGOPTIONS_H
 #define CIRCT_SUPPORT_LOWERINGOPTIONS_H
 
+#include "mlir/IR/BuiltinAttributes.h"
 #include "llvm/ADT/StringRef.h"
 #include "llvm/ADT/Twine.h"
-#include "mlir/IR/BuiltinAttributes.h"
 
 namespace mlir {
 class ModuleOp;
@@ -104,9 +104,9 @@ struct LoweringOptions {
 
   /// This option controls emitted location information style.
   enum LocationInfoStyle {
-    Plain,                  // Default.
-    WrapInAtSquareBracket,  // Wrap location info in @[..].
-    None,                   // No location info comment.
+    Plain,                 // Default.
+    WrapInAtSquareBracket, // Wrap location info in @[..].
+    None,                  // No location info comment.
   } locationInfoStyle = Plain;
 
   /// If true, every port is declared separately
@@ -123,9 +123,9 @@ struct LoweringOptions {
   /// This controls extra wire spilling performed in PrepareForEmission to
   /// improve readablitiy and debuggability.
   enum WireSpillingHeuristic : unsigned {
-    SpillLargeTermsWithNamehints = 1,  // Spill wires for expressions with
-                                       // namehints if the term size is greater
-                                       // than `wireSpillingNamehintTermLimit`.
+    SpillLargeTermsWithNamehints = 1, // Spill wires for expressions with
+                                      // namehints if the term size is greater
+                                      // than `wireSpillingNamehintTermLimit`.
   };
 
   unsigned wireSpillingHeuristicSet = 0;
@@ -163,7 +163,10 @@ struct LoweringOptions {
   /// This is used to avoid stricter lint warnings which, e.g., treat "REG" as a
   /// Verilog keyword.
   bool caseInsensitiveKeywords = false;
-};
-}  // namespace circt
 
-#endif  // CIRCT_SUPPORT_LOWERINGOPTIONS_H
+  /// If true, then update the the mlir to include output verilog locations.
+  bool emitVerilogLocations = false;
+};
+} // namespace circt
+
+#endif // CIRCT_SUPPORT_LOWERINGOPTIONS_H

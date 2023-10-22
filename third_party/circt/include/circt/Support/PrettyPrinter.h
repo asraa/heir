@@ -20,15 +20,15 @@
 #ifndef CIRCT_SUPPORT_PRETTYPRINTER_H
 #define CIRCT_SUPPORT_PRETTYPRINTER_H
 
-#include <cstdint>
-#include <deque>
-#include <limits>
-
 #include "circt/Support/LLVM.h"
 #include "llvm/ADT/SmallVector.h"
 #include "llvm/ADT/StringRef.h"
 #include "llvm/Support/ErrorHandling.h"
 #include "llvm/Support/SaveAndRestore.h"
+
+#include <cstdint>
+#include <deque>
+#include <limits>
 
 namespace circt {
 namespace pretty {
@@ -49,23 +49,23 @@ enum class Breaks { Consistent, Inconsistent, Never };
 enum class IndentStyle { Visual, Block };
 
 class Token {
- public:
+public:
   enum class Kind { String, Break, Begin, End, Callback };
 
   struct TokenInfo {
-    Kind kind;  // Common initial sequence.
+    Kind kind; // Common initial sequence.
   };
   struct StringInfo : public TokenInfo {
     uint32_t len;
     const char *str;
   };
   struct BreakInfo : public TokenInfo {
-    uint32_t spaces;  // How many spaces to emit when not broken.
-    int32_t offset;   // How many spaces to emit when broken.
-    bool neverbreak;  // If set, behaves like break except this always 'fits'.
+    uint32_t spaces; // How many spaces to emit when not broken.
+    int32_t offset;  // How many spaces to emit when broken.
+    bool neverbreak; // If set, behaves like break except this always 'fits'.
   };
   struct BeginInfo : public TokenInfo {
-    int32_t offset;  // Adjust base indentation by this amount.
+    int32_t offset; // Adjust base indentation by this amount.
     Breaks breaks;
     IndentStyle style;
   };
@@ -78,7 +78,7 @@ class Token {
   // is added and popped from the queue.
   struct CallbackInfo : public TokenInfo {};
 
- private:
+private:
   union {
     TokenInfo info;
     StringInfo stringInfo;
@@ -88,20 +88,25 @@ class Token {
     CallbackInfo callbackInfo;
   } data;
 
- protected:
+protected:
   template <Kind k, typename T>
   static auto &getInfoImpl(T &t) {
-    if constexpr (k == Kind::String) return t.data.stringInfo;
-    if constexpr (k == Kind::Break) return t.data.breakInfo;
-    if constexpr (k == Kind::Begin) return t.data.beginInfo;
-    if constexpr (k == Kind::End) return t.data.endInfo;
-    if constexpr (k == Kind::Callback) return t.data.callbackInfo;
+    if constexpr (k == Kind::String)
+      return t.data.stringInfo;
+    if constexpr (k == Kind::Break)
+      return t.data.breakInfo;
+    if constexpr (k == Kind::Begin)
+      return t.data.beginInfo;
+    if constexpr (k == Kind::End)
+      return t.data.endInfo;
+    if constexpr (k == Kind::Callback)
+      return t.data.callbackInfo;
     llvm_unreachable("unhandled token kind");
   }
 
   Token(Kind k) { data.info.kind = k; }
 
- public:
+public:
   Kind getKind() const { return data.info.kind; }
 };
 
@@ -110,7 +115,7 @@ template <class DerivedT, Token::Kind DerivedKind>
 struct TokenBase : public Token {
   static bool classof(const Token *t) { return t->getKind() == DerivedKind; }
 
- protected:
+protected:
   TokenBase() : Token(DerivedKind) {}
 
   using InfoType = std::remove_reference_t<std::invoke_result_t<
@@ -168,7 +173,7 @@ struct CallbackToken : public TokenBase<CallbackToken, Token::Kind::Callback> {
 //===----------------------------------------------------------------------===//
 
 class PrettyPrinter {
- public:
+public:
   /// Listener to Token storage events.
   struct Listener {
     virtual ~Listener();
@@ -188,12 +193,9 @@ class PrettyPrinter {
                 uint32_t maxStartingIndent = kInfinity / 4,
                 Listener *listener = nullptr)
       : space(margin - std::max(currentColumn, baseIndent)),
-        defaultFrame{baseIndent, PrintBreaks::Inconsistent},
-        indent(baseIndent),
-        margin(margin),
-        maxStartingIndent(std::max(maxStartingIndent, margin)),
-        os(os),
-        listener(listener) {
+        defaultFrame{baseIndent, PrintBreaks::Inconsistent}, indent(baseIndent),
+        margin(margin), maxStartingIndent(std::max(maxStartingIndent, margin)),
+        os(os), listener(listener) {
     assert(maxStartingIndent < kInfinity / 2);
     assert(maxStartingIndent > baseIndent);
     assert(margin > currentColumn);
@@ -212,10 +214,12 @@ class PrettyPrinter {
     // Don't invoke listener until range processed, we own it now.
     {
       llvm::SaveAndRestore<bool> save(donotClear, true);
-      for (Token &t : tokens) add(t);
+      for (Token &t : tokens)
+        add(t);
     }
     // Invoke it now if appropriate.
-    if (scanStack.empty()) clear();
+    if (scanStack.empty())
+      clear();
   }
 
   void eof();
@@ -225,11 +229,11 @@ class PrettyPrinter {
 
   static constexpr uint32_t kInfinity = (1U << 15) - 1;
 
- private:
+private:
   /// Format token with tracked size.
   struct FormattedToken {
-    Token token;   /// underlying token
-    int32_t size;  /// calculate size when positive.
+    Token token;  /// underlying token
+    int32_t size; /// calculate size when positive.
   };
 
   /// Breaking style for a printStack entry.
@@ -319,7 +323,7 @@ class PrettyPrinter {
       1UL << (std::numeric_limits<decltype(leftTotal)>::digits - 3);
 };
 
-}  // end namespace pretty
-}  // end namespace circt
+} // end namespace pretty
+} // end namespace circt
 
-#endif  // CIRCT_SUPPORT_PRETTYPRINTER_H
+#endif // CIRCT_SUPPORT_PRETTYPRINTER_H

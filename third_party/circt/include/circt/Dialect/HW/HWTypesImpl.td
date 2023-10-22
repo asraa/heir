@@ -131,6 +131,7 @@ def StructTypeImpl : HWType<"Struct", [DeclareTypeInterfaceMethods<FieldIDTypeIn
   let mnemonic = "struct";
 
   let hasCustomAssemblyFormat = 1;
+  let genVerifyDecl = 1;
 
   let parameters = (
     ins ArrayRefParameter<
@@ -184,6 +185,7 @@ def UnionTypeImpl : HWType<"Union"> {
   let mnemonic = "union";
 
   let hasCustomAssemblyFormat = 1;
+  let genVerifyDecl = 1;
 
   let extraClassDeclaration = [{
     using FieldInfo = ::circt::hw::detail::OffsetFieldInfo;
@@ -243,6 +245,9 @@ def ModuleTypeImpl : HWType<"Module"> {
   let extraClassDeclaration = [{
     // Many of these are transitional and will be removed when modules and instances
     // have moved over to this type.
+    // *Input* are input indexed
+    // *Output* are output indexed
+    // *Port* are absolutely indexed
     size_t getNumPorts();
     size_t getNumInputs();
     size_t getNumOutputs();

@@ -29,7 +29,7 @@ struct PrintInstanceGraphPass
   }
   raw_ostream &os;
 };
-}  // end anonymous namespace
+} // end anonymous namespace
 
 std::unique_ptr<mlir::Pass> circt::hw::createPrintInstanceGraphPass() {
   return std::make_unique<PrintInstanceGraphPass>(llvm::errs());

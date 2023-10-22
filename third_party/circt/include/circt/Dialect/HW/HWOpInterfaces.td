@@ -22,7 +22,10 @@ def PortList : OpInterface<"PortList", []> {
   let description = "Operations which produce a unified port list representation";
   let methods = [
     InterfaceMethod<"Get port list",
-    "::circt::hw::ModulePortInfo", "getPortList", (ins)>,
+    "SmallVector<::circt::hw::PortInfo>", "getPortList", (ins)>,
+
+    InterfaceMethod<"Get port list",
+    "::circt::hw::PortInfo", "getPort", (ins "size_t":$idx)>,
 
     InterfaceMethod<"Get the port a specific input",
     "size_t", "getPortIdForInputId", (ins "size_t":$idx)>,
@@ -39,18 +42,8 @@ def PortList : OpInterface<"PortList", []> {
   ];
 }
 
-def SymboledPortList : OpInterface<"SymboledPortList", [PortList]> {
-  let cppNamespace = "circt::hw";
-  let description = "Operations which produce a unified port list representation which includes port symbols";
-  let methods = [
-    InterfaceMethod<"Get a port symbol attribute",
-    "::circt::hw::InnerSymAttr", "getPortSymbolAttr", (ins "size_t":$portIndex)>,
-  ];
-}
-
-
 def HWModuleLike : OpInterface<"HWModuleLike", [
-  Symbol, SymboledPortList, InstanceGraphModuleOpInterface]> {
+  Symbol, PortList, InstanceGraphModuleOpInterface]> {
   let cppNamespace = "circt::hw";
   let description = "Provide common module information.";
 
@@ -180,19 +173,21 @@ def HWModuleLike : OpInterface<"HWModuleLike", [
 
     SmallVector<Attribute> getAllInputAttrs() {
       auto attrs = $_op.getAllPortAttrs();
-      SmallVector<Attribute> retval;
+      auto num = $_op.getNumInputPorts();
+      SmallVector<Attribute> retval(num);
       auto modType = $_op.getHWModuleType();
-      for (unsigned x = 0, e = $_op.getNumInputPorts(); x < e; ++x)
-        retval.push_back(attrs[modType.getPortIdForInputId(x)]);
+      for (unsigned x = 0; x < num; ++x)
+        retval[x] = attrs[modType.getPortIdForInputId(x)];
       return retval;
     }
 
     SmallVector<Attribute> getAllOutputAttrs() {
       auto attrs = $_op.getAllPortAttrs();
-      SmallVector<Attribute> retval;
+      auto num = $_op.getNumOutputPorts();
+      SmallVector<Attribute> retval(num);
       auto modType = $_op.getHWModuleType();
-      for (unsigned x = 0, e = $_op.getNumOutputPorts(); x < e; ++x)
-        retval.push_back(attrs[modType.getPortIdForOutputId(x)]);
+      for (unsigned x = 0; x < num; ++x)
+        retval[x] = attrs[modType.getPortIdForOutputId(x)];
       return retval;
     }
 
@@ -242,7 +237,7 @@ def HWModuleLike : OpInterface<"HWModuleLike", [
       auto ctxt = $_op.getContext();
       assert(newAttrs.size() == attrs.size());
       for (size_t idx = 0, e = attrs.size(); idx != e; ++idx) {
-        NamedAttrList pattr(cast<mlir::DictionaryAttr>(attrs[idx]));
+        NamedAttrList pattr(cast_or_null<mlir::DictionaryAttr>(attrs[idx]));
         auto newAttr = newAttrs[idx];
         if (newAttr)
           pattr.set(attrName, newAttr);
@@ -395,6 +390,17 @@ def HWInstanceLike : OpInterface<"HWInstanceLike", [
     PortList, InstanceGraphInstanceOpInterface]> {
   let cppNamespace = "circt::hw";
   let description = "Provide common  module information.";
+
+  let methods = [
+    InterfaceMethod<"Get the referenced module via a HW symbol cache.",
+    "::mlir::Operation *", "getReferencedModuleCached", (ins
+      "const ::circt::hw::HWSymbolCache *":$cache),
+    /*methodBody=*/[{}],
+    /*defaultImplementation=*/[{
+      return hw::instance_like_impl::getReferencedModule(
+          cache, $_op, $_op.getModuleNameAttr());
+    }]>,
+  ];
 }
 
 def InnerRefNamespace : NativeOpTrait<"InnerRefNamespace">;

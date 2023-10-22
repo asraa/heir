@@ -13,8 +13,6 @@
 #ifndef CIRCT_SUPPORT_PRETTYPRINTERHELPERS_H
 #define CIRCT_SUPPORT_PRETTYPRINTERHELPERS_H
 
-#include <queue>
-
 #include "circt/Support/PrettyPrinter.h"
 #include "llvm/ADT/STLExtras.h"
 #include "llvm/ADT/ScopeExit.h"
@@ -22,6 +20,7 @@
 #include "llvm/Support/Allocator.h"
 #include "llvm/Support/StringSaver.h"
 #include "llvm/Support/raw_ostream.h"
+#include <queue>
 
 namespace circt {
 namespace pretty {
@@ -74,14 +73,14 @@ struct BufferingPP {
 
 namespace detail {
 void emitNBSP(unsigned n, llvm::function_ref<void(Token)> add);
-}  // end namespace detail
+} // end namespace detail
 
 /// Add convenience methods for generating pretty-printing tokens.
 template <typename PPTy = PrettyPrinter>
 class TokenBuilder {
   PPTy &pp;
 
- public:
+public:
   TokenBuilder(PPTy &pp) : pp(pp) {}
 
   //===- Add tokens -------------------------------------------------------===//
@@ -158,7 +157,7 @@ class TokenStringSaver : public PrettyPrinter::Listener {
   llvm::BumpPtrAllocator alloc;
   llvm::StringSaver strings;
 
- public:
+public:
   TokenStringSaver() : strings(alloc) {}
 
   /// Add string, save in storage.
@@ -172,6 +171,7 @@ class TokenStringSaver : public PrettyPrinter::Listener {
 /// void (Data)
 template <typename CallableTy, typename DataTy>
 class PrintEventAndStorageListener : public TokenStringSaver {
+
   /// List of all the unique data associated with each callback token.
   /// The fact that tokens on a stream can never be printed out of order,
   /// ensures that CallbackTokens are always added and invoked in FIFO order,
@@ -180,7 +180,7 @@ class PrintEventAndStorageListener : public TokenStringSaver {
   /// The storage for the callback, as a function object.
   CallableTy &callable;
 
- public:
+public:
   PrintEventAndStorageListener(CallableTy &c) : callable(c) {}
 
   /// PrettyPrinter::Listener::print -- indicates all the preceding tokens on
@@ -240,9 +240,11 @@ struct PPSaveString {
 template <typename PPTy = PrettyPrinter>
 class TokenStream : public TokenBuilder<PPTy> {
   using Base = TokenBuilder<PPTy>;
+
+protected:
   TokenStringSaver &saver;
 
- public:
+public:
   /// Create a TokenStream using the specified PrettyPrinter and StringSaver
   /// storage. Strings are saved in `saver`, which is generally the listener in
   /// the PrettyPrinter, but may not be (e.g., using BufferingPP).
@@ -274,45 +276,45 @@ class TokenStream : public TokenBuilder<PPTy> {
   /// Convenience for inline streaming of builder methods.
   TokenStream &operator<<(PP s) {
     switch (s) {
-      case PP::bbox2:
-        Base::bbox(2);
-        break;
-      case PP::cbox0:
-        Base::cbox(0);
-        break;
-      case PP::cbox2:
-        Base::cbox(2);
-        break;
-      case PP::end:
-        Base::end();
-        break;
-      case PP::eof:
-        Base::eof();
-        break;
-      case PP::ibox0:
-        Base::ibox(0);
-        break;
-      case PP::ibox2:
-        Base::ibox(2);
-        break;
-      case PP::nbsp:
-        Base::nbsp();
-        break;
-      case PP::neverbox:
-        Base::neverbox();
-        break;
-      case PP::neverbreak:
-        Base::neverbreak();
-        break;
-      case PP::newline:
-        Base::newline();
-        break;
-      case PP::space:
-        Base::space();
-        break;
-      case PP::zerobreak:
-        Base::zerobreak();
-        break;
+    case PP::bbox2:
+      Base::bbox(2);
+      break;
+    case PP::cbox0:
+      Base::cbox(0);
+      break;
+    case PP::cbox2:
+      Base::cbox(2);
+      break;
+    case PP::end:
+      Base::end();
+      break;
+    case PP::eof:
+      Base::eof();
+      break;
+    case PP::ibox0:
+      Base::ibox(0);
+      break;
+    case PP::ibox2:
+      Base::ibox(2);
+      break;
+    case PP::nbsp:
+      Base::nbsp();
+      break;
+    case PP::neverbox:
+      Base::neverbox();
+      break;
+    case PP::neverbreak:
+      Base::neverbreak();
+      break;
+    case PP::newline:
+      Base::newline();
+      break;
+    case PP::space:
+      Base::space();
+      break;
+    case PP::zerobreak:
+      Base::zerobreak();
+      break;
     }
     return *this;
   }
@@ -338,7 +340,8 @@ class TokenStream : public TokenBuilder<PPTy> {
     SmallString<BufferLen> ss;
     llvm::raw_svector_ostream ssos(ss);
     auto flush = llvm::make_scope_exit([&]() {
-      if (!ss.empty()) *this << ss;
+      if (!ss.empty())
+        *this << ss;
     });
     return std::invoke(std::forward<Callable>(c), ssos);
   }
@@ -368,7 +371,29 @@ class TokenStream : public TokenBuilder<PPTy> {
   }
 };
 
-}  // end namespace pretty
-}  // end namespace circt
+/// Wrap the TokenStream with a helper for CallbackTokens, to record the print
+/// events on the stream.
+template <typename CallableType, typename DataType,
+          typename PPTy = PrettyPrinter>
+class TokenStreamWithCallback : public TokenStream<PPTy> {
+  using Base = TokenStream<PPTy>;
+  PrintEventAndStorageListener<CallableType, DataType> &saver;
 
-#endif  // CIRCT_SUPPORT_PRETTYPRINTERHELPERS_H
+  const bool enableCallback;
+
+public:
+  TokenStreamWithCallback(
+      PPTy &pp, PrintEventAndStorageListener<CallableType, DataType> &saver,
+      bool enableCallback)
+      : TokenStream<PPTy>(pp, saver), saver(saver),
+        enableCallback(enableCallback) {}
+  /// Add a Callback token.
+  void addCallback(DataType d) {
+    if (enableCallback)
+      Base::addToken(saver.getToken(d));
+  }
+};
+} // end namespace pretty
+} // end namespace circt
+
+#endif // CIRCT_SUPPORT_PRETTYPRINTERHELPERS_H

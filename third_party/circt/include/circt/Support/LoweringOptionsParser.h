@@ -22,6 +22,7 @@ namespace circt {
 /// Commandline parser for LoweringOptions.  Delegates to the parser
 /// defined by LoweringOptions.
 struct LoweringOptionsParser : public llvm::cl::parser<LoweringOptions> {
+
   LoweringOptionsParser(llvm::cl::Option &option)
       : llvm::cl::parser<LoweringOptions>(option) {}
 
@@ -52,6 +53,6 @@ struct LoweringOptionsOption
             llvm::cl::cat(cat), llvm::cl::value_desc("option")} {}
 };
 
-}  // namespace circt
+} // namespace circt
 
-#endif  // CIRCT_SUPPORT_LOWERINGOPTIONSPARSER_H
+#endif // CIRCT_SUPPORT_LOWERINGOPTIONSPARSER_H

@@ -35,10 +35,10 @@ uint64_t getFieldID(Type type, uint64_t index);
 
 uint64_t getIndexForFieldID(Type type, uint64_t fieldID);
 
-}  // namespace FieldIdImpl
-}  // namespace hw
-}  // namespace circt
+} // namespace FieldIdImpl
+} // namespace hw
+} // namespace circt
 
 #include "circt/Dialect/HW/HWTypeInterfaces.h.inc"
 
-#endif  // CIRCT_DIALECT_HW_HWTYPEINTERFACES_H
+#endif // CIRCT_DIALECT_HW_HWTYPEINTERFACES_H

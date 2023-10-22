@@ -7,7 +7,6 @@
 //===----------------------------------------------------------------------===//
 
 #include "circt/Dialect/HW/ConversionPatterns.h"
-
 #include "circt/Dialect/HW/HWTypes.h"
 
 using namespace circt;
@@ -30,13 +29,14 @@ static hw::ModuleType convertModuleType(const TypeConverter &typeConverter,
                                         hw::ModuleType type) {
   // Convert the original function types.
   SmallVector<hw::ModulePort> ports(type.getPorts());
-  for (auto &p : ports) p.type = typeConverter.convertType(p.type);
+  for (auto &p : ports)
+    p.type = typeConverter.convertType(p.type);
   return hw::ModuleType::get(type.getContext(), ports);
 }
 
-LogicalResult TypeConversionPattern::matchAndRewrite(
-    Operation *op, ArrayRef<Value> operands,
-    ConversionPatternRewriter &rewriter) const {
+LogicalResult circt::doTypeConversion(Operation *op, ValueRange operands,
+                                      ConversionPatternRewriter &rewriter,
+                                      const TypeConverter *typeConverter) {
   // Convert the TypeAttrs.
   llvm::SmallVector<NamedAttribute, 4> newAttrs;
   newAttrs.reserve(op->getAttrs().size());
@@ -46,11 +46,11 @@ LogicalResult TypeConversionPattern::matchAndRewrite(
       // TypeConvert::convertType doesn't handle function types, so we need to
       // handle them manually.
       if (auto funcType = innerType.dyn_cast<FunctionType>())
-        innerType = convertFunctionType(*getTypeConverter(), funcType);
+        innerType = convertFunctionType(*typeConverter, funcType);
       else if (auto modType = innerType.dyn_cast<hw::ModuleType>())
-        innerType = convertModuleType(*getTypeConverter(), modType);
+        innerType = convertModuleType(*typeConverter, modType);
       else
-        innerType = getTypeConverter()->convertType(innerType);
+        innerType = typeConverter->convertType(innerType);
       newAttrs.emplace_back(attr.getName(), TypeAttr::get(innerType));
     } else {
       newAttrs.push_back(attr);
@@ -59,14 +59,14 @@ LogicalResult TypeConversionPattern::matchAndRewrite(
 
   // Convert the result types.
   llvm::SmallVector<Type, 4> newResults;
-  if (failed(
-          getTypeConverter()->convertTypes(op->getResultTypes(), newResults)))
+  if (failed(typeConverter->convertTypes(op->getResultTypes(), newResults)))
     return rewriter.notifyMatchFailure(op->getLoc(), "type conversion failed");
 
   // Build the state for the edited clone.
   OperationState state(op->getLoc(), op->getName().getStringRef(), operands,
                        newResults, newAttrs, op->getSuccessors());
-  for (size_t i = 0, e = op->getNumRegions(); i < e; ++i) state.addRegion();
+  for (size_t i = 0, e = op->getNumRegions(); i < e; ++i)
+    state.addRegion();
 
   // Must create the op before running any modifications on the regions so that
   // we don't crash with '-debug' and so we have something to 'root update'.
@@ -81,16 +81,17 @@ LogicalResult TypeConversionPattern::matchAndRewrite(
     // TypeConverter::SignatureConversion drops argument locations, so we need
     // to manually copy them over (a verifier in e.g. HWModule checks this).
     llvm::SmallVector<Location, 4> argLocs;
-    for (auto arg : region.getArguments()) argLocs.push_back(arg.getLoc());
+    for (auto arg : region.getArguments())
+      argLocs.push_back(arg.getLoc());
 
     // Move the region and convert the region args.
     rewriter.inlineRegionBefore(region, *newRegion, newRegion->begin());
     TypeConverter::SignatureConversion result(newRegion->getNumArguments());
-    if (failed(getTypeConverter()->convertSignatureArgs(
+    if (failed(typeConverter->convertSignatureArgs(
             newRegion->getArgumentTypes(), result)))
       return rewriter.notifyMatchFailure(op->getLoc(),
                                          "type conversion failed");
-    rewriter.applySignatureConversion(newRegion, result, getTypeConverter());
+    rewriter.applySignatureConversion(newRegion, result, typeConverter);
 
     // Apply the argument locations.
     for (auto [arg, loc] : llvm::zip(newRegion->getArguments(), argLocs))

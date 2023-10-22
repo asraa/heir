@@ -9,30 +9,34 @@
 #ifndef CIRCT_SUPPORT_FOLDUTILS_H
 #define CIRCT_SUPPORT_FOLDUTILS_H
 
-#include "llvm/ADT/APInt.h"
 #include "mlir/IR/BuiltinAttributes.h"
+#include "llvm/ADT/APInt.h"
 
 namespace circt {
 
 /// Determine the integer value of a constant operand.
 static inline std::optional<APInt> getConstantInt(Attribute operand) {
-  if (!operand) return {};
-  if (auto attr = dyn_cast<IntegerAttr>(operand)) return attr.getValue();
+  if (!operand)
+    return {};
+  if (auto attr = dyn_cast<IntegerAttr>(operand))
+    return attr.getValue();
   return {};
 }
 
 /// Determine whether a constant operand is a zero value.
 static inline bool isConstantZero(Attribute operand) {
-  if (auto cst = getConstantInt(operand)) return cst->isZero();
+  if (auto cst = getConstantInt(operand))
+    return cst->isZero();
   return false;
 }
 
 /// Determine whether a constant operand is a one value.
 static inline bool isConstantOne(Attribute operand) {
-  if (auto cst = getConstantInt(operand)) return cst->isOne();
+  if (auto cst = getConstantInt(operand))
+    return cst->isOne();
   return false;
 }
 
-}  // namespace circt
+} // namespace circt
 
-#endif  // CIRCT_SUPPORT_FOLDUTILS_H
+#endif // CIRCT_SUPPORT_FOLDUTILS_H

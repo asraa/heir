@@ -65,7 +65,6 @@
 //===----------------------------------------------------------------------===//
 
 #include "circt/Support/PrettyPrinter.h"
-
 #include "llvm/ADT/TypeSwitch.h"
 #include "llvm/Support/Casting.h"
 #include "llvm/Support/raw_ostream.h"
@@ -90,7 +89,8 @@ void PrettyPrinter::add(Token t) {
         FormattedToken f{t, (int32_t)s->text().size()};
         // Empty string token isn't /wrong/ but can have unintended effect.
         assert(!s->text().empty() && "empty string token");
-        if (scanStack.empty()) return print(f);
+        if (scanStack.empty())
+          return print(f);
         tokens.push_back(f);
         rightTotal += f.size;
         assert(rightTotal > 0);
@@ -106,18 +106,21 @@ void PrettyPrinter::add(Token t) {
         assert(rightTotal > 0);
       })
       .Case([&](BeginToken *b) {
-        if (scanStack.empty()) clear();
+        if (scanStack.empty())
+          clear();
         addScanToken(-rightTotal);
       })
       .Case([&](EndToken *end) {
-        if (scanStack.empty()) return print({t, 0});
+        if (scanStack.empty())
+          return print({t, 0});
         addScanToken(-1);
       })
       .Case([&](CallbackToken *c) {
         // Callbacktoken must be associated with a listener, it doesn't have any
         // meaning without it.
         assert(listener);
-        if (scanStack.empty()) return print({t, 0});
+        if (scanStack.empty())
+          return print({t, 0});
         tokens.push_back({t, 0});
       });
   rebaseIfNeeded();
@@ -127,7 +130,8 @@ void PrettyPrinter::rebaseIfNeeded() {
   // Check for too-large totals, reset.
   // This can happen if we have an open group and emit
   // many tokens, especially newlines which have artificial size.
-  if (tokens.empty()) return;
+  if (tokens.empty())
+    return;
   assert(leftTotal >= 0);
   assert(rightTotal >= 0);
   if (uint32_t(leftTotal) > rebaseThreshold) {
@@ -157,7 +161,8 @@ void PrettyPrinter::eof() {
     advanceLeft();
   }
   assert(scanStack.empty() && "unclosed groups at EOF");
-  if (scanStack.empty()) clear();
+  if (scanStack.empty())
+    clear();
 }
 
 void PrettyPrinter::clear() {
@@ -166,7 +171,8 @@ void PrettyPrinter::clear() {
   leftTotal = rightTotal = 1;
   tokens.clear();
   tokenOffset = 0;
-  if (listener && !donotClear) listener->clear();
+  if (listener && !donotClear)
+    listener->clear();
 }
 
 /// Break encountered, set sizes of begin/breaks in scanStack that we now know.
@@ -177,7 +183,8 @@ void PrettyPrinter::checkStack() {
     assert(x >= tokenOffset && tokens.size() + tokenOffset > x);
     auto &t = tokens[x - tokenOffset];
     if (llvm::isa<BeginToken>(&t.token)) {
-      if (depth == 0) break;
+      if (depth == 0)
+        break;
       scanStack.pop_back();
       t.size += rightTotal;
       --depth;
@@ -188,7 +195,8 @@ void PrettyPrinter::checkStack() {
     } else {
       scanStack.pop_back();
       t.size += rightTotal;
-      if (depth == 0) break;
+      if (depth == 0)
+        break;
     }
   }
 }
@@ -201,6 +209,7 @@ void PrettyPrinter::checkStream() {
   assert(leftTotal >= 0);
   assert(rightTotal >= 0);
   while (rightTotal - leftTotal > space && !tokens.empty()) {
+
     // Ran out of space, set size to infinity and take off scan stack.
     // No need to keep track as we know enough to know this won't fit.
     if (!scanStack.empty() && tokenOffset == scanStack.front()) {
@@ -283,8 +292,10 @@ void PrettyPrinter::print(const FormattedToken &f) {
       .Case([&](const EndToken *) {
         assert(!printStack.empty() && "more ends than begins?");
         // Try to tolerate this when assertions are disabled.
-        if (printStack.empty()) return;
-        if (getPrintFrame().breaks == PrintBreaks::AlwaysFits) --alwaysFits;
+        if (printStack.empty())
+          return;
+        if (getPrintFrame().breaks == PrintBreaks::AlwaysFits)
+          --alwaysFits;
         printStack.pop_back();
         auto &frame = getPrintFrame();
         if (frame.breaks != PrintBreaks::Fits &&
@@ -301,5 +312,5 @@ void PrettyPrinter::print(const FormattedToken &f) {
         listener->print();
       });
 }
-}  // end namespace pretty
-}  // end namespace circt
+} // end namespace pretty
+} // end namespace circt

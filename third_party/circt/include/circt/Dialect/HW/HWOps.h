@@ -17,7 +17,6 @@
 #include "circt/Dialect/HW/HWOpInterfaces.h"
 #include "circt/Dialect/HW/HWTypes.h"
 #include "circt/Support/BuilderUtils.h"
-#include "llvm/ADT/StringExtras.h"
 #include "mlir/IR/BuiltinOps.h"
 #include "mlir/IR/ImplicitLocOpBuilder.h"
 #include "mlir/IR/OpImplementation.h"
@@ -27,6 +26,7 @@
 #include "mlir/Interfaces/FunctionInterfaces.h"
 #include "mlir/Interfaces/InferTypeOpInterface.h"
 #include "mlir/Interfaces/SideEffectInterfaces.h"
+#include "llvm/ADT/StringExtras.h"
 
 namespace circt {
 namespace hw {
@@ -103,7 +103,8 @@ bool isOffset(Value base, Value index, uint64_t offset);
 // A class for providing access to the in- and output ports of a module through
 // use of the HWModuleBuilder.
 class HWModulePortAccessor {
- public:
+
+public:
   HWModulePortAccessor(Location loc, const ModulePortInfo &info,
                        Region &bodyRegion);
 
@@ -121,7 +122,7 @@ class HWModulePortAccessor {
     return outputOperands;
   }
 
- private:
+private:
   llvm::StringMap<unsigned> inputIdx, outputIdx;
   llvm::SmallVector<Value> inputArgs;
   llvm::SmallVector<Value> outputOperands;
@@ -131,10 +132,10 @@ class HWModulePortAccessor {
 using HWModuleBuilder =
     llvm::function_ref<void(OpBuilder &, HWModulePortAccessor &)>;
 
-}  // namespace hw
-}  // namespace circt
+} // namespace hw
+} // namespace circt
 
 #define GET_OP_CLASSES
 #include "circt/Dialect/HW/HW.h.inc"
 
-#endif  // CIRCT_DIALECT_HW_OPS_H
+#endif // CIRCT_DIALECT_HW_OPS_H

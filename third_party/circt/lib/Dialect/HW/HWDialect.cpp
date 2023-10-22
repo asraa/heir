@@ -11,7 +11,6 @@
 //===----------------------------------------------------------------------===//
 
 #include "circt/Dialect/HW/HWDialect.h"
-
 #include "circt/Dialect/HW/HWAttributes.h"
 #include "circt/Dialect/HW/HWOps.h"
 #include "circt/Dialect/HW/HWTypes.h"
@@ -42,7 +41,7 @@ struct HWOpAsmDialectInterface : public OpAsmDialectInterface {
   /// OpAsmInterface.td#getAsmResultNames for usage details and documentation.
   void getAsmResultNames(Operation *op, OpAsmSetValueNameFn setNameFn) const {}
 };
-}  // end anonymous namespace
+} // end anonymous namespace
 
 namespace {
 /// This class defines the interface for handling inlining with HW operations.
@@ -65,7 +64,7 @@ struct HWInlinerInterface : public mlir::DialectInlinerInterface {
     return false;
   }
 };
-}  // end anonymous namespace
+} // end anonymous namespace
 
 void HWDialect::initialize() {
   // Register types and attributes.
@@ -105,7 +104,8 @@ Operation *HWDialect::materializeConstant(OpBuilder &builder, Attribute value,
   // Parameter expressions materialize into hw.param.value.
   auto parentOp = builder.getBlock()->getParentOp();
   auto curModule = dyn_cast<HWModuleOp>(parentOp);
-  if (!curModule) curModule = parentOp->getParentOfType<HWModuleOp>();
+  if (!curModule)
+    curModule = parentOp->getParentOfType<HWModuleOp>();
   if (curModule && isValidParameterExpression(value, curModule))
     return builder.create<ParamValueOp>(loc, type, value);
 

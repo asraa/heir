@@ -15,6 +15,7 @@
 
 #include "circt/Dialect/HW/HWTypes.h"
 #include "circt/Dialect/HW/InnerSymbolTable.h"
+#include "circt/Dialect/HW/InstanceImplementation.h"
 #include "circt/Support/InstanceGraphInterface.h"
 #include "circt/Support/LLVM.h"
 #include "mlir/IR/OpDefinition.h"
@@ -35,7 +36,6 @@ struct PortInfo : public ModulePort {
   size_t argNum = ~0U;
 
   /// The optional symbol for this port.
-  InnerSymAttr sym = {};
   DictionaryAttr attrs = {};
   LocationAttr loc = {};
 
@@ -46,6 +46,10 @@ struct PortInfo : public ModulePort {
 
   /// Return a unique numeric identifier for this port.
   ssize_t getId() const { return isOutput() ? argNum : (-1 - argNum); };
+
+  // Inspect or mutate attributes
+  InnerSymAttr getSym() const;
+  void setSym(InnerSymAttr sym, MLIRContext *ctx);
 };
 
 raw_ostream &operator<<(raw_ostream &printer, PortInfo port);
@@ -134,7 +138,8 @@ struct ModulePortInfo {
   size_t portNumForInput(size_t idx) const {
     size_t port = 0;
     while (idx || ports[port].isOutput()) {
-      if (!ports[port].isOutput()) --idx;
+      if (!ports[port].isOutput())
+        --idx;
       ++port;
     }
     return port;
@@ -143,7 +148,8 @@ struct ModulePortInfo {
   size_t portNumForOutput(size_t idx) const {
     size_t port = 0;
     while (idx || !ports[port].isOutput()) {
-      if (ports[port].isOutput()) --idx;
+      if (ports[port].isOutput())
+        --idx;
       ++port;
     }
     return port;
@@ -166,7 +172,7 @@ struct ModulePortInfo {
     ports.erase(ports.begin() + portNumForInput(idx));
   }
 
- private:
+private:
   // convert input inout<type> -> inout type
   void sanitizeInOut() {
     for (auto &p : ports)
@@ -182,23 +188,29 @@ struct ModulePortInfo {
 
 // This provides capability for looking up port indices based on port names.
 struct ModulePortLookupInfo {
-  FailureOr<unsigned> lookupPortIndex(
-      const llvm::DenseMap<StringAttr, unsigned> &portMap,
-      StringAttr name) const {
+  FailureOr<unsigned>
+  lookupPortIndex(const llvm::DenseMap<StringAttr, unsigned> &portMap,
+                  StringAttr name) const {
     auto it = portMap.find(name);
-    if (it == portMap.end()) return failure();
+    if (it == portMap.end())
+      return failure();
     return it->second;
   }
 
- public:
+public:
   explicit ModulePortLookupInfo(MLIRContext *ctx,
                                 const ModulePortInfo &portInfo)
       : ctx(ctx) {
-    for (auto &in : portInfo.getInputs()) inputPortMap[in.name] = in.argNum;
+    for (auto &in : portInfo.getInputs())
+      inputPortMap[in.name] = in.argNum;
 
     for (auto &out : portInfo.getOutputs())
       outputPortMap[out.name] = out.argNum;
   }
+
+  explicit ModulePortLookupInfo(MLIRContext *ctx,
+                                const SmallVector<PortInfo> &portInfo)
+      : ModulePortLookupInfo(ctx, ModulePortInfo(portInfo)) {}
 
   // Return the index of the input port with the specified name.
   FailureOr<unsigned> getInputPortIndex(StringAttr name) const {
@@ -218,7 +230,7 @@ struct ModulePortLookupInfo {
     return getOutputPortIndex(StringAttr::get(ctx, name));
   }
 
- private:
+private:
   llvm::DenseMap<StringAttr, unsigned> inputPortMap;
   llvm::DenseMap<StringAttr, unsigned> outputPortMap;
   MLIRContext *ctx;
@@ -230,7 +242,7 @@ LogicalResult verifyInnerSymAttr(InnerSymbolOpInterface op);
 
 namespace detail {
 LogicalResult verifyInnerRefNamespace(Operation *op);
-}  // namespace detail
+} // namespace detail
 
 /// Classify operations that are InnerRefNamespace-like,
 /// until structure is in place to do this via Traits.
@@ -243,8 +255,8 @@ struct InnerRefNamespaceLike {
   static bool classof(const mlir::RegisteredOperationName *opInfo);
 };
 
-}  // namespace hw
-}  // namespace circt
+} // namespace hw
+} // namespace circt
 
 namespace mlir {
 namespace OpTrait {
@@ -253,7 +265,7 @@ namespace OpTrait {
 /// and provides verification for InnerRef users (via InnerRefUserOpInterface).
 template <typename ConcreteType>
 class InnerRefNamespace : public TraitBase<ConcreteType, InnerRefNamespace> {
- public:
+public:
   static LogicalResult verifyRegionTrait(Operation *op) {
     static_assert(
         ConcreteType::template hasTrait<::mlir::OpTrait::SymbolTable>(),
@@ -272,7 +284,7 @@ class InnerRefNamespace : public TraitBase<ConcreteType, InnerRefNamespace> {
 /// A trait for inner symbol table functionality on an operation.
 template <typename ConcreteType>
 class InnerSymbolTable : public TraitBase<ConcreteType, InnerSymbolTable> {
- public:
+public:
   static LogicalResult verifyRegionTrait(Operation *op) {
     // Insist that ops with InnerSymbolTable's provide a Symbol, this is
     // essential to how InnerRef's work.
@@ -289,9 +301,9 @@ class InnerSymbolTable : public TraitBase<ConcreteType, InnerSymbolTable> {
     return success();
   }
 };
-}  // namespace OpTrait
-}  // namespace mlir
+} // namespace OpTrait
+} // namespace mlir
 
 #include "circt/Dialect/HW/HWOpInterfaces.h.inc"
 
-#endif  // CIRCT_DIALECT_HW_HWOPINTERFACES_H
+#endif // CIRCT_DIALECT_HW_HWOPINTERFACES_H

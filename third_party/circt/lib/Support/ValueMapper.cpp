@@ -19,10 +19,9 @@ using namespace mlir;
 using namespace circt;
 mlir::Value ValueMapper::get(Value from, TypeTransformer typeTransformer) {
   if (mapping.count(from) == 0) {
-    assert(bb &&
-           "Trying to 'get' a mapped value without any value set. No "
-           "BackedgeBuilder was provided, so cannot provide any mapped "
-           "SSA value!");
+    assert(bb && "Trying to 'get' a mapped value without any value set. No "
+                 "BackedgeBuilder was provided, so cannot provide any mapped "
+                 "SSA value!");
     // Create a backedge which will be resolved at a later time once all
     // operands are created.
     mapping[from] = bb->get(typeTransformer(from.getType()));
@@ -39,7 +38,8 @@ mlir::Value ValueMapper::get(Value from, TypeTransformer typeTransformer) {
 llvm::SmallVector<Value> ValueMapper::get(ValueRange from,
                                           TypeTransformer typeTransformer) {
   llvm::SmallVector<Value> to;
-  for (auto f : from) to.push_back(get(f, typeTransformer));
+  for (auto f : from)
+    to.push_back(get(f, typeTransformer));
   return to;
 }
 
@@ -58,5 +58,6 @@ void ValueMapper::set(Value from, Value to, bool replace) {
 void ValueMapper::set(ValueRange from, ValueRange to, bool replace) {
   assert(from.size() == to.size() &&
          "Expected # of 'from' values and # of 'to' values to be identical.");
-  for (auto [f, t] : llvm::zip(from, to)) set(f, t, replace);
+  for (auto [f, t] : llvm::zip(from, to))
+    set(f, t, replace);
 }

@@ -11,7 +11,6 @@
 //===----------------------------------------------------------------------===//
 
 #include "circt/Support/APInt.h"
-
 #include "llvm/ADT/APSInt.h"
 
 using namespace circt;

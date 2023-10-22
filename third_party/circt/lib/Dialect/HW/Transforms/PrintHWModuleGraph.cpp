@@ -35,7 +35,7 @@ struct PrintHWModuleGraphPass
   }
   raw_ostream &os;
 };
-}  // end anonymous namespace
+} // end anonymous namespace
 
 std::unique_ptr<mlir::Pass> circt::hw::createPrintHWModuleGraphPass() {
   return std::make_unique<PrintHWModuleGraphPass>(llvm::errs());

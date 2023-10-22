@@ -11,12 +11,11 @@
 //===----------------------------------------------------------------------===//
 
 #include "circt/Dialect/Comb/CombOps.h"
-
 #include "circt/Dialect/HW/HWOps.h"
-#include "llvm/Support/FormatVariadic.h"
 #include "mlir/IR/Builders.h"
 #include "mlir/IR/ImplicitLocOpBuilder.h"
 #include "mlir/IR/PatternMatch.h"
+#include "llvm/Support/FormatVariadic.h"
 
 using namespace circt;
 using namespace comb;
@@ -30,7 +29,8 @@ Value comb::createOrFoldSExt(Location loc, Value value, Type destTy,
          valueType.getWidth() <= destTy.getIntOrFloatBitWidth() &&
          valueType.getWidth() != 0 && "invalid sext operands");
   // If already the right size, we are done.
-  if (valueType == destTy) return value;
+  if (valueType == destTy)
+    return value;
 
   // sext is concat with a replicate of the sign bits and the bottom part.
   auto signBit =
@@ -62,56 +62,56 @@ Value comb::createOrFoldNot(Value value, ImplicitLocOpBuilder &builder,
 
 ICmpPredicate ICmpOp::getFlippedPredicate(ICmpPredicate predicate) {
   switch (predicate) {
-    case ICmpPredicate::eq:
-      return ICmpPredicate::eq;
-    case ICmpPredicate::ne:
-      return ICmpPredicate::ne;
-    case ICmpPredicate::slt:
-      return ICmpPredicate::sgt;
-    case ICmpPredicate::sle:
-      return ICmpPredicate::sge;
-    case ICmpPredicate::sgt:
-      return ICmpPredicate::slt;
-    case ICmpPredicate::sge:
-      return ICmpPredicate::sle;
-    case ICmpPredicate::ult:
-      return ICmpPredicate::ugt;
-    case ICmpPredicate::ule:
-      return ICmpPredicate::uge;
-    case ICmpPredicate::ugt:
-      return ICmpPredicate::ult;
-    case ICmpPredicate::uge:
-      return ICmpPredicate::ule;
-    case ICmpPredicate::ceq:
-      return ICmpPredicate::ceq;
-    case ICmpPredicate::cne:
-      return ICmpPredicate::cne;
-    case ICmpPredicate::weq:
-      return ICmpPredicate::weq;
-    case ICmpPredicate::wne:
-      return ICmpPredicate::wne;
+  case ICmpPredicate::eq:
+    return ICmpPredicate::eq;
+  case ICmpPredicate::ne:
+    return ICmpPredicate::ne;
+  case ICmpPredicate::slt:
+    return ICmpPredicate::sgt;
+  case ICmpPredicate::sle:
+    return ICmpPredicate::sge;
+  case ICmpPredicate::sgt:
+    return ICmpPredicate::slt;
+  case ICmpPredicate::sge:
+    return ICmpPredicate::sle;
+  case ICmpPredicate::ult:
+    return ICmpPredicate::ugt;
+  case ICmpPredicate::ule:
+    return ICmpPredicate::uge;
+  case ICmpPredicate::ugt:
+    return ICmpPredicate::ult;
+  case ICmpPredicate::uge:
+    return ICmpPredicate::ule;
+  case ICmpPredicate::ceq:
+    return ICmpPredicate::ceq;
+  case ICmpPredicate::cne:
+    return ICmpPredicate::cne;
+  case ICmpPredicate::weq:
+    return ICmpPredicate::weq;
+  case ICmpPredicate::wne:
+    return ICmpPredicate::wne;
   }
   llvm_unreachable("unknown comparison predicate");
 }
 
 bool ICmpOp::isPredicateSigned(ICmpPredicate predicate) {
   switch (predicate) {
-    case ICmpPredicate::ult:
-    case ICmpPredicate::ugt:
-    case ICmpPredicate::ule:
-    case ICmpPredicate::uge:
-    case ICmpPredicate::ne:
-    case ICmpPredicate::eq:
-    case ICmpPredicate::cne:
-    case ICmpPredicate::ceq:
-    case ICmpPredicate::wne:
-    case ICmpPredicate::weq:
-      return false;
-    case ICmpPredicate::slt:
-    case ICmpPredicate::sgt:
-    case ICmpPredicate::sle:
-    case ICmpPredicate::sge:
-      return true;
+  case ICmpPredicate::ult:
+  case ICmpPredicate::ugt:
+  case ICmpPredicate::ule:
+  case ICmpPredicate::uge:
+  case ICmpPredicate::ne:
+  case ICmpPredicate::eq:
+  case ICmpPredicate::cne:
+  case ICmpPredicate::ceq:
+  case ICmpPredicate::wne:
+  case ICmpPredicate::weq:
+    return false;
+  case ICmpPredicate::slt:
+  case ICmpPredicate::sgt:
+  case ICmpPredicate::sle:
+  case ICmpPredicate::sge:
+    return true;
   }
   llvm_unreachable("unknown comparison predicate");
 }
@@ -120,34 +120,34 @@ bool ICmpOp::isPredicateSigned(ICmpPredicate predicate) {
 /// EQ => NE and SLE => SGT.
 ICmpPredicate ICmpOp::getNegatedPredicate(ICmpPredicate predicate) {
   switch (predicate) {
-    case ICmpPredicate::eq:
-      return ICmpPredicate::ne;
-    case ICmpPredicate::ne:
-      return ICmpPredicate::eq;
-    case ICmpPredicate::slt:
-      return ICmpPredicate::sge;
-    case ICmpPredicate::sle:
-      return ICmpPredicate::sgt;
-    case ICmpPredicate::sgt:
-      return ICmpPredicate::sle;
-    case ICmpPredicate::sge:
-      return ICmpPredicate::slt;
-    case ICmpPredicate::ult:
-      return ICmpPredicate::uge;
-    case ICmpPredicate::ule:
-      return ICmpPredicate::ugt;
-    case ICmpPredicate::ugt:
-      return ICmpPredicate::ule;
-    case ICmpPredicate::uge:
-      return ICmpPredicate::ult;
-    case ICmpPredicate::ceq:
-      return ICmpPredicate::cne;
-    case ICmpPredicate::cne:
-      return ICmpPredicate::ceq;
-    case ICmpPredicate::weq:
-      return ICmpPredicate::wne;
-    case ICmpPredicate::wne:
-      return ICmpPredicate::weq;
+  case ICmpPredicate::eq:
+    return ICmpPredicate::ne;
+  case ICmpPredicate::ne:
+    return ICmpPredicate::eq;
+  case ICmpPredicate::slt:
+    return ICmpPredicate::sge;
+  case ICmpPredicate::sle:
+    return ICmpPredicate::sgt;
+  case ICmpPredicate::sgt:
+    return ICmpPredicate::sle;
+  case ICmpPredicate::sge:
+    return ICmpPredicate::slt;
+  case ICmpPredicate::ult:
+    return ICmpPredicate::uge;
+  case ICmpPredicate::ule:
+    return ICmpPredicate::ugt;
+  case ICmpPredicate::ugt:
+    return ICmpPredicate::ule;
+  case ICmpPredicate::uge:
+    return ICmpPredicate::ult;
+  case ICmpPredicate::ceq:
+    return ICmpPredicate::cne;
+  case ICmpPredicate::cne:
+    return ICmpPredicate::ceq;
+  case ICmpPredicate::weq:
+    return ICmpPredicate::wne;
+  case ICmpPredicate::wne:
+    return ICmpPredicate::weq;
   }
   llvm_unreachable("unknown comparison predicate");
 }
@@ -155,7 +155,8 @@ ICmpPredicate ICmpOp::getNegatedPredicate(ICmpPredicate predicate) {
 /// Return true if this is an equality test with -1, which is a "reduction
 /// and" operation in Verilog.
 bool ICmpOp::isEqualAllOnes() {
-  if (getPredicate() != ICmpPredicate::eq) return false;
+  if (getPredicate() != ICmpPredicate::eq)
+    return false;
 
   if (auto op1 =
           dyn_cast_or_null<hw::ConstantOp>(getOperand(1).getDefiningOp()))
@@ -166,7 +167,8 @@ bool ICmpOp::isEqualAllOnes() {
 /// Return true if this is a not equal test with 0, which is a "reduction
 /// or" operation in Verilog.
 bool ICmpOp::isNotEqualZero() {
-  if (getPredicate() != ICmpPredicate::ne) return false;
+  if (getPredicate() != ICmpPredicate::ne)
+    return false;
 
   if (auto op1 =
           dyn_cast_or_null<hw::ConstantOp>(getOperand(1).getDefiningOp()))
@@ -220,9 +222,11 @@ LogicalResult XorOp::verify() { return verifyUTBinOp(*this); }
 /// Return true if this is a two operand xor with an all ones constant as its
 /// RHS operand.
 bool XorOp::isBinaryNot() {
-  if (getNumOperands() != 2) return false;
+  if (getNumOperands() != 2)
+    return false;
   if (auto cst = getOperand(1).getDefiningOp<hw::ConstantOp>())
-    if (cst.getValue().isAllOnes()) return true;
+    if (cst.getValue().isAllOnes())
+      return true;
   return false;
 }
 
@@ -242,10 +246,9 @@ LogicalResult ConcatOp::verify() {
   unsigned tyWidth = getType().cast<IntegerType>().getWidth();
   unsigned operandsTotalWidth = getTotalWidth(getInputs());
   if (tyWidth != operandsTotalWidth)
-    return emitOpError(
-               "ConcatOp requires operands total width to "
-               "match type width. operands "
-               "totalWidth is")
+    return emitOpError("ConcatOp requires operands total width to "
+                       "match type width. operands "
+                       "totalWidth is")
            << operandsTotalWidth << ", but concatOp type width is " << tyWidth;
 
   return success();

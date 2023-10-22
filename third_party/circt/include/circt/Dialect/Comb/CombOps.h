@@ -57,7 +57,7 @@ Value createOrFoldNot(Location loc, Value value, OpBuilder &builder,
 Value createOrFoldNot(Value value, ImplicitLocOpBuilder &builder,
                       bool twoState = false);
 
-}  // namespace comb
-}  // namespace circt
+} // namespace comb
+} // namespace circt
 
-#endif  // CIRCT_DIALECT_COMB_COMBOPS_H
+#endif // CIRCT_DIALECT_COMB_COMBOPS_H

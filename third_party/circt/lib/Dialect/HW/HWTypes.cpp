@@ -11,20 +11,21 @@
 //===----------------------------------------------------------------------===//
 
 #include "circt/Dialect/HW/HWTypes.h"
-
 #include "circt/Dialect/HW/HWAttributes.h"
 #include "circt/Dialect/HW/HWDialect.h"
 #include "circt/Dialect/HW/HWOps.h"
 #include "circt/Dialect/HW/HWSymCache.h"
 #include "circt/Support/LLVM.h"
-#include "llvm/ADT/StringExtras.h"
-#include "llvm/ADT/TypeSwitch.h"
 #include "mlir/IR/Builders.h"
 #include "mlir/IR/BuiltinTypes.h"
 #include "mlir/IR/Diagnostics.h"
 #include "mlir/IR/DialectImplementation.h"
 #include "mlir/IR/StorageUniquerSupport.h"
 #include "mlir/IR/Types.h"
+#include "llvm/ADT/SmallSet.h"
+#include "llvm/ADT/StringExtras.h"
+#include "llvm/ADT/StringSet.h"
+#include "llvm/ADT/TypeSwitch.h"
 
 using namespace circt;
 using namespace circt::hw;
@@ -51,10 +52,12 @@ mlir::Type circt::hw::getCanonicalType(mlir::Type type) {
 bool circt::hw::isHWIntegerType(mlir::Type type) {
   Type canonicalType = getCanonicalType(type);
 
-  if (canonicalType.isa<hw::IntType>()) return true;
+  if (canonicalType.isa<hw::IntType>())
+    return true;
 
   auto intType = canonicalType.dyn_cast<IntegerType>();
-  if (!intType || !intType.isSignless()) return false;
+  if (!intType || !intType.isSignless())
+    return false;
 
   return true;
 }
@@ -68,7 +71,8 @@ bool circt::hw::isHWEnumType(mlir::Type type) {
 /// hardware but not marker types like InOutType.
 bool circt::hw::isHWValueType(Type type) {
   // Signless and signed integer types are both valid.
-  if (type.isa<IntegerType, IntType, EnumType>()) return true;
+  if (type.isa<IntegerType, IntType, EnumType>())
+    return true;
 
   if (auto array = type.dyn_cast<ArrayType>())
     return isHWValueType(array.getElementType());
@@ -101,16 +105,19 @@ int64_t circt::hw::getBitWidth(mlir::Type type) {
           [](IntegerType t) { return t.getIntOrFloatBitWidth(); })
       .Case<ArrayType, UnpackedArrayType>([](auto a) {
         int64_t elementBitWidth = getBitWidth(a.getElementType());
-        if (elementBitWidth < 0) return elementBitWidth;
+        if (elementBitWidth < 0)
+          return elementBitWidth;
         int64_t dimBitWidth = a.getNumElements();
-        if (dimBitWidth < 0) return static_cast<int64_t>(-1L);
+        if (dimBitWidth < 0)
+          return static_cast<int64_t>(-1L);
         return (int64_t)a.getNumElements() * elementBitWidth;
       })
       .Case<StructType>([](StructType s) {
         int64_t total = 0;
         for (auto field : s.getElements()) {
           int64_t fieldSize = getBitWidth(field.type);
-          if (fieldSize < 0) return fieldSize;
+          if (fieldSize < 0)
+            return fieldSize;
           total += fieldSize;
         }
         return total;
@@ -119,7 +126,8 @@ int64_t circt::hw::getBitWidth(mlir::Type type) {
         int64_t maxSize = 0;
         for (auto field : u.getElements()) {
           int64_t fieldSize = getBitWidth(field.type) + field.offset;
-          if (fieldSize > maxSize) maxSize = fieldSize;
+          if (fieldSize > maxSize)
+            maxSize = fieldSize;
         }
         return maxSize;
       })
@@ -174,7 +182,8 @@ static ParseResult parseHWElementType(Type &result, AsmParser &p) {
 }
 
 static void printHWElementType(Type element, AsmPrinter &p) {
-  if (succeeded(generatedTypePrinter(element, p))) return;
+  if (succeeded(generatedTypePrinter(element, p)))
+    return;
   p.printType(element);
 }
 
@@ -225,65 +234,101 @@ bool operator==(const FieldInfo &a, const FieldInfo &b) {
 llvm::hash_code hash_value(const FieldInfo &fi) {
   return llvm::hash_combine(fi.name, fi.type);
 }
-}  // namespace detail
-}  // namespace hw
-}  // namespace circt
+} // namespace detail
+} // namespace hw
+} // namespace circt
 
-/// Parse a list of field names and types within <>. E.g.:
+/// Parse a list of unique field names and types within <>. E.g.:
 /// <foo: i7, bar: i8>
 static ParseResult parseFields(AsmParser &p,
                                SmallVectorImpl<FieldInfo> &parameters) {
-  return p.parseCommaSeparatedList(
+  llvm::StringSet<> nameSet;
+  bool hasDuplicateName = false;
+  auto parseResult = p.parseCommaSeparatedList(
       mlir::AsmParser::Delimiter::LessGreater, [&]() -> ParseResult {
-        StringRef name;
+        std::string name;
         Type type;
-        if (p.parseKeyword(&name) || p.parseColon() || p.parseType(type))
+
+        auto fieldLoc = p.getCurrentLocation();
+        if (p.parseKeywordOrString(&name) || p.parseColon() ||
+            p.parseType(type))
           return failure();
+
+        if (!nameSet.insert(name).second) {
+          p.emitError(fieldLoc, "duplicate field name \'" + name + "\'");
+          // Continue parsing to print all duplicates, but make sure to error
+          // eventually
+          hasDuplicateName = true;
+        }
+
         parameters.push_back(
             FieldInfo{StringAttr::get(p.getContext(), name), type});
         return success();
       });
+
+  if (hasDuplicateName)
+    return failure();
+  return parseResult;
 }
 
 /// Print out a list of named fields surrounded by <>.
 static void printFields(AsmPrinter &p, ArrayRef<FieldInfo> fields) {
   p << '<';
   llvm::interleaveComma(fields, p, [&](const FieldInfo &field) {
-    p << field.name.getValue() << ": " << field.type;
+    p.printKeywordOrString(field.name.getValue());
+    p << ": " << field.type;
   });
   p << ">";
 }
 
 Type StructType::parse(AsmParser &p) {
   llvm::SmallVector<FieldInfo, 4> parameters;
-  if (parseFields(p, parameters)) return Type();
+  if (parseFields(p, parameters))
+    return Type();
   return get(p.getContext(), parameters);
+}
+
+LogicalResult StructType::verify(function_ref<InFlightDiagnostic()> emitError,
+                                 ArrayRef<StructType::FieldInfo> elements) {
+  llvm::SmallDenseSet<StringAttr> fieldNameSet;
+  LogicalResult result = success();
+  fieldNameSet.reserve(elements.size());
+  for (const auto &elt : elements)
+    if (!fieldNameSet.insert(elt.name).second) {
+      result = failure();
+      emitError() << "duplicate field name '" << elt.name.getValue()
+                  << "' in hw.struct type";
+    }
+  return result;
 }
 
 void StructType::print(AsmPrinter &p) const { printFields(p, getElements()); }
 
 Type StructType::getFieldType(mlir::StringRef fieldName) {
   for (const auto &field : getElements())
-    if (field.name == fieldName) return field.type;
+    if (field.name == fieldName)
+      return field.type;
   return Type();
 }
 
 std::optional<unsigned> StructType::getFieldIndex(mlir::StringRef fieldName) {
   ArrayRef<hw::StructType::FieldInfo> elems = getElements();
   for (size_t idx = 0, numElems = elems.size(); idx < numElems; ++idx)
-    if (elems[idx].name == fieldName) return idx;
+    if (elems[idx].name == fieldName)
+      return idx;
   return {};
 }
 
 std::optional<unsigned> StructType::getFieldIndex(mlir::StringAttr fieldName) {
   ArrayRef<hw::StructType::FieldInfo> elems = getElements();
   for (size_t idx = 0, numElems = elems.size(); idx < numElems; ++idx)
-    if (elems[idx].name == fieldName) return idx;
+    if (elems[idx].name == fieldName)
+      return idx;
   return {};
 }
 
-static std::pair<uint64_t, SmallVector<uint64_t>> getFieldIDsStruct(
-    const StructType &st) {
+static std::pair<uint64_t, SmallVector<uint64_t>>
+getFieldIDsStruct(const StructType &st) {
   uint64_t fieldID = 0;
   auto elements = st.getElements();
   SmallVector<uint64_t> fieldIDs;
@@ -299,7 +344,8 @@ static std::pair<uint64_t, SmallVector<uint64_t>> getFieldIDsStruct(
 }
 
 void StructType::getInnerTypes(SmallVectorImpl<Type> &types) {
-  for (const auto &field : getElements()) types.push_back(field.type);
+  for (const auto &field : getElements())
+    types.push_back(field.type);
 }
 
 uint64_t StructType::getMaxFieldID() const {
@@ -309,9 +355,10 @@ uint64_t StructType::getMaxFieldID() const {
   return fieldID;
 }
 
-std::pair<Type, uint64_t> StructType::getSubTypeByFieldID(
-    uint64_t fieldID) const {
-  if (fieldID == 0) return {*this, 0};
+std::pair<Type, uint64_t>
+StructType::getSubTypeByFieldID(uint64_t fieldID) const {
+  if (fieldID == 0)
+    return {*this, 0};
   auto [maxId, fieldIDs] = getFieldIDsStruct(*this);
   auto *it = std::prev(llvm::upper_bound(fieldIDs, fieldID));
   auto subfieldIndex = std::distance(fieldIDs.begin(), it);
@@ -320,8 +367,8 @@ std::pair<Type, uint64_t> StructType::getSubTypeByFieldID(
   return {subfieldType, subfieldID};
 }
 
-std::pair<uint64_t, bool> StructType::projectToChildFieldID(
-    uint64_t fieldID, uint64_t index) const {
+std::pair<uint64_t, bool>
+StructType::projectToChildFieldID(uint64_t fieldID, uint64_t index) const {
   auto [maxId, fieldIDs] = getFieldIDsStruct(*this);
   auto childRoot = fieldIDs[index];
   auto rangeEnd =
@@ -342,8 +389,8 @@ uint64_t StructType::getIndexForFieldID(uint64_t fieldID) const {
   return std::distance(fieldIDs.begin(), it);
 }
 
-std::pair<uint64_t, uint64_t> StructType::getIndexAndSubfieldID(
-    uint64_t fieldID) const {
+std::pair<uint64_t, uint64_t>
+StructType::getIndexAndSubfieldID(uint64_t fieldID) const {
   auto index = getIndexForFieldID(fieldID);
   auto elementFieldID = getFieldID(index);
   return {index, fieldID - elementFieldID};
@@ -363,26 +410,44 @@ bool operator==(const OffsetFieldInfo &a, const OffsetFieldInfo &b) {
 llvm::hash_code hash_value(const OffsetFieldInfo &fi) {
   return llvm::hash_combine(fi.name, fi.type, fi.offset);
 }
-}  // namespace detail
-}  // namespace hw
-}  // namespace circt
+} // namespace detail
+} // namespace hw
+} // namespace circt
 
 Type UnionType::parse(AsmParser &p) {
   llvm::SmallVector<FieldInfo, 4> parameters;
+  llvm::StringSet<> nameSet;
+  bool hasDuplicateName = false;
   if (p.parseCommaSeparatedList(
           mlir::AsmParser::Delimiter::LessGreater, [&]() -> ParseResult {
             StringRef name;
             Type type;
+
+            auto fieldLoc = p.getCurrentLocation();
             if (p.parseKeyword(&name) || p.parseColon() || p.parseType(type))
               return failure();
+
+            if (!nameSet.insert(name).second) {
+              p.emitError(fieldLoc, "duplicate field name \'" + name +
+                                        "\' in hw.union type");
+              // Continue parsing to print all duplicates, but make sure to
+              // error eventually
+              hasDuplicateName = true;
+            }
+
             size_t offset = 0;
             if (succeeded(p.parseOptionalKeyword("offset")))
-              if (p.parseInteger(offset)) return failure();
+              if (p.parseInteger(offset))
+                return failure();
             parameters.push_back(UnionType::FieldInfo{
                 StringAttr::get(p.getContext(), name), type, offset});
             return success();
           }))
     return Type();
+
+  if (hasDuplicateName)
+    return Type();
+
   return get(p.getContext(), parameters);
 }
 
@@ -391,14 +456,30 @@ void UnionType::print(AsmPrinter &odsPrinter) const {
   llvm::interleaveComma(
       getElements(), odsPrinter, [&](const UnionType::FieldInfo &field) {
         odsPrinter << field.name.getValue() << ": " << field.type;
-        if (field.offset) odsPrinter << " offset " << field.offset;
+        if (field.offset)
+          odsPrinter << " offset " << field.offset;
       });
   odsPrinter << ">";
 }
 
+LogicalResult UnionType::verify(function_ref<InFlightDiagnostic()> emitError,
+                                ArrayRef<UnionType::FieldInfo> elements) {
+  llvm::SmallDenseSet<StringAttr> fieldNameSet;
+  LogicalResult result = success();
+  fieldNameSet.reserve(elements.size());
+  for (const auto &elt : elements)
+    if (!fieldNameSet.insert(elt.name).second) {
+      result = failure();
+      emitError() << "duplicate field name '" << elt.name.getValue()
+                  << "' in hw.union type";
+    }
+  return result;
+}
+
 UnionType::FieldInfo UnionType::getFieldInfo(::mlir::StringRef fieldName) {
   for (const auto &field : getElements())
-    if (field.name == fieldName) return field;
+    if (field.name == fieldName)
+      return field;
   return FieldInfo();
 }
 
@@ -415,7 +496,8 @@ Type EnumType::parse(AsmParser &p) {
 
   if (p.parseCommaSeparatedList(AsmParser::Delimiter::LessGreater, [&]() {
         StringRef name;
-        if (p.parseKeyword(&name)) return failure();
+        if (p.parseKeyword(&name))
+          return failure();
         fields.push_back(StringAttr::get(p.getContext(), name));
         return success();
       }))
@@ -438,13 +520,15 @@ bool EnumType::contains(mlir::StringRef field) {
 
 std::optional<size_t> EnumType::indexOf(mlir::StringRef field) {
   for (auto it : llvm::enumerate(getFields()))
-    if (it.value().cast<StringAttr>().getValue() == field) return it.index();
+    if (it.value().cast<StringAttr>().getValue() == field)
+      return it.index();
   return {};
 }
 
 size_t EnumType::getBitWidth() {
   auto w = getFields().size();
-  if (w > 1) return llvm::Log2_64_Ceil(getFields().size());
+  if (w > 1)
+    return llvm::Log2_64_Ceil(getFields().size());
   return 1;
 }
 
@@ -453,7 +537,8 @@ size_t EnumType::getBitWidth() {
 //===----------------------------------------------------------------------===//
 
 static LogicalResult parseArray(AsmParser &p, Attribute &dim, Type &inner) {
-  if (p.parseLess()) return failure();
+  if (p.parseLess())
+    return failure();
 
   uint64_t dimLiteral;
   auto int64Type = p.getBuilder().getIntegerType(64);
@@ -479,7 +564,8 @@ Type ArrayType::parse(AsmParser &p) {
   Attribute dim;
   Type inner;
 
-  if (failed(parseArray(p, dim, inner))) return Type();
+  if (failed(parseArray(p, dim, inner)))
+    return Type();
 
   auto loc = p.getEncodedSourceLoc(p.getCurrentLocation());
   if (failed(verify(mlir::detail::getDefaultDiagnosticEmitFn(loc), inner, dim)))
@@ -514,14 +600,15 @@ uint64_t ArrayType::getMaxFieldID() const {
          (hw::FieldIdImpl::getMaxFieldID(getElementType()) + 1);
 }
 
-std::pair<Type, uint64_t> ArrayType::getSubTypeByFieldID(
-    uint64_t fieldID) const {
-  if (fieldID == 0) return {*this, 0};
+std::pair<Type, uint64_t>
+ArrayType::getSubTypeByFieldID(uint64_t fieldID) const {
+  if (fieldID == 0)
+    return {*this, 0};
   return {getElementType(), getIndexAndSubfieldID(fieldID).second};
 }
 
-std::pair<uint64_t, bool> ArrayType::projectToChildFieldID(
-    uint64_t fieldID, uint64_t index) const {
+std::pair<uint64_t, bool>
+ArrayType::projectToChildFieldID(uint64_t fieldID, uint64_t index) const {
   auto childRoot = getFieldID(index);
   auto rangeEnd =
       index >= getNumElements() ? getMaxFieldID() : (getFieldID(index + 1) - 1);
@@ -535,8 +622,8 @@ uint64_t ArrayType::getIndexForFieldID(uint64_t fieldID) const {
   return (fieldID - 1) / (hw::FieldIdImpl::getMaxFieldID(getElementType()) + 1);
 }
 
-std::pair<uint64_t, uint64_t> ArrayType::getIndexAndSubfieldID(
-    uint64_t fieldID) const {
+std::pair<uint64_t, uint64_t>
+ArrayType::getIndexAndSubfieldID(uint64_t fieldID) const {
   auto index = getIndexForFieldID(fieldID);
   auto elementFieldID = getFieldID(index);
   return {index, fieldID - elementFieldID};
@@ -554,7 +641,8 @@ Type UnpackedArrayType::parse(AsmParser &p) {
   Attribute dim;
   Type inner;
 
-  if (failed(parseArray(p, dim, inner))) return Type();
+  if (failed(parseArray(p, dim, inner)))
+    return Type();
 
   auto loc = p.getEncodedSourceLoc(p.getCurrentLocation());
   if (failed(verify(mlir::detail::getDefaultDiagnosticEmitFn(loc), inner, dim)))
@@ -571,9 +659,9 @@ void UnpackedArrayType::print(AsmPrinter &p) const {
   p << '>';
 }
 
-LogicalResult UnpackedArrayType::verify(
-    function_ref<InFlightDiagnostic()> emitError, Type innerType,
-    Attribute size) {
+LogicalResult
+UnpackedArrayType::verify(function_ref<InFlightDiagnostic()> emitError,
+                          Type innerType, Attribute size) {
   if (!isHWValueType(innerType))
     return emitError() << "invalid element for uarray type";
   return success();
@@ -588,14 +676,16 @@ uint64_t UnpackedArrayType::getMaxFieldID() const {
          (hw::FieldIdImpl::getMaxFieldID(getElementType()) + 1);
 }
 
-std::pair<Type, uint64_t> UnpackedArrayType::getSubTypeByFieldID(
-    uint64_t fieldID) const {
-  if (fieldID == 0) return {*this, 0};
+std::pair<Type, uint64_t>
+UnpackedArrayType::getSubTypeByFieldID(uint64_t fieldID) const {
+  if (fieldID == 0)
+    return {*this, 0};
   return {getElementType(), getIndexAndSubfieldID(fieldID).second};
 }
 
-std::pair<uint64_t, bool> UnpackedArrayType::projectToChildFieldID(
-    uint64_t fieldID, uint64_t index) const {
+std::pair<uint64_t, bool>
+UnpackedArrayType::projectToChildFieldID(uint64_t fieldID,
+                                         uint64_t index) const {
   auto childRoot = getFieldID(index);
   auto rangeEnd =
       index >= getNumElements() ? getMaxFieldID() : (getFieldID(index + 1) - 1);
@@ -609,8 +699,8 @@ uint64_t UnpackedArrayType::getIndexForFieldID(uint64_t fieldID) const {
   return (fieldID - 1) / (hw::FieldIdImpl::getMaxFieldID(getElementType()) + 1);
 }
 
-std::pair<uint64_t, uint64_t> UnpackedArrayType::getIndexAndSubfieldID(
-    uint64_t fieldID) const {
+std::pair<uint64_t, uint64_t>
+UnpackedArrayType::getIndexAndSubfieldID(uint64_t fieldID) const {
   auto index = getIndexForFieldID(fieldID);
   auto elementFieldID = getFieldID(index);
   return {index, fieldID - elementFieldID};
@@ -700,7 +790,8 @@ TypedeclOp TypeAliasType::getTypeDecl(const HWSymbolCache &cache) {
   SymbolRefAttr ref = getRef();
   auto typeScope = ::dyn_cast_or_null<TypeScopeOp>(
       cache.getDefinition(ref.getRootReference()));
-  if (!typeScope) return {};
+  if (!typeScope)
+    return {};
 
   return typeScope.lookupSymbol<TypedeclOp>(ref.getLeafReference());
 }
@@ -721,7 +812,8 @@ LogicalResult ModuleType::verify(function_ref<InFlightDiagnostic()> emitError,
 size_t ModuleType::getPortIdForInputId(size_t idx) {
   for (auto [i, p] : llvm::enumerate(getPorts())) {
     if (p.dir != ModulePort::Direction::Output) {
-      if (!idx) return i;
+      if (!idx)
+        return i;
       --idx;
     }
   }
@@ -732,12 +824,33 @@ size_t ModuleType::getPortIdForInputId(size_t idx) {
 size_t ModuleType::getPortIdForOutputId(size_t idx) {
   for (auto [i, p] : llvm::enumerate(getPorts())) {
     if (p.dir == ModulePort::Direction::Output) {
-      if (!idx) return i;
+      if (!idx)
+        return i;
       --idx;
     }
   }
   assert(0 && "Out of bounds output port id");
   return ~0UL;
+}
+
+size_t ModuleType::getInputIdForPortId(size_t idx) {
+  auto ports = getPorts();
+  assert(ports[idx].dir != ModulePort::Direction::Output);
+  size_t retval = 0;
+  for (size_t i = 0; i < idx; ++i)
+    if (ports[i].dir != ModulePort::Direction::Output)
+      ++retval;
+  return retval;
+}
+
+size_t ModuleType::getOutputIdForPortId(size_t idx) {
+  auto ports = getPorts();
+  assert(ports[idx].dir == ModulePort::Direction::Output);
+  size_t retval = 0;
+  for (size_t i = 0; i < idx; ++i)
+    if (ports[i].dir == ModulePort::Direction::Output)
+      ++retval;
+  return retval;
 }
 
 size_t ModuleType::getNumInputs() {
@@ -769,18 +882,23 @@ SmallVector<Type> ModuleType::getInputTypes() {
 SmallVector<Type> ModuleType::getOutputTypes() {
   SmallVector<Type> retval;
   for (auto &p : getPorts())
-    if (p.dir == ModulePort::Direction::Output) retval.push_back(p.type);
+    if (p.dir == ModulePort::Direction::Output)
+      retval.push_back(p.type);
   return retval;
 }
 
 SmallVector<Type> ModuleType::getPortTypes() {
   SmallVector<Type> retval;
-  for (auto &p : getPorts()) retval.push_back(p.type);
+  for (auto &p : getPorts())
+    retval.push_back(p.type);
   return retval;
 }
 
 Type ModuleType::getInputType(size_t idx) {
-  return getPorts()[getPortIdForInputId(idx)].type;
+  const auto &portInfo = getPorts()[getPortIdForInputId(idx)];
+  if (portInfo.dir != ModulePort::InOut)
+    return portInfo.type;
+  return InOutType::get(portInfo.type);
 }
 
 Type ModuleType::getOutputType(size_t idx) {
@@ -790,28 +908,32 @@ Type ModuleType::getOutputType(size_t idx) {
 SmallVector<StringAttr> ModuleType::getInputNamesStr() {
   SmallVector<StringAttr> retval;
   for (auto &p : getPorts())
-    if (p.dir != ModulePort::Direction::Output) retval.push_back(p.name);
+    if (p.dir != ModulePort::Direction::Output)
+      retval.push_back(p.name);
   return retval;
 }
 
 SmallVector<StringAttr> ModuleType::getOutputNamesStr() {
   SmallVector<StringAttr> retval;
   for (auto &p : getPorts())
-    if (p.dir == ModulePort::Direction::Output) retval.push_back(p.name);
+    if (p.dir == ModulePort::Direction::Output)
+      retval.push_back(p.name);
   return retval;
 }
 
 SmallVector<Attribute> ModuleType::getInputNames() {
   SmallVector<Attribute> retval;
   for (auto &p : getPorts())
-    if (p.dir != ModulePort::Direction::Output) retval.push_back(p.name);
+    if (p.dir != ModulePort::Direction::Output)
+      retval.push_back(p.name);
   return retval;
 }
 
 SmallVector<Attribute> ModuleType::getOutputNames() {
   SmallVector<Attribute> retval;
   for (auto &p : getPorts())
-    if (p.dir == ModulePort::Direction::Output) retval.push_back(p.name);
+    if (p.dir == ModulePort::Direction::Output)
+      retval.push_back(p.name);
   return retval;
 }
 
@@ -821,7 +943,8 @@ StringAttr ModuleType::getPortNameAttr(size_t idx) {
 
 StringRef ModuleType::getPortName(size_t idx) {
   auto sa = getPortNameAttr(idx);
-  if (sa) return sa.getValue();
+  if (sa)
+    return sa.getValue();
   return {};
 }
 
@@ -831,7 +954,8 @@ StringAttr ModuleType::getInputNameAttr(size_t idx) {
 
 StringRef ModuleType::getInputName(size_t idx) {
   auto sa = getInputNameAttr(idx);
-  if (sa) return sa.getValue();
+  if (sa)
+    return sa.getValue();
   return {};
 }
 
@@ -841,8 +965,14 @@ StringAttr ModuleType::getOutputNameAttr(size_t idx) {
 
 StringRef ModuleType::getOutputName(size_t idx) {
   auto sa = getOutputNameAttr(idx);
-  if (sa) return sa.getValue();
+  if (sa)
+    return sa.getValue();
   return {};
+}
+
+bool ModuleType::isOutput(size_t idx) {
+  auto &p = getPorts()[idx];
+  return p.dir == ModulePort::Direction::Output;
 }
 
 FunctionType ModuleType::getFuncType() {
@@ -859,19 +989,22 @@ FunctionType ModuleType::getFuncType() {
 
 static StringRef dirToStr(ModulePort::Direction dir) {
   switch (dir) {
-    case ModulePort::Direction::Input:
-      return "input";
-    case ModulePort::Direction::Output:
-      return "output";
-    case ModulePort::Direction::InOut:
-      return "inout";
+  case ModulePort::Direction::Input:
+    return "input";
+  case ModulePort::Direction::Output:
+    return "output";
+  case ModulePort::Direction::InOut:
+    return "inout";
   }
 }
 
 static ModulePort::Direction strToDir(StringRef str) {
-  if (str == "input") return ModulePort::Direction::Input;
-  if (str == "output") return ModulePort::Direction::Output;
-  if (str == "inout") return ModulePort::Direction::InOut;
+  if (str == "input")
+    return ModulePort::Direction::Input;
+  if (str == "output")
+    return ModulePort::Direction::Output;
+  if (str == "inout")
+    return ModulePort::Direction::InOut;
   llvm::report_fatal_error("invalid direction");
 }
 
@@ -882,10 +1015,10 @@ static ParseResult parsePorts(AsmParser &p,
   return p.parseCommaSeparatedList(
       mlir::AsmParser::Delimiter::LessGreater, [&]() -> ParseResult {
         StringRef dir;
-        StringRef name;
+        std::string name;
         Type type;
-        if (p.parseKeyword(&dir) || p.parseKeyword(&name) || p.parseColon() ||
-            p.parseType(type))
+        if (p.parseKeyword(&dir) || p.parseKeywordOrString(&name) ||
+            p.parseColon() || p.parseType(type))
           return failure();
         ports.push_back(
             {StringAttr::get(p.getContext(), name), type, strToDir(dir)});
@@ -897,15 +1030,17 @@ static ParseResult parsePorts(AsmParser &p,
 static void printPorts(AsmPrinter &p, ArrayRef<ModulePort> ports) {
   p << '<';
   llvm::interleaveComma(ports, p, [&](const ModulePort &port) {
-    p << dirToStr(port.dir) << " " << port.name.getValue() << " : "
-      << port.type;
+    p << dirToStr(port.dir) << " ";
+    p.printKeywordOrString(port.name.getValue());
+    p << " : " << port.type;
   });
   p << ">";
 }
 
 Type ModuleType::parse(AsmParser &odsParser) {
   llvm::SmallVector<ModulePort, 4> ports;
-  if (parsePorts(odsParser, ports)) return Type();
+  if (parsePorts(odsParser, ports))
+    return Type();
   return get(odsParser.getContext(), ports);
 }
 
@@ -922,8 +1057,8 @@ static bool operator==(const ModulePort &a, const ModulePort &b) {
 static llvm::hash_code hash_value(const ModulePort &port) {
   return llvm::hash_combine(port.dir, port.name, port.type);
 }
-}  // namespace hw
-}  // namespace circt
+} // namespace hw
+} // namespace circt
 
 ModuleType circt::hw::detail::fnToMod(Operation *op,
                                       ArrayRef<Attribute> inputNames,

@@ -23,7 +23,7 @@ namespace hw {
 template <typename ConcreteType, typename ResultType = void,
           typename... ExtraArgs>
 class TypeOpVisitor {
- public:
+public:
   ResultType dispatchTypeOpVisitor(Operation *op, ExtraArgs... args) {
     auto *thisCast = static_cast<ConcreteType *>(this);
     return TypeSwitch<Operation *, ResultType>(op)
@@ -57,10 +57,10 @@ class TypeOpVisitor {
     return ResultType();
   }
 
-#define HANDLE(OPTYPE, OPKIND)                                                \
-  ResultType visitTypeOp(OPTYPE op, ExtraArgs... args) {                      \
-    return static_cast<ConcreteType *>(this)->visit##OPKIND##TypeOp(op,       \
-                                                                    args...); \
+#define HANDLE(OPTYPE, OPKIND)                                                 \
+  ResultType visitTypeOp(OPTYPE op, ExtraArgs... args) {                       \
+    return static_cast<ConcreteType *>(this)->visit##OPKIND##TypeOp(op,        \
+                                                                    args...);  \
   }
 
   HANDLE(ConstantOp, Unhandled);
@@ -85,7 +85,7 @@ class TypeOpVisitor {
 template <typename ConcreteType, typename ResultType = void,
           typename... ExtraArgs>
 class StmtVisitor {
- public:
+public:
   ResultType dispatchStmtVisitor(Operation *op, ExtraArgs... args) {
     auto *thisCast = static_cast<ConcreteType *>(this);
     return TypeSwitch<Operation *, ResultType>(op)
@@ -120,10 +120,10 @@ class StmtVisitor {
     return static_cast<ConcreteType *>(this)->visitUnhandledTypeOp(op, args...);
   }
 
-#define HANDLE(OPTYPE, OPKIND)                                              \
-  ResultType visitStmt(OPTYPE op, ExtraArgs... args) {                      \
-    return static_cast<ConcreteType *>(this)->visit##OPKIND##Stmt(op,       \
-                                                                  args...); \
+#define HANDLE(OPTYPE, OPKIND)                                                 \
+  ResultType visitStmt(OPTYPE op, ExtraArgs... args) {                         \
+    return static_cast<ConcreteType *>(this)->visit##OPKIND##Stmt(op,          \
+                                                                  args...);    \
   }
 
   // Basic nodes.
@@ -134,7 +134,7 @@ class StmtVisitor {
 #undef HANDLE
 };
 
-}  // namespace hw
-}  // namespace circt
+} // namespace hw
+} // namespace circt
 
-#endif  // CIRCT_DIALECT_HW_HWVISITORS_H
+#endif // CIRCT_DIALECT_HW_HWVISITORS_H

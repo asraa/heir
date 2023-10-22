@@ -18,11 +18,11 @@
 #include "circt/Dialect/HW/HWSymCache.h"
 #include "circt/Support/Namespace.h"
 #include "circt/Support/ValueMapper.h"
-#include "llvm/ADT/TypeSwitch.h"
 #include "mlir/IR/Builders.h"
 #include "mlir/IR/IRMapping.h"
 #include "mlir/IR/PatternMatch.h"
 #include "mlir/Transforms/DialectConversion.h"
+#include "llvm/ADT/TypeSwitch.h"
 
 using namespace llvm;
 using namespace mlir;
@@ -77,10 +77,11 @@ static hw::HWModuleOp targetModuleOp(hw::InstanceOp instanceOp,
                                      const SymbolCache &sc) {
   auto *targetOp = sc.getDefinition(instanceOp.getModuleNameAttr());
   auto targetHWModule = dyn_cast<hw::HWModuleOp>(targetOp);
-  if (!targetHWModule) return {};  // Won't specialize external modules.
+  if (!targetHWModule)
+    return {}; // Won't specialize external modules.
 
   if (targetHWModule.getParameters().size() == 0)
-    return {};  // nothing to record or specialize
+    return {}; // nothing to record or specialize
 
   return targetHWModule;
 }
@@ -110,7 +111,8 @@ struct EliminateParamValueOpPattern : public OpRewritePattern<ParamValueOp> {
     // Substitute the param value op with an evaluated constant operation.
     FailureOr<Attribute> evaluated =
         evaluateParametricAttr(op.getLoc(), parameters, op.getValue());
-    if (failed(evaluated)) return failure();
+    if (failed(evaluated))
+      return failure();
     rewriter.replaceOpWithNewOp<hw::ConstantOp>(
         op, op.getType(),
         evaluated->cast<IntegerAttr>().getValue().getSExtValue());
@@ -124,12 +126,12 @@ struct EliminateParamValueOpPattern : public OpRewritePattern<ParamValueOp> {
 // array itself. Since indexes may originate from constants or parameters,
 // emit comb.extract operations to fulfill this invariant.
 struct NarrowArrayGetIndexPattern : public OpConversionPattern<ArrayGetOp> {
- public:
+public:
   using OpConversionPattern<ArrayGetOp>::OpConversionPattern;
 
-  LogicalResult matchAndRewrite(
-      ArrayGetOp op, OpAdaptor adaptor,
-      ConversionPatternRewriter &rewriter) const override {
+  LogicalResult
+  matchAndRewrite(ArrayGetOp op, OpAdaptor adaptor,
+                  ConversionPatternRewriter &rewriter) const override {
     auto inputType = type_cast<ArrayType>(op.getInput().getType());
     Type targetIndexType = IntegerType::get(
         getContext(), inputType.getNumElements() == 1
@@ -138,12 +140,13 @@ struct NarrowArrayGetIndexPattern : public OpConversionPattern<ArrayGetOp> {
 
     if (op.getIndex().getType().getIntOrFloatBitWidth() ==
         targetIndexType.getIntOrFloatBitWidth())
-      return failure();  // nothing to do
+      return failure(); // nothing to do
 
     // Narrow the index value.
     FailureOr<Value> narrowedIndex =
         narrowValueToArrayWidth(rewriter, op.getInput(), op.getIndex());
-    if (failed(narrowedIndex)) return failure();
+    if (failed(narrowedIndex))
+      return failure();
     rewriter.replaceOpWithNewOp<ArrayGetOp>(op, op.getInput(), *narrowedIndex);
     return success();
   }
@@ -158,9 +161,9 @@ struct ParametricTypeConversionPattern : public ConversionPattern {
                           ctx),
         parameters(parameters) {}
 
-  LogicalResult matchAndRewrite(
-      Operation *op, ArrayRef<Value> operands,
-      ConversionPatternRewriter &rewriter) const override {
+  LogicalResult
+  matchAndRewrite(Operation *op, ArrayRef<Value> operands,
+                  ConversionPatternRewriter &rewriter) const override {
     llvm::SmallVector<Value, 4> convertedOperands;
     // Update the result types of the operation
     bool ok = true;
@@ -170,7 +173,8 @@ struct ParametricTypeConversionPattern : public ConversionPattern {
         FailureOr<Type> res =
             evaluateParametricType(op->getLoc(), parameters, it.value());
         ok &= succeeded(res);
-        if (!ok) return;
+        if (!ok)
+          return;
         op->getResult(it.index()).setType(*res);
       }
 
@@ -216,7 +220,8 @@ static LogicalResult registerNestedParametricInstanceOps(
   auto walkResult = target->walk([&](InstanceOp instanceOp) -> WalkResult {
     auto instanceParameters = instanceOp.getParameters();
     // We can ignore non-parametric instances
-    if (instanceParameters.empty()) return WalkResult::advance();
+    if (instanceParameters.empty())
+      return WalkResult::advance();
 
     // Replace instance parameters with evaluated versions
     llvm::SmallVector<Attribute> evaluatedInstanceParameters;
@@ -226,7 +231,8 @@ static LogicalResult registerNestedParametricInstanceOps(
       auto instanceParameterValue = instanceParameterDecl.getValue();
       auto evaluated = evaluateParametricAttr(target.getLoc(), parameters,
                                               instanceParameterValue);
-      if (failed(evaluated)) return WalkResult::interrupt();
+      if (failed(evaluated))
+        return WalkResult::interrupt();
       evaluatedInstanceParameters.push_back(
           hw::ParamDeclAttr::get(instanceParameterDecl.getName(), *evaluated));
     }
@@ -268,17 +274,19 @@ static LogicalResult specializeModule(
   auto *ctx = builder.getContext();
   // Update the types of the source module ports based on evaluating any
   // parametric in/output ports.
-  auto ports = source.getPortList();
+  ModulePortInfo ports(source.getPortList());
   for (auto in : llvm::enumerate(source.getInputTypes())) {
     FailureOr<Type> resType =
         evaluateParametricType(source.getLoc(), parameters, in.value());
-    if (failed(resType)) return failure();
+    if (failed(resType))
+      return failure();
     ports.atInput(in.index()).type = *resType;
   }
   for (auto out : llvm::enumerate(source.getOutputTypes())) {
     FailureOr<Type> resolvedType =
         evaluateParametricType(source.getLoc(), parameters, out.value());
-    if (failed(resolvedType)) return failure();
+    if (failed(resolvedType))
+      return failure();
     ports.atOutput(out.index()).type = *resolvedType;
   }
 
@@ -313,7 +321,8 @@ static LogicalResult specializeModule(
   // Register any nested parametric instance ops for the next loop
   auto nestedRegistrationResult = registerNestedParametricInstanceOps(
       target, parameters, sc, currentRegistry, nextRegistry, parametersUsers);
-  if (failed(nestedRegistrationResult)) return failure();
+  if (failed(nestedRegistrationResult))
+    return failure();
 
   // We've now created a separate copy of the source module with a rewritten
   // top-level interface. Next, we enter the module to convert parametric
@@ -353,7 +362,8 @@ void HWSpecializePass::runOnOperation() {
   for (auto hwModule : module.getOps<hw::HWModuleOp>()) {
     // If this module is parametric, defer registering its parametric
     // instantiations until this module is specialized
-    if (!hwModule.getParameters().empty()) continue;
+    if (!hwModule.getParameters().empty())
+      continue;
     for (auto instanceOp : hwModule.getOps<hw::InstanceOp>()) {
       if (auto targetHWModule = targetModuleOp(instanceOp, sc)) {
         auto parameters = instanceOp.getParameters();
@@ -415,7 +425,7 @@ void HWSpecializePass::runOnOperation() {
   }
 }
 
-}  // namespace
+} // namespace
 
 std::unique_ptr<Pass> circt::hw::createHWSpecializePass() {
   return std::make_unique<HWSpecializePass>();

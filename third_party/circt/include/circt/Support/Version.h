@@ -11,6 +11,6 @@ const char *getCirctVersionComment();
 constexpr const char *circtBugReportMsg =
     "PLEASE submit a bug report to https://github.com/llvm/circt and include "
     "the crash backtrace.\n";
-}  // namespace circt
+} // namespace circt
 
-#endif  // CIRCT_SUPPORT_VERSION_H
+#endif // CIRCT_SUPPORT_VERSION_H

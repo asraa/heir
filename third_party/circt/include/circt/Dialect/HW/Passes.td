@@ -23,7 +23,7 @@ def PrintInstanceGraph : Pass<"hw-print-instance-graph", "mlir::ModuleOp"> {
 def PrintHWModuleGraph : Pass<"hw-print-module-graph", "mlir::ModuleOp"> {
   let summary = "Print a DOT graph of the HWModule's within a top-level module.";
   let constructor =  "circt::hw::createPrintHWModuleGraphPass()";
-
+  
   let options = [
     Option<"verboseEdges", "verbose-edges", "bool", "false",
       "Print information on SSA edges (types, operand #, ...)">,
@@ -33,7 +33,7 @@ def PrintHWModuleGraph : Pass<"hw-print-module-graph", "mlir::ModuleOp"> {
 def FlattenIO : Pass<"hw-flatten-io", "mlir::ModuleOp"> {
   let summary = "Flattens hw::Structure typed in- and output ports.";
   let constructor =  "circt::hw::createFlattenIOPass()";
-
+  
   let options = [
     Option<"recursive", "recursive", "bool", "false",
       "Recursively flatten nested structs.">,

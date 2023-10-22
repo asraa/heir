@@ -7,7 +7,6 @@
 //===----------------------------------------------------------------------===//
 
 #include "circt/Dialect/HW/HWReductions.h"
-
 #include "circt/Dialect/HW/HWInstanceGraph.h"
 #include "circt/Dialect/HW/HWOps.h"
 #include "circt/Reduce/ReductionUtils.h"
@@ -44,7 +43,7 @@ struct ModuleSizeCache {
     return size;
   }
 
- private:
+private:
   llvm::DenseMap<Operation *, uint64_t> moduleSizes;
 };
 
@@ -112,7 +111,8 @@ struct HWOperandForwarder : public Reduction {
 /// zero of their type.
 struct HWConstantifier : public Reduction {
   uint64_t match(Operation *op) override {
-    if (op->getNumResults() == 0 || op->getNumOperands() == 0) return 0;
+    if (op->getNumResults() == 0 || op->getNumOperands() == 0)
+      return 0;
     return llvm::all_of(op->getResults(), [](Value result) {
       return result.getType().isa<IntegerType>();
     });

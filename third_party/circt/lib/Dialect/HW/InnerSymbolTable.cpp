@@ -11,10 +11,9 @@
 //===----------------------------------------------------------------------===//
 
 #include "circt/Dialect/HW/InnerSymbolTable.h"
-
 #include "circt/Dialect/HW/HWOpInterfaces.h"
-#include "llvm/Support/Debug.h"
 #include "mlir/IR/Threading.h"
+#include "llvm/Support/Debug.h"
 
 using namespace circt;
 using namespace hw;
@@ -46,7 +45,8 @@ FailureOr<InnerSymbolTable> InnerSymbolTable::get(Operation *op) {
   auto result = walkSymbols(
       op, [&](StringAttr name, const InnerSymTarget &target) -> LogicalResult {
         auto it = table.try_emplace(name, target);
-        if (it.second) return success();
+        if (it.second)
+          return success();
         auto existing = it.first->second;
         return target.getOp()
             ->emitError()
@@ -54,7 +54,8 @@ FailureOr<InnerSymbolTable> InnerSymbolTable::get(Operation *op) {
             .attachNote(existing.getOp()->getLoc())
             .append("see existing inner symbol definition here");
       });
-  if (failed(result)) return failure();
+  if (failed(result))
+    return failure();
   return InnerSymbolTable(op, std::move(table));
 }
 
@@ -86,9 +87,9 @@ LogicalResult InnerSymbolTable::walkSymbols(Operation *op,
                  return WalkResult::interrupt();
 
            // Check for ports
-           if (auto mod = dyn_cast<SymboledPortList>(curOp)) {
-             for (size_t i = 0, e = mod.getNumPorts(); i < e; ++i) {
-               if (auto symAttr = mod.getPortSymbolAttr(i))
+           if (auto mod = dyn_cast<PortList>(curOp)) {
+             for (auto [i, port] : llvm::enumerate(mod.getPortList())) {
+               if (auto symAttr = port.getSym())
                  if (failed(walkSyms(symAttr, InnerSymTarget(i, curOp))))
                    return WalkResult::interrupt();
              }
@@ -113,7 +114,8 @@ Operation *InnerSymbolTable::lookupOp(StringRef name) const {
 }
 Operation *InnerSymbolTable::lookupOp(StringAttr name) const {
   auto result = lookup(name);
-  if (result.isOpOnly()) return result.getOp();
+  if (result.isOpOnly())
+    return result.getOp();
   return nullptr;
 }
 
@@ -133,9 +135,9 @@ StringAttr InnerSymbolTable::getInnerSymbol(const InnerSymTarget &target) {
   // Obtain the base InnerSymAttr for the specified target.
   auto getBase = [](auto &target) -> hw::InnerSymAttr {
     if (target.isPort()) {
-      if (auto mod = dyn_cast<SymboledPortList>(target.getOp())) {
+      if (auto mod = dyn_cast<PortList>(target.getOp())) {
         assert(target.getPort() < mod.getNumPorts());
-        return mod.getPortSymbolAttr(target.getPort());
+        return mod.getPort(target.getPort()).getSym();
       }
     } else {
       // InnerSymbols only supported if op implements the interface.
@@ -154,15 +156,16 @@ StringAttr InnerSymbolTable::getInnerSymbol(const InnerSymTarget &target) {
 // InnerSymbolTableCollection
 //===----------------------------------------------------------------------===//
 
-InnerSymbolTable &InnerSymbolTableCollection::getInnerSymbolTable(
-    Operation *op) {
+InnerSymbolTable &
+InnerSymbolTableCollection::getInnerSymbolTable(Operation *op) {
   auto it = symbolTables.try_emplace(op, nullptr);
-  if (it.second) it.first->second = ::std::make_unique<InnerSymbolTable>(op);
+  if (it.second)
+    it.first->second = ::std::make_unique<InnerSymbolTable>(op);
   return *it.first->second;
 }
 
-LogicalResult InnerSymbolTableCollection::populateAndVerifyTables(
-    Operation *innerRefNSOp) {
+LogicalResult
+InnerSymbolTableCollection::populateAndVerifyTables(Operation *innerRefNSOp) {
   // Gather top-level operations that have the InnerSymbolTable trait.
   SmallVector<Operation *> innerSymTableOps(llvm::make_filter_range(
       llvm::make_pointer_range(innerRefNSOp->getRegion(0).front()),
@@ -181,7 +184,8 @@ LogicalResult InnerSymbolTableCollection::populateAndVerifyTables(
         assert(it != symbolTables.end());
         if (!it->second) {
           auto result = InnerSymbolTable::get(op);
-          if (failed(result)) return failure();
+          if (failed(result))
+            return failure();
           it->second = std::make_unique<InnerSymbolTable>(std::move(*result));
           return success();
         }
@@ -195,14 +199,16 @@ LogicalResult InnerSymbolTableCollection::populateAndVerifyTables(
 
 InnerSymTarget InnerRefNamespace::lookup(hw::InnerRefAttr inner) {
   auto *mod = symTable.lookup(inner.getModule());
-  if (!mod) return {};
+  if (!mod)
+    return {};
   assert(mod->hasTrait<mlir::OpTrait::InnerSymbolTable>());
   return innerSymTables.getInnerSymbolTable(mod).lookup(inner.getName());
 }
 
 Operation *InnerRefNamespace::lookupOp(hw::InnerRefAttr inner) {
   auto *mod = symTable.lookup(inner.getModule());
-  if (!mod) return nullptr;
+  if (!mod)
+    return nullptr;
   assert(mod->hasTrait<mlir::OpTrait::InnerSymbolTable>());
   return innerSymTables.getInnerSymbolTable(mod).lookupOp(inner.getName());
 }
@@ -216,7 +222,8 @@ namespace detail {
 LogicalResult verifyInnerRefNamespace(Operation *op) {
   // Construct the symbol tables.
   InnerSymbolTableCollection innerSymTables;
-  if (failed(innerSymTables.populateAndVerifyTables(op))) return failure();
+  if (failed(innerSymTables.populateAndVerifyTables(op)))
+    return failure();
 
   SymbolTable symbolTable(op);
   InnerRefNamespace ns{symbolTable, innerSymTables};
@@ -234,7 +241,7 @@ LogicalResult verifyInnerRefNamespace(Operation *op) {
       });
 }
 
-}  // namespace detail
+} // namespace detail
 
 bool InnerRefNamespaceLike::classof(mlir::Operation *op) {
   return op->hasTrait<mlir::OpTrait::InnerRefNamespace>() ||
@@ -247,5 +254,5 @@ bool InnerRefNamespaceLike::classof(
          opInfo->hasTrait<mlir::OpTrait::SymbolTable>();
 }
 
-}  // namespace hw
-}  // namespace circt
+} // namespace hw
+} // namespace circt

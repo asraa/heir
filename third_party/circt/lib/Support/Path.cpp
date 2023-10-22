@@ -12,7 +12,6 @@
 //===----------------------------------------------------------------------===//
 
 #include "circt/Support/Path.h"
-
 #include "llvm/Support/Path.h"
 
 using namespace circt;

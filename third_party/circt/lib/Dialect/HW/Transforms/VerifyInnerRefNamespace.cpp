@@ -23,7 +23,7 @@ namespace {
 class VerifyInnerRefNamespacePass
     : public circt::hw::VerifyInnerRefNamespaceBase<
           VerifyInnerRefNamespacePass> {
- public:
+public:
   void runOnOperation() override {
     auto *irnLike = getOperation();
     if (!irnLike->hasTrait<mlir::OpTrait::InnerRefNamespace>())
@@ -37,7 +37,7 @@ class VerifyInnerRefNamespacePass
   }
 };
 
-}  // namespace
+} // namespace
 
 std::unique_ptr<mlir::Pass> circt::hw::createVerifyInnerRefNamespacePass() {
   return std::make_unique<VerifyInnerRefNamespacePass>();

@@ -12,7 +12,6 @@
 //===----------------------------------------------------------------------===//
 
 #include "circt/Support/LoweringOptions.h"
-
 #include "mlir/IR/BuiltinOps.h"
 
 using namespace circt;
@@ -31,8 +30,8 @@ LoweringOptions::LoweringOptions(mlir::ModuleOp module) : LoweringOptions() {
   parseFromAttribute(module);
 }
 
-static std::optional<LoweringOptions::LocationInfoStyle> parseLocationInfoStyle(
-    StringRef option) {
+static std::optional<LoweringOptions::LocationInfoStyle>
+parseLocationInfoStyle(StringRef option) {
   return llvm::StringSwitch<std::optional<LoweringOptions::LocationInfoStyle>>(
              option)
       .Case("plain", LoweringOptions::Plain)
@@ -120,6 +119,8 @@ void LoweringOptions::parse(StringRef text, ErrorHandlerT errorHandler) {
       omitVersionComment = true;
     } else if (option == "caseInsensitiveKeywords") {
       caseInsensitiveKeywords = true;
+    } else if (option == "emitVerilogLocations") {
+      emitVerilogLocations = true;
     } else {
       errorHandler(llvm::Twine("unknown style option \'") + option + "\'");
       // We continue parsing options after a failure.
@@ -130,27 +131,37 @@ void LoweringOptions::parse(StringRef text, ErrorHandlerT errorHandler) {
 std::string LoweringOptions::toString() const {
   std::string options = "";
   // All options should add a trailing comma to simplify the code.
-  if (noAlwaysComb) options += "noAlwaysComb,";
-  if (allowExprInEventControl) options += "exprInEventControl,";
-  if (disallowPackedArrays) options += "disallowPackedArrays,";
+  if (noAlwaysComb)
+    options += "noAlwaysComb,";
+  if (allowExprInEventControl)
+    options += "exprInEventControl,";
+  if (disallowPackedArrays)
+    options += "disallowPackedArrays,";
   if (disallowPackedStructAssignments)
     options += "disallowPackedStructAssignments,";
-  if (disallowLocalVariables) options += "disallowLocalVariables,";
-  if (enforceVerifLabels) options += "verifLabels,";
-  if (explicitBitcast) options += "explicitBitcast,";
-  if (emitReplicatedOpsToHeader) options += "emitReplicatedOpsToHeader,";
+  if (disallowLocalVariables)
+    options += "disallowLocalVariables,";
+  if (enforceVerifLabels)
+    options += "verifLabels,";
+  if (explicitBitcast)
+    options += "explicitBitcast,";
+  if (emitReplicatedOpsToHeader)
+    options += "emitReplicatedOpsToHeader,";
   if (locationInfoStyle == LocationInfoStyle::WrapInAtSquareBracket)
     options += "locationInfoStyle=wrapInAtSquareBracket,";
   if (locationInfoStyle == LocationInfoStyle::None)
     options += "locationInfoStyle=none,";
-  if (disallowPortDeclSharing) options += "disallowPortDeclSharing,";
-  if (printDebugInfo) options += "printDebugInfo,";
+  if (disallowPortDeclSharing)
+    options += "disallowPortDeclSharing,";
+  if (printDebugInfo)
+    options += "printDebugInfo,";
   if (isWireSpillingHeuristicEnabled(
           WireSpillingHeuristic::SpillLargeTermsWithNamehints))
     options += "wireSpillingHeuristic=spillLargeTermsWithNamehints,";
   if (disallowExpressionInliningInPorts)
     options += "disallowExpressionInliningInPorts,";
-  if (disallowMuxInlining) options += "disallowMuxInlining,";
+  if (disallowMuxInlining)
+    options += "disallowMuxInlining,";
   if (mitigateVivadoArrayIndexConstPropBug)
     options += "mitigateVivadoArrayIndexConstPropBug,";
 
@@ -159,10 +170,16 @@ std::string LoweringOptions::toString() const {
   if (maximumNumberOfTermsPerExpression != DEFAULT_TERM_LIMIT)
     options += "maximumNumberOfTermsPerExpression=" +
                std::to_string(maximumNumberOfTermsPerExpression) + ',';
-  if (emitWireInPorts) options += "emitWireInPorts,";
-  if (emitBindComments) options += "emitBindComments,";
-  if (omitVersionComment) options += "omitVersionComment,";
-  if (caseInsensitiveKeywords) options += "caseInsensitiveKeywords,";
+  if (emitWireInPorts)
+    options += "emitWireInPorts,";
+  if (emitBindComments)
+    options += "emitBindComments,";
+  if (omitVersionComment)
+    options += "omitVersionComment,";
+  if (caseInsensitiveKeywords)
+    options += "caseInsensitiveKeywords,";
+  if (emitVerilogLocations)
+    options += "emitVerilogLocations,";
 
   // Remove a trailing comma if present.
   if (!options.empty()) {

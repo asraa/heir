@@ -13,11 +13,10 @@
 #ifndef CIRCT_DIALECT_COMB_COMBPASSES_H
 #define CIRCT_DIALECT_COMB_COMBPASSES_H
 
-#include <memory>
-#include <optional>
-
 #include "mlir/Pass/Pass.h"
 #include "mlir/Pass/PassRegistry.h"
+#include <memory>
+#include <optional>
 
 namespace circt {
 namespace comb {
@@ -27,7 +26,7 @@ namespace comb {
 #define GEN_PASS_REGISTRATION
 #include "circt/Dialect/Comb/Passes.h.inc"
 
-}  // namespace comb
-}  // namespace circt
+} // namespace comb
+} // namespace circt
 
-#endif  // CIRCT_DIALECT_COMB_COMBPASSES_H
+#endif // CIRCT_DIALECT_COMB_COMBPASSES_H

@@ -25,16 +25,16 @@ namespace hw {
 /// thus can be used by multiple threads).  The  "freeze" method transitions
 /// between the two states.
 class HWSymbolCache : public SymbolCacheBase {
- public:
+public:
   class Item {
-   public:
+  public:
     Item(mlir::Operation *op) : op(op), port(~0ULL) {}
     Item(mlir::Operation *op, size_t port) : op(op), port(port) {}
     bool hasPort() const { return port != ~0ULL; }
     size_t getPort() const { return port; }
     mlir::Operation *getOp() const { return op; }
 
-   private:
+  private:
     mlir::Operation *op;
     size_t port;
   };
@@ -56,7 +56,8 @@ class HWSymbolCache : public SymbolCacheBase {
   mlir::Operation *getDefinition(mlir::Attribute attr) const override {
     assert(isFrozen && "cannot read from this cache until it is frozen");
     auto it = symbolCache.find(attr);
-    if (it == symbolCache.end()) return nullptr;
+    if (it == symbolCache.end())
+      return nullptr;
     assert(!it->second.hasPort() && "Module names should never be ports");
     return it->second.getOp();
   }
@@ -73,7 +74,7 @@ class HWSymbolCache : public SymbolCacheBase {
   /// Mark the cache as frozen, which allows it to be shared across threads.
   void freeze() { isFrozen = true; }
 
- private:
+private:
   Item lookupInner(InnerRefAttr attr) const {
     assert(isFrozen && "cannot read from this cache until it is frozen");
     auto it = symbolCache.find(attr);
@@ -86,7 +87,7 @@ class HWSymbolCache : public SymbolCacheBase {
   /// that defines it.
   llvm::DenseMap<mlir::Attribute, Item> symbolCache;
 
- private:
+private:
   // Iterator support. Map from Item's to their inner operations.
   using Iterator = decltype(symbolCache)::iterator;
   struct HwSymbolCacheIteratorImpl : public CacheIteratorImpl {
@@ -101,7 +102,7 @@ class HWSymbolCache : public SymbolCacheBase {
     Iterator it;
   };
 
- public:
+public:
   SymbolCacheBase::Iterator begin() override {
     return SymbolCacheBase::Iterator(
         std::make_unique<HwSymbolCacheIteratorImpl>(symbolCache.begin()));
@@ -112,7 +113,7 @@ class HWSymbolCache : public SymbolCacheBase {
   }
 };
 
-}  // namespace hw
-}  // namespace circt
+} // namespace hw
+} // namespace circt
 
-#endif  // CIRCT_DIALECT_HW_SYMCACHE_H
+#endif // CIRCT_DIALECT_HW_SYMCACHE_H

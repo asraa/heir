@@ -15,9 +15,8 @@
 #ifndef CIRCT_DIALECT_HW_INSTANCEIMPLEMENTATION_H
 #define CIRCT_DIALECT_HW_INSTANCEIMPLEMENTATION_H
 
-#include <functional>
-
 #include "circt/Support/LLVM.h"
+#include <functional>
 
 namespace circt {
 namespace hw {
@@ -97,8 +96,8 @@ ArrayAttr updateName(ArrayAttr oldNames, size_t i, StringAttr name);
 void getAsmResultNames(OpAsmSetValueNameFn setNameFn, StringRef instanceName,
                        ArrayAttr resultNames, ValueRange results);
 
-}  // namespace instance_like_impl
-}  // namespace hw
-}  // namespace circt
+} // namespace instance_like_impl
+} // namespace hw
+} // namespace circt
 
-#endif  // CIRCT_DIALECT_HW_INSTANCEIMPLEMENTATION_H
+#endif // CIRCT_DIALECT_HW_INSTANCEIMPLEMENTATION_H

@@ -13,9 +13,9 @@
 #ifndef CIRCT_SUPPORT_SYMCACHE_H
 #define CIRCT_SUPPORT_SYMCACHE_H
 
+#include "mlir/IR/SymbolTable.h"
 #include "llvm/ADT/iterator.h"
 #include "llvm/Support/Casting.h"
-#include "mlir/IR/SymbolTable.h"
 
 namespace circt {
 
@@ -23,7 +23,7 @@ namespace circt {
 /// abstract cache. A symbol cache stores lookup tables to make manipulating and
 /// working with the IR more efficient.
 class SymbolCacheBase {
- public:
+public:
   virtual ~SymbolCacheBase();
 
   /// Defines 'op' as associated with the 'symbol' in the cache.
@@ -70,7 +70,7 @@ class SymbolCacheBase {
     }
     void operator++() { impl->operator++(); }
 
-   private:
+  private:
     std::unique_ptr<CacheIteratorImpl> impl;
   };
   virtual Iterator begin() = 0;
@@ -83,7 +83,7 @@ class SymbolCacheBase {
 /// thread safe. If this is required, synchronizing cache acccess should be
 /// ensured by the caller.
 class SymbolCache : public SymbolCacheBase {
- public:
+public:
   /// In the building phase, add symbols.
   void addDefinition(mlir::Attribute key, mlir::Operation *op) override {
     symbolCache.try_emplace(key, op);
@@ -93,16 +93,17 @@ class SymbolCache : public SymbolCacheBase {
   using SymbolCacheBase::getDefinition;
   mlir::Operation *getDefinition(mlir::Attribute attr) const override {
     auto it = symbolCache.find(attr);
-    if (it == symbolCache.end()) return nullptr;
+    if (it == symbolCache.end())
+      return nullptr;
     return it->second;
   }
 
- protected:
+protected:
   /// This stores a lookup table from symbol attribute to the operation
   /// that defines it.
   llvm::DenseMap<mlir::Attribute, mlir::Operation *> symbolCache;
 
- private:
+private:
   /// Iterator support: A simple mapping between decltype(symbolCache)::iterator
   /// to SymbolCacheBase::Iterator.
   using Iterator = decltype(symbolCache)::iterator;
@@ -116,7 +117,7 @@ class SymbolCache : public SymbolCacheBase {
     Iterator it;
   };
 
- public:
+public:
   SymbolCacheBase::Iterator begin() override {
     return SymbolCacheBase::Iterator(
         std::make_unique<SymbolCacheIteratorImpl>(symbolCache.begin()));
@@ -127,6 +128,6 @@ class SymbolCache : public SymbolCacheBase {
   }
 };
 
-}  // namespace circt
+} // namespace circt
 
-#endif  // CIRCT_SUPPORT_SYMCACHE_H
+#endif // CIRCT_SUPPORT_SYMCACHE_H

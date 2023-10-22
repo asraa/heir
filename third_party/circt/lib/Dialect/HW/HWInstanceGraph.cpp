@@ -13,21 +13,29 @@ using namespace hw;
 
 InstanceGraph::InstanceGraph(Operation *operation)
     : igraph::InstanceGraph(operation) {
-  for (auto &node : nodes)
-    if (cast<HWModuleLike>(node.getModule().getOperation()).isPublic())
+  for (auto &node : nodes) {
+    // Note: we dyn_cast here because we cannot assume that _all_ nodes are
+    // HWModuleLike - there may be cases where hw.module's are mixed with
+    // other ops that implement the igraph::ModuleOpInterface.
+    auto hwModuleLikeNode =
+        dyn_cast<HWModuleLike>(node.getModule().getOperation());
+    if (hwModuleLikeNode && hwModuleLikeNode.isPublic())
       entry.addInstance({}, &node);
+  }
 }
 
 igraph::InstanceGraphNode *InstanceGraph::addHWModule(HWModuleLike module) {
   auto *node = igraph::InstanceGraph::addModule(
       cast<igraph::ModuleOpInterface>(module.getOperation()));
-  if (module.isPublic()) entry.addInstance({}, node);
+  if (module.isPublic())
+    entry.addInstance({}, node);
   return node;
 }
 
 void InstanceGraph::erase(igraph::InstanceGraphNode *node) {
   for (auto *instance : llvm::make_early_inc_range(entry)) {
-    if (instance->getTarget() == node) instance->erase();
+    if (instance->getTarget() == node)
+      instance->erase();
   }
   igraph::InstanceGraph::erase(node);
 }

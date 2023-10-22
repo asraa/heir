@@ -25,6 +25,6 @@ LogicalResult convertAttributeToJSON(llvm::json::OStream &json, Attribute attr);
 Attribute convertJSONToAttribute(MLIRContext *context, llvm::json::Value &value,
                                  llvm::json::Path p);
 
-}  // namespace circt
+} // namespace circt
 
-#endif  // CIRCT_SUPPORT_JSON_H
+#endif // CIRCT_SUPPORT_JSON_H

@@ -14,8 +14,8 @@
 #define CIRCT_SUPPORT_FIELDREF_H
 
 #include "circt/Support/LLVM.h"
-#include "llvm/ADT/DenseMapInfo.h"
 #include "mlir/IR/Value.h"
+#include "llvm/ADT/DenseMapInfo.h"
 
 namespace circt {
 
@@ -26,7 +26,7 @@ namespace circt {
 /// This can be used as the key in a hashtable to store field specific
 /// information.
 class FieldRef {
- public:
+public:
   /// Get a null FieldRef.
   FieldRef() {}
 
@@ -71,14 +71,16 @@ class FieldRef {
   }
 
   bool operator<(const FieldRef &other) const {
-    if (value.getImpl() < other.value.getImpl()) return true;
-    if (value.getImpl() > other.value.getImpl()) return false;
+    if (value.getImpl() < other.value.getImpl())
+      return true;
+    if (value.getImpl() > other.value.getImpl())
+      return false;
     return id < other.id;
   }
 
   operator bool() const { return bool(value); }
 
- private:
+private:
   /// A pointer to the value which created this.
   Value value;
 
@@ -91,7 +93,7 @@ inline ::llvm::hash_code hash_value(const FieldRef &fieldRef) {
   return llvm::hash_combine(fieldRef.getValue(), fieldRef.getFieldID());
 }
 
-}  // namespace circt
+} // namespace circt
 
 namespace llvm {
 /// Allow using FieldRef with DenseMaps.  This hash is based on the Value
@@ -111,6 +113,6 @@ struct DenseMapInfo<circt::FieldRef> {
     return lhs == rhs;
   }
 };
-}  // namespace llvm
+} // namespace llvm
 
-#endif  // CIRCT_SUPPORT_FIELDREF_H
+#endif // CIRCT_SUPPORT_FIELDREF_H

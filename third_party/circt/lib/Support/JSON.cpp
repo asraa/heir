@@ -7,13 +7,12 @@
 //===----------------------------------------------------------------------===//
 
 #include "circt/Support/JSON.h"
-
-#include "llvm/ADT/StringSwitch.h"
-#include "llvm/ADT/TypeSwitch.h"
 #include "mlir/IR/BuiltinAttributes.h"
 #include "mlir/IR/BuiltinTypes.h"
 #include "mlir/IR/Diagnostics.h"
 #include "mlir/IR/OperationSupport.h"
+#include "llvm/ADT/StringSwitch.h"
+#include "llvm/ADT/TypeSwitch.h"
 
 namespace json = llvm::json;
 
@@ -38,7 +37,8 @@ LogicalResult circt::convertAttributeToJSON(llvm::json::OStream &json,
       .Case<ArrayAttr>([&](auto attr) {
         json.arrayBegin();
         for (auto subAttr : attr)
-          if (failed(convertAttributeToJSON(json, subAttr))) return failure();
+          if (failed(convertAttributeToJSON(json, subAttr)))
+            return failure();
         json.arrayEnd();
         return success();
       })
@@ -50,7 +50,8 @@ LogicalResult circt::convertAttributeToJSON(llvm::json::OStream &json,
         // If the integer can be accurately represented by a double, print
         // it as an integer. Otherwise, convert it to an exact decimal string.
         const auto &apint = attr.getValue();
-        if (!apint.isSignedIntN(64)) return failure();
+        if (!apint.isSignedIntN(64))
+          return failure();
         json.value(apint.getSExtValue());
         return success();
       })
@@ -96,10 +97,12 @@ Attribute circt::convertJSONToAttribute(MLIRContext *context,
     return FloatAttr::get(mlir::FloatType::getF64(context), *a);
 
   // Boolean
-  if (auto a = value.getAsBoolean()) return BoolAttr::get(context, *a);
+  if (auto a = value.getAsBoolean())
+    return BoolAttr::get(context, *a);
 
   // Null
-  if (auto a = value.getAsNull()) return mlir::UnitAttr::get(context);
+  if (auto a = value.getAsNull())
+    return mlir::UnitAttr::get(context);
 
   // Object
   if (auto *a = value.getAsObject()) {

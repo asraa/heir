@@ -11,7 +11,6 @@
 //===----------------------------------------------------------------------===//
 
 #include "circt/Dialect/Comb/CombDialect.h"
-
 #include "circt/Dialect/Comb/CombOps.h"
 #include "circt/Dialect/HW/HWOps.h"
 #include "mlir/IR/Builders.h"
@@ -50,7 +49,8 @@ Operation *CombDialect::materializeConstant(OpBuilder &builder, Attribute value,
   // Parameter expressions materialize into hw.param.value.
   auto parentOp = builder.getBlock()->getParentOp();
   auto curModule = dyn_cast<hw::HWModuleOp>(parentOp);
-  if (!curModule) curModule = parentOp->getParentOfType<hw::HWModuleOp>();
+  if (!curModule)
+    curModule = parentOp->getParentOfType<hw::HWModuleOp>();
   if (curModule && isValidParameterExpression(value, curModule))
     return builder.create<hw::ParamValueOp>(loc, type, value);
 
@@ -58,5 +58,6 @@ Operation *CombDialect::materializeConstant(OpBuilder &builder, Attribute value,
 }
 
 // Provide implementations for the enums we use.
-#include "circt/Dialect/Comb/CombDialect.cpp.inc"
 #include "circt/Dialect/Comb/CombEnums.cpp.inc"
+
+#include "circt/Dialect/Comb/CombDialect.cpp.inc"

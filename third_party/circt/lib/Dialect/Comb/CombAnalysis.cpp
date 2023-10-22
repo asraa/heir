@@ -21,7 +21,8 @@ using namespace comb;
 /// recursion, this is controlled by `depth`.
 static KnownBits computeKnownBits(Value v, unsigned depth) {
   Operation *op = v.getDefiningOp();
-  if (!op || depth == 5) return KnownBits(v.getType().getIntOrFloatBitWidth());
+  if (!op || depth == 5)
+    return KnownBits(v.getType().getIntOrFloatBitWidth());
 
   // A constant has all bits known!
   if (auto constant = dyn_cast<hw::ConstantOp>(op))
@@ -63,7 +64,8 @@ static KnownBits computeKnownBits(Value v, unsigned depth) {
     auto result = computeKnownBits(xorOp.getOperand(0), depth + 1);
     for (size_t i = 1, e = xorOp.getNumOperands(); i != e; ++i) {
       // If we don't know anything, we don't need to evaluate more subexprs.
-      if (result.isUnknown()) return result;
+      if (result.isUnknown())
+        return result;
       result ^= computeKnownBits(xorOp.getOperand(i), depth + 1);
     }
     return result;

@@ -26,10 +26,10 @@ namespace circt {
 /// Parse a list of instance input ports.
 /// input-list ::= `(` ( input-element (`,` input-element )* )? `)`
 /// input-element ::= identifier `:` value `:` type
-ParseResult parseInputPortList(
-    OpAsmParser &parser,
-    SmallVectorImpl<OpAsmParser::UnresolvedOperand> &inputs,
-    SmallVectorImpl<Type> &inputTypes, ArrayAttr &inputNames);
+ParseResult
+parseInputPortList(OpAsmParser &parser,
+                   SmallVectorImpl<OpAsmParser::UnresolvedOperand> &inputs,
+                   SmallVectorImpl<Type> &inputTypes, ArrayAttr &inputNames);
 
 /// Print a list of instance input ports.
 void printInputPortList(OpAsmPrinter &p, Operation *op, OperandRange inputs,
@@ -65,6 +65,6 @@ ParseResult parseOptionalParameterList(OpAsmParser &parser,
 void printOptionalParameterList(OpAsmPrinter &p, Operation *op,
                                 ArrayAttr parameters);
 
-}  // namespace circt
+} // namespace circt
 
-#endif  // CIRCT_DIALECT_HW_CUSTOMDIRECTIVEIMPL_H
+#endif // CIRCT_DIALECT_HW_CUSTOMDIRECTIVEIMPL_H

@@ -26,4 +26,4 @@ void SymbolCacheBase::addDefinitions(mlir::Operation *top) {
       for (auto symOp : block.getOps<mlir::SymbolOpInterface>())
         addSymbol(symOp);
 }
-}  // namespace circt
+} // namespace circt

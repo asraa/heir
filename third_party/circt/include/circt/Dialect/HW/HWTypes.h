@@ -16,6 +16,7 @@
 
 #include "circt/Dialect/HW/HWDialect.h"
 #include "circt/Dialect/HW/HWTypeInterfaces.h"
+
 #include "circt/Support/LLVM.h"
 #include "mlir/IR/BuiltinTypes.h"
 #include "mlir/IR/Types.h"
@@ -54,9 +55,9 @@ struct OffsetFieldInfo {
   Type type;
   size_t offset;
 };
-}  // namespace detail
-}  // namespace hw
-}  // namespace circt
+} // namespace detail
+} // namespace hw
+} // namespace circt
 
 #define GET_TYPEDEF_CLASSES
 #include "circt/Dialect/HW/HWTypes.h.inc"
@@ -95,7 +96,8 @@ bool hasHWInOutType(mlir::Type type);
 template <typename... BaseTy>
 bool type_isa(Type type) {
   // First check if the type is the requested type.
-  if (type.isa<BaseTy...>()) return true;
+  if (type.isa<BaseTy...>())
+    return true;
 
   // Then check if it is a type alias wrapping the requested type.
   if (auto alias = type.dyn_cast<TypeAliasType>())
@@ -106,8 +108,9 @@ bool type_isa(Type type) {
 
 // type_isa for a nullable argument.
 template <typename... BaseTy>
-bool type_isa_and_nonnull(Type type) {  // NOLINT(readability-identifier-naming)
-  if (!type) return false;
+bool type_isa_and_nonnull(Type type) { // NOLINT(readability-identifier-naming)
+  if (!type)
+    return false;
   return type_isa<BaseTy...>(type);
 }
 
@@ -116,7 +119,8 @@ BaseTy type_cast(Type type) {
   assert(type_isa<BaseTy>(type) && "type must convert to requested type");
 
   // If the type is the requested type, return it.
-  if (type.isa<BaseTy>()) return type.cast<BaseTy>();
+  if (type.isa<BaseTy>())
+    return type.cast<BaseTy>();
 
   // Otherwise, it must be a type alias wrapping the requested type.
   return type_cast<BaseTy>(type.cast<TypeAliasType>().getInnerType());
@@ -124,7 +128,8 @@ BaseTy type_cast(Type type) {
 
 template <typename BaseTy>
 BaseTy type_dyn_cast(Type type) {
-  if (!type_isa<BaseTy>(type)) return BaseTy();
+  if (!type_isa<BaseTy>(type))
+    return BaseTy();
 
   return type_cast<BaseTy>(type);
 }
@@ -139,7 +144,7 @@ class TypeVariant
   using mlir::Type::TypeBase<TypeVariant<Types...>, mlir::Type,
                              mlir::TypeStorage>::Base::Base;
 
- public:
+public:
   // Support LLVM isa/cast/dyn_cast to one of the possible types.
   static bool classof(Type other) { return type_isa<Types...>(other); }
 };
@@ -151,7 +156,7 @@ class TypeAliasOr
   using mlir::Type::TypeBase<TypeAliasOr<BaseTy>, mlir::Type,
                              mlir::TypeStorage>::Base::Base;
 
- public:
+public:
   // Support LLVM isa/cast/dyn_cast to BaseTy.
   static bool classof(Type other) { return type_isa<BaseTy>(other); }
 
@@ -159,7 +164,7 @@ class TypeAliasOr
   operator BaseTy() const { return type_cast<BaseTy>(*this); }
 };
 
-}  // namespace hw
-}  // namespace circt
+} // namespace hw
+} // namespace circt
 
-#endif  // CIRCT_DIALECT_HW_TYPES_H
+#endif // CIRCT_DIALECT_HW_TYPES_H
