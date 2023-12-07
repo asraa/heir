@@ -20,6 +20,16 @@ namespace mlir::heir::comb {
 #define GEN_PASS_DEF_COMBTOCGGI
 #include "include/Conversion/CombToCGGI/CombToCGGI.h.inc"
 
+namespace {
+
+Type getLWECiphertextForInt(IntegerType intType, MLIRContext *ctx) {
+  return lwe::LWECiphertextType::get(
+      ctx, lwe::UnspecifiedBitFieldEncodingAttr::get(ctx, intType.getWidth()),
+      lwe::LWEParamsAttr());
+}
+
+}  // namespace
+
 class SecretTypeConverter : public TypeConverter {
  public:
   SecretTypeConverter(MLIRContext *ctx) {
@@ -28,11 +38,16 @@ class SecretTypeConverter : public TypeConverter {
     // Convert secret types to LWE ciphertext types
     addConversion([ctx](secret::SecretType type) -> Type {
       auto intType = dyn_cast<IntegerType>(type.getValueType());
-      assert(intType);
-      return lwe::LWECiphertextType::get(
-          ctx,
-          lwe::UnspecifiedBitFieldEncodingAttr::get(ctx, intType.getWidth()),
-          lwe::LWEParamsAttr());
+      if (intType) {
+        return getLWECiphertextForInt(intType, ctx);
+      }
+      // If the secret is not wrapping an integer type, we must be wrapping a
+      // shape with an underlying int type.
+      auto shapedType = dyn_cast<ShapedType>(type.getValueType());
+      assert(shapedType);
+      intType = dyn_cast<IntegerType>(shapedType.getElementType());
+      return shapedType.cloneWith(shapedType.getShape(),
+                                  getLWECiphertextForInt(intType, ctx));
     });
   }
 };
