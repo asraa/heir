@@ -262,7 +262,7 @@ struct SplitGeneric : public OpRewritePattern<GenericOp> {
     // secret will yield all of this op's results immediately.
     SmallVector<Type> newResultTypes;
     for (Type ty : opToDistribute.getResultTypes()) {
-      newResultTypes.push_back(SecretType::get(ty));
+      newResultTypes.push_back(SecretType::castToSecretType(ty));
     }
 
     // We may be adding non-secret inputs to the generic, but later patterns

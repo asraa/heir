@@ -30,6 +30,15 @@ def Secret : Secret_Type<"Secret", "secret"> {
     }]>
   ];
   let assemblyFormat = "`<` $valueType `>`";
+
+  let extraClassDeclaration = [{
+    static Type castToSecretType(Type candidateType);
+
+    static Type castFromSecretType(Type candidateType);
+    
+    // Returns whether the candidate type contains secret data types.
+    static bool isSecretType(Type candidateType);
+  }];
 }
 
 #endif  // HEIR_INCLUDE_DIALECT_SECRET_IR_SECRETTYPES_TD_

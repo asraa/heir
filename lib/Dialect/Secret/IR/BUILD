@@ -15,6 +15,7 @@ cc_library(
     ],
     deps = [
         ":SecretOps",
+        ":SecretTypes",
         ":SecretPatterns",
         "@heir//include/Dialect/Secret/IR:dialect_inc_gen",
         "@heir//include/Dialect/Secret/IR:ops_inc_gen",
@@ -57,6 +58,28 @@ cc_library(
     hdrs = [
         "@heir//include/Dialect/Secret/IR:SecretDialect.h",
         "@heir//include/Dialect/Secret/IR:SecretOps.h",
+        "@heir//include/Dialect/Secret/IR:SecretTypes.h",
+    ],
+    deps = [
+        ":SecretPatterns",
+        "@heir//include/Dialect/Secret/IR:dialect_inc_gen",
+        "@heir//include/Dialect/Secret/IR:ops_inc_gen",
+        "@heir//include/Dialect/Secret/IR:types_inc_gen",
+        "@llvm-project//llvm:Support",
+        "@llvm-project//mlir:ControlFlowInterfaces",
+        "@llvm-project//mlir:IR",
+        "@llvm-project//mlir:InferTypeOpInterface",
+        "@llvm-project//mlir:Support",
+    ],
+)
+
+cc_library(
+    name = "SecretTypes",
+    srcs = [
+        "SecretTypes.cpp",
+    ],
+    hdrs = [
+        "@heir//include/Dialect/Secret/IR:SecretDialect.h",
         "@heir//include/Dialect/Secret/IR:SecretTypes.h",
     ],
     deps = [

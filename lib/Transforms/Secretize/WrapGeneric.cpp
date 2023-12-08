@@ -31,7 +31,7 @@ struct WrapWithGeneric : public OpRewritePattern<func::FuncOp> {
         hasSecrets = true;
         op.removeArgAttr(i, secret::SecretDialect::kArgSecretAttrName);
 
-        auto newTy = secret::SecretType::get(argTy);
+        auto newTy = secret::SecretType::castToSecretType(argTy);
         op.getArgument(i).setType(newTy);  // Updates the block argument type.
         newInputs.push_back(newTy);
       } else {
@@ -46,7 +46,7 @@ struct WrapWithGeneric : public OpRewritePattern<func::FuncOp> {
 
     auto newOutputs = llvm::to_vector<6>(llvm::map_range(
         op.getResultTypes(),
-        [](Type t) -> Type { return secret::SecretType::get(t); }));
+        [](Type t) -> Type { return secret::SecretType::castToSecretType(t); }));
 
     op.setFunctionType(
         FunctionType::get(getContext(), {newInputs}, {newOutputs}));

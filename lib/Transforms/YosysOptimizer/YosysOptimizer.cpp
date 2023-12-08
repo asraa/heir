@@ -120,9 +120,10 @@ LogicalResult convertOpOperands(secret::GenericOp op, func::FuncOp func,
                                 SmallVector<Value> &typeConvertedArgs) {
   for (OpOperand &opOperand : op->getOpOperands()) {
     Type convertedType =
-        func.getFunctionType().getInputs()[opOperand.getOperandNumber()];
+        func.getFunctionType()
+            .getInputs()[opOperand.getOperandNumber()];  // tensor<i8>
 
-    if (!opOperand.get().getType().isa<secret::SecretType>()) {
+    if (!secret::SecretType::isSecretType(opOperand.get().getType())) {
       // The type is not secret, but still must be booleanized
       OpBuilder builder(op);
       auto fromElementsOp = convertIntegerValue(opOperand.get(), convertedType,
@@ -131,60 +132,62 @@ LogicalResult convertOpOperands(secret::GenericOp op, func::FuncOp func,
       continue;
     }
 
-    secret::SecretType originalType =
-        opOperand.get().getType().cast<secret::SecretType>();
-    if (!originalType.getValueType().isa<IntegerType>()) {
+    Type originalType =
+       secret::SecretType::castFromSecretType(opOperand.get().getType());  // secret<i8>
+    if (!originalType.isa<IntegerType>()) {
       op.emitError() << "Unsupported input type to secret.generic: "
-                     << originalType.getValueType();
+                     << originalType;
       return failure();
     }
 
     // Insert a conversion from the original type to the converted type
     OpBuilder builder(op);
     typeConvertedArgs.push_back(builder.create<secret::CastOp>(
-        op.getLoc(), secret::SecretType::get(convertedType), opOperand.get()));
+        op.getLoc(), secret::SecretType::castToSecretType(convertedType),
+        opOperand.get()));
   }
 
   return success();
 }
 
-/// Convert a secret.generic's results from secret.secret<tensor<3xi1>>
+/// Convert a secret.generic's results from tensor<3xsecret.secret<i1>>
 /// to secret.secret<i3>.
 LogicalResult convertOpResults(secret::GenericOp op,
                                DenseSet<Operation *> &castOps,
                                SmallVector<Value> &typeConvertedResults) {
   for (Value opResult : op.getResults()) {
     // The secret.yield verifier ensures generic can only return secret types.
-    assert(opResult.getType().isa<secret::SecretType>());
-    RankedTensorType convertedType = opResult.getType()
-                                         .cast<secret::SecretType>()
-                                         .getValueType()
-                                         .cast<RankedTensorType>();
-    if (!convertedType.getElementType().isa<IntegerType>() ||
-        convertedType.getRank() != 1) {
+    assert(secret::SecretType::isSecretType(opResult.getType()));
+
+    secret::SecretType convertedType = opResult.getType()
+                                           .cast<RankedTensorType>()
+                                           .getElementType()
+                                           .cast<secret::SecretType>();
+    if (!convertedType.getValueType().isa<IntegerType>()) {
       op.emitError() << "While booleanizing secret.generic, found converted "
                         "type that cannot be reassembled: "
                      << convertedType;
       return failure();
     }
 
-    IntegerType elementType =
-        convertedType.getElementType().cast<IntegerType>();
+    IntegerType elementType = convertedType.getValueType().cast<IntegerType>();
     if (elementType.getWidth() != 1) {
       op.emitError() << "Converted element type must be i1";
       return failure();
     }
 
-    IntegerType reassembledType =
-        IntegerType::get(op.getContext(), elementType.getWidth() *
-                                              convertedType.getNumElements());
+    IntegerType reassembledType = IntegerType::get(
+        op.getContext(),
+        elementType.getWidth() *
+            opResult.getType().cast<RankedTensorType>().getNumElements());
 
     // Insert a reassembly of the original integer type from its booleanized
     // tensor version.
     OpBuilder builder(op);
     builder.setInsertionPointAfter(op);
     auto castOp = builder.create<secret::CastOp>(
-        op.getLoc(), secret::SecretType::get(reassembledType), opResult);
+        op.getLoc(), secret::SecretType::castToSecretType(reassembledType),
+        opResult);
     castOps.insert(castOp);
     typeConvertedResults.push_back(castOp.getOutput());
   }
@@ -256,7 +259,8 @@ LogicalResult runOnGenericOp(MLIRContext *context, secret::GenericOp op,
 
   int resultIndex = 0;
   for (Type ty : func.getFunctionType().getResults())
-    op->getResult(resultIndex++).setType(secret::SecretType::get(ty));
+    op->getResult(resultIndex++)
+        .setType(secret::SecretType::castToSecretType(ty));
 
   // Replace the func.return with a secret.yield
   op.getRegion().takeBody(func.getBody());

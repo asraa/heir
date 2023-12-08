@@ -43,7 +43,8 @@ LogicalResult YieldOp::verify() {
   auto parent = llvm::cast<GenericOp>(getParentOp());
 
   for (int i = 0; i < getValues().size(); ++i) {
-    auto yieldSecretType = SecretType::get(getValues().getTypes()[i]);
+    auto yieldSecretType =
+        SecretType::castToSecretType(getValues().getTypes()[i]);
     if (yieldSecretType != parent.getResultTypes()[i]) {
       return emitOpError()
              << "If a yield op returns types T, S, ..., then the enclosing "
@@ -138,7 +139,7 @@ LogicalResult GenericOp::verify() {
   // analogues of the generic's operands.
   for (BlockArgument arg : body->getArguments()) {
     auto operand = getOperands()[arg.getArgNumber()];
-    auto operandType = dyn_cast<SecretType>(operand.getType());
+    auto operandType = SecretType::castFromSecretType(operand.getType());
 
     // An error for the case where the generic operand and block arguments
     // are both non-secrets, but they are not the same type
@@ -165,7 +166,7 @@ LogicalResult GenericOp::verify() {
     //   ...
     // }
     //
-    if (operandType && arg.getType() != operandType.getValueType()) {
+    if (operandType && arg.getType() != operandType) {
       return emitOpError()
              << "Type mismatch between block argument " << arg.getArgNumber()
              << " of type " << arg.getType() << " and generic operand of type "
@@ -180,7 +181,7 @@ LogicalResult GenericOp::verify() {
 
 void ConcealOp::build(OpBuilder &builder, OperationState &result,
                       Value cleartextValue) {
-  Type resultType = SecretType::get(cleartextValue.getType());
+  Type resultType = SecretType::castToSecretType(cleartextValue.getType());
   build(builder, result, resultType, cleartextValue);
 }
 
