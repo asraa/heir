@@ -82,6 +82,10 @@ class LevelAnalysis
   LogicalResult visitOperation(Operation *op,
                                ArrayRef<const LevelLattice *> operands,
                                ArrayRef<LevelLattice *> results) override;
+
+  void visitExternalCall(CallOpInterface call,
+                         ArrayRef<const LevelLattice *> argumentLattices,
+                         ArrayRef<LevelLattice *> resultLattices) override;
 };
 
 void annotateLevel(Operation *top, DataFlowSolver *solver);

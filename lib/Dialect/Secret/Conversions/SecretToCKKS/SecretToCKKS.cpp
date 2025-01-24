@@ -25,10 +25,11 @@
 #include "lib/Dialect/TensorExt/IR/TensorExtOps.h"
 #include "lib/Utils/ConversionUtils.h"
 #include "lib/Utils/Utils.h"
-#include "llvm/include/llvm/ADT/STLExtras.h"    // from @llvm-project
-#include "llvm/include/llvm/ADT/SmallVector.h"  // from @llvm-project
-#include "llvm/include/llvm/ADT/TypeSwitch.h"   // from @llvm-project
-#include "llvm/include/llvm/Support/Casting.h"  // from @llvm-project
+#include "llvm/include/llvm/ADT/STLExtras.h"           // from @llvm-project
+#include "llvm/include/llvm/ADT/SmallVector.h"         // from @llvm-project
+#include "llvm/include/llvm/ADT/TypeSwitch.h"          // from @llvm-project
+#include "llvm/include/llvm/Support/Casting.h"         // from @llvm-project
+#include "llvm/include/llvm/Support/FormatVariadic.h"  // from @llvm-project
 #include "mlir/include/mlir/Dialect/Affine/IR/AffineOps.h"  // from @llvm-project
 #include "mlir/include/mlir/Dialect/Arith/IR/Arith.h"    // from @llvm-project
 #include "mlir/include/mlir/Dialect/Func/IR/FuncOps.h"   // from @llvm-project
@@ -268,6 +269,47 @@ class SecretGenericTensorInsertConversion
   }
 };
 
+class SecretGenericFuncCallConversion
+    : public SecretGenericOpConversion<func::CallOp, func::CallOp> {
+ public:
+  using SecretGenericOpConversion<func::CallOp,
+                                  func::CallOp>::SecretGenericOpConversion;
+
+  LogicalResult matchAndRewriteInner(
+      secret::GenericOp op, TypeRange outputTypes, ValueRange inputs,
+      ArrayRef<NamedAttribute> attributes,
+      ConversionPatternRewriter &rewriter) const override {
+    // check if any args are secret from wrapping generic
+    // clone the callee (and update a unique name, for now always) the call
+    // operands add a note that we don't have to always clone to be secret
+    // update the called func's type signature
+
+    func::CallOp callOp = *op.getBody()->getOps<func::CallOp>().begin();
+    auto module = callOp->getParentOfType<ModuleOp>();
+    func::FuncOp callee = module.lookupSymbol<func::FuncOp>(callOp.getCallee());
+
+    SmallVector<Type> newInputTypes;
+    // FIXME: use callOp
+    for (auto val : inputs) {
+      newInputTypes.push_back(val.getType());
+    }
+
+    FunctionType newFunctionType =
+        cast<FunctionType>(callee.cloneTypeWith(newInputTypes, outputTypes));
+    auto newFuncOp = rewriter.cloneWithoutRegions(callee);
+    newFuncOp->moveAfter(callee);
+    newFuncOp.setFunctionType(newFunctionType);
+    newFuncOp.setSymName(
+        llvm::formatv("{0}_secret", callee.getSymName()).str());
+
+    auto newCallOp = rewriter.create<func::CallOp>(op.getLoc(), outputTypes,
+                                                   newFuncOp.getName(), inputs);
+    rewriter.replaceOp(op, newCallOp);
+    rewriter.eraseOp(callee);
+    return success();
+  }
+};
+
 struct SecretToCKKS : public impl::SecretToCKKSBase<SecretToCKKS> {
   using SecretToCKKSBase::SecretToCKKSBase;
 
@@ -329,6 +371,8 @@ struct SecretToCKKS : public impl::SecretToCKKSBase<SecretToCKKS> {
     target.addDynamicallyLegalOp<func::FuncOp>([&](func::FuncOp op) {
       return typeConverter.isFuncArgumentAndResultLegal(op);
     });
+    target.addDynamicallyLegalOp<func::CallOp>(
+        [&](func::CallOp op) { return typeConverter.isOperationLegal(op); });
 
     // We add an explicit allowlist of operations to mark legal. If we use
     // markUnknownOpDynamicallyLegal, then ConvertAny will be applied to any
@@ -359,8 +403,8 @@ struct SecretToCKKS : public impl::SecretToCKKSBase<SecretToCKKS> {
         SecretGenericOpCipherPlainConversion<arith::AddIOp, ckks::AddPlainOp>,
         SecretGenericOpCipherPlainConversion<arith::SubIOp, ckks::SubPlainOp>,
         SecretGenericOpCipherPlainConversion<arith::MulIOp, ckks::MulPlainOp>,
-        ConvertAny<affine::AffineForOp>, ConvertAny<affine::AffineYieldOp>>(
-        typeConverter, context);
+        ConvertAny<affine::AffineForOp>, ConvertAny<affine::AffineYieldOp>,
+        SecretGenericFuncCallConversion>(typeConverter, context);
 
     if (failed(applyPartialConversion(module, target, std::move(patterns)))) {
       return signalPassFailure();

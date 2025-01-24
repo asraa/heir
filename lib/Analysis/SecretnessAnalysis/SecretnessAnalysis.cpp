@@ -86,8 +86,9 @@ LogicalResult SecretnessAnalysis::visitOperation(
       isUninitializedOpFound = true;
     }
     resultSecretness = Secretness::join(resultSecretness, operandSecretness);
-    if (resultSecretness.isInitialized() && resultSecretness.getSecretness())
+    if (resultSecretness.isInitialized() && resultSecretness.getSecretness()) {
       break;
+    }
   }
 
   // Uninitialized operand: "false" needs to be reverted to "unknown"
@@ -106,6 +107,24 @@ LogicalResult SecretnessAnalysis::visitOperation(
     propagateIfChanged(result, result->join(resultSecretness));
   }
   return mlir::success();
+}
+
+void SecretnessAnalysis::visitExternalCall(
+    CallOpInterface call, ArrayRef<const SecretnessLattice *> argumentLattices,
+    ArrayRef<SecretnessLattice *> resultLattices) {
+  auto resultSecretness = Secretness();
+
+  for (const SecretnessLattice *operand : argumentLattices) {
+    const Secretness operandSecretness = operand->getValue();
+    resultSecretness = Secretness::join(resultSecretness, operandSecretness);
+    if (resultSecretness.isInitialized() && resultSecretness.getSecretness()) {
+      break;
+    }
+  }
+
+  for (SecretnessLattice *result : resultLattices) {
+    propagateIfChanged(result, result->join(resultSecretness));
+  }
 }
 
 void annotateSecretness(Operation *top, DataFlowSolver *solver) {

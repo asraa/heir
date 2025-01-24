@@ -32,6 +32,9 @@ void annotateMgmtAttr(Operation *top) {
     return mgmtAttr;
   };
   top->walk<WalkOrder::PreOrder>([&](func::FuncOp funcOp) {
+    if (funcOp.isPrivate()) {
+      return;
+    }
     bool bodyContainsSecretGeneric = false;
     funcOp->walk<WalkOrder::PreOrder>([&](secret::GenericOp genericOp) {
       bodyContainsSecretGeneric = true;

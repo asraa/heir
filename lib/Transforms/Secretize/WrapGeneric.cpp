@@ -19,18 +19,18 @@ struct WrapWithGeneric : public OpRewritePattern<func::FuncOp> {
 
   LogicalResult matchAndRewrite(func::FuncOp op,
                                 PatternRewriter &rewriter) const override {
-    bool hasSecrets = false;
+    bool hasSecrets = false;    
 
     SmallVector<Type, 4> newInputs;
     for (unsigned i = 0; i < op.getNumArguments(); i++) {
-      auto argTy = op.getArgument(i).getType();
+      auto argTy = op.getArgumentTypes()[i];
       if (op.getArgAttr(i, secret::SecretDialect::kArgSecretAttrName) !=
           nullptr) {
         hasSecrets = true;
         op.removeArgAttr(i, secret::SecretDialect::kArgSecretAttrName);
 
         auto newTy = secret::SecretType::get(argTy);
-        op.getArgument(i).setType(newTy);  // Updates the block argument type.
+        if (!op.isPrivate()) op.getArgument(i).setType(newTy);  // Updates the block argument type.
         newInputs.push_back(newTy);
       } else {
         newInputs.push_back(argTy);
@@ -49,6 +49,9 @@ struct WrapWithGeneric : public OpRewritePattern<func::FuncOp> {
     op.setFunctionType(
         FunctionType::get(getContext(), {newInputs}, {newOutputs}));
 
+    if (op.isPrivate()) {
+      return success();
+    }
     // Create a new block where we will insert the new secret.generic and move
     // the function ops into.
     Block &opEntryBlock = op.getRegion().front();

@@ -78,6 +78,11 @@ class DimensionAnalysis
   LogicalResult visitOperation(Operation *op,
                                ArrayRef<const DimensionLattice *> operands,
                                ArrayRef<DimensionLattice *> results) override;
+
+
+  void visitExternalCall(CallOpInterface call,
+                         ArrayRef<const DimensionLattice *> argumentLattices,
+                         ArrayRef<DimensionLattice *> resultLattices) override;
 };
 
 // this function will assert false when Lattice does not exist or not

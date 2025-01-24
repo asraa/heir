@@ -104,6 +104,10 @@ class SecretnessAnalysis
   LogicalResult visitOperation(Operation *operation,
                                ArrayRef<const SecretnessLattice *> operands,
                                ArrayRef<SecretnessLattice *> results) override;
+
+  void visitExternalCall(CallOpInterface call,
+                         ArrayRef<const SecretnessLattice *> argumentLattices,
+                         ArrayRef<SecretnessLattice *> resultLattices) override;
 };
 
 /**

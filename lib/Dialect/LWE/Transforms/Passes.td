@@ -22,6 +22,18 @@ def AddClientInterface : Pass<"lwe-add-client-interface"> {
   ];
 }
 
+def AddDebugPort : Pass<"lwe-add-debug-port"> {
+  let summary = "Add debug port to (R)LWE encrypted functions";
+  let description = [{
+  }];
+  let dependentDialects = ["mlir::heir::lwe::LWEDialect"];
+  let options = [
+    Option<"entryFunction", "entry-function", "std::string",
+           /*default=*/"", "Default entry function "
+           "name of entry function.">,
+  ];
+}
+
 def SetDefaultParameters : Pass<"lwe-set-default-parameters"> {
   let summary = "Set default parameters for LWE ops";
   let description = [{

@@ -80,6 +80,24 @@ LogicalResult DimensionAnalysis::visitOperation(
   return success();
 }
 
+void DimensionAnalysis::visitExternalCall(
+    CallOpInterface call, ArrayRef<const DimensionLattice *> argumentLattices,
+    ArrayRef<DimensionLattice *> resultLattices) {
+  auto resultSecretness = DimensionState();
+
+  for (const DimensionLattice *operand : argumentLattices) {
+    const DimensionState operandSecretness = operand->getValue();
+    resultSecretness = DimensionState::join(resultSecretness, operandSecretness);
+    if (resultSecretness.isInitialized() && resultSecretness.getDimension()) {
+      break;
+    }
+  }
+
+  for (DimensionLattice *result : resultLattices) {
+    propagateIfChanged(result, result->join(resultSecretness));
+  }
+}
+
 int getDimension(Value value, DataFlowSolver *solver) {
   auto *lattice = solver->lookupState<DimensionLattice>(value);
   if (!lattice) {

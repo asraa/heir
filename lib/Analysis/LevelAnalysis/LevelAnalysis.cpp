@@ -77,6 +77,25 @@ LogicalResult LevelAnalysis::visitOperation(
   return success();
 }
 
+
+void LevelAnalysis::visitExternalCall(
+    CallOpInterface call, ArrayRef<const LevelLattice *> argumentLattices,
+    ArrayRef<LevelLattice *> resultLattices) {
+  auto resultSecretness = LevelState();
+
+  for (const LevelLattice *operand : argumentLattices) {
+    const LevelState operandSecretness = operand->getValue();
+    resultSecretness = LevelState::join(resultSecretness, operandSecretness);
+    if (resultSecretness.isInitialized() && resultSecretness.getLevel()) {
+      break;
+    }
+  }
+
+  for (LevelLattice *result : resultLattices) {
+    propagateIfChanged(result, result->join(resultSecretness));
+  }
+}
+
 static int getMaxLevel(Operation *top, DataFlowSolver *solver) {
   auto maxLevel = 0;
   top->walk<WalkOrder::PreOrder>([&](secret::GenericOp genericOp) {
