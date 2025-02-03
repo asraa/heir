@@ -107,6 +107,8 @@ class OpenFhePkeEmitter {
   void emitAutoAssignPrefix(::mlir::Value result);
   LogicalResult emitTypedAssignPrefix(::mlir::Value result,
                                       ::mlir::Location loc);
+
+  std::string inputVarFilledLengthName_;
 };
 
 }  // namespace openfhe

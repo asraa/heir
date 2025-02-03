@@ -417,6 +417,12 @@ LogicalResult OpenFhePkeEmitter::printOperation(arith::ConstantOp op) {
         int end = value_str.find('>') - start;
         os << "(" << denseElementsAttr.getNumElements() << ", "
            << value_str.substr(start, end) << ");\n";
+      } else if (value_str.find_first_of("0x") != std::string::npos) {
+        // std::vector<double> = convertToStdDouble(hex);
+        int start = value_str.find_first_of('x') + 1;
+        int end = value_str.find_first_of(':') - start - 2;
+
+        os << " = convertToVector(\"" << value_str.substr(start, end) << ");\n";
       } else {
         // DenseElementsAttr are printed as dense<[1, 2]> : tensor<2xi32>.
         // Output as `std::vector<int32_t> constant = {1, 2};`
@@ -601,20 +607,23 @@ LogicalResult OpenFhePkeEmitter::printOperation(
 
   std::string inputVarName = variableNames->getNameForValue(op.getValue());
   std::string inputVarFilledName = inputVarName + "_filled";
-  std::string inputVarFilledLengthName = inputVarName + "_filled_n";
 
   FailureOr<Value> resultCC = getContextualCryptoContext(op.getOperation());
   if (failed(resultCC)) return resultCC;
   std::string cc = variableNames->getNameForValue(resultCC.value());
 
   // cyclic repetition to mitigate openfhe zero-padding (#645)
-  os << "auto " << inputVarFilledLengthName << " = " << cc
-     << "->GetCryptoParameters()->GetElementParams()->GetRingDimension() / "
-        "2;\n";
+  if (inputVarFilledLengthName_ == "") {
+    inputVarFilledLengthName_ = inputVarName + "_filled_n";
+    os << "auto " << inputVarFilledLengthName_ << " = " << cc
+       << "->GetCryptoParameters()->GetElementParams()->GetRingDimension() / "
+          "2;\n";
+  }
   os << "auto " << inputVarFilledName << " = " << inputVarName << ";\n";
-  os << inputVarFilledName << ".clear();\n";
-  os << inputVarFilledName << ".reserve(" << inputVarFilledLengthName << ");\n";
-  os << "for (auto i = 0; i < " << inputVarFilledLengthName << "; ++i) {\n";
+  // os << inputVarFilledName << ".clear();\n";
+  os << inputVarFilledName << ".reserve(" << inputVarFilledLengthName_
+     << ");\n";
+  os << "for (auto i = 0; i < " << inputVarFilledLengthName_ << "; ++i) {\n";
   os << "  " << inputVarFilledName << ".push_back(" << inputVarName << "[i % "
      << inputVarName << ".size()]);\n";
   os << "}\n";

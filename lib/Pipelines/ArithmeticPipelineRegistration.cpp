@@ -48,7 +48,7 @@ void heirSIMDVectorizerPipelineBuilder(OpPassManager &manager) {
   // For now we unroll loops to enable insert-rotate, but we would like to be
   // smarter about this and do an affine loop analysis.
   // TODO(#589): avoid unrolling loops
-  manager.addPass(createFullLoopUnroll());
+  // manager.addPass(createFullLoopUnroll());
 
   // These two passes are required in this position for a relatively nuanced
   // reason. insert-rotate doesn't have general match support. In particular,
@@ -167,7 +167,7 @@ void mlirToRLWEPipeline(OpPassManager &pm,
   }
 
   // Optimize relinearization at mgmt dialect level
-  pm.addPass(createOptimizeRelinearization());
+   // pm.addPass(createOptimizeRelinearization());
 
   // Prepare to lower to RLWE Scheme
   pm.addPass(secret::createSecretDistributeGeneric());
