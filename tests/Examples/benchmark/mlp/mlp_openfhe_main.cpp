@@ -3,7 +3,7 @@
 #include <iostream>
 #include <vector>
 
-#include "mlp_openfhe.h"
+#include "mlp_openfhe_loops.h"
 
 #define DIM 1024
 
@@ -58,7 +58,13 @@ int main(int argc, char *argv[]) {
 
     auto input_encrypted =
         mlp__encrypt__arg0(cryptoContext, input_vector, publicKey);
-    auto output_encrypted = mlp(cryptoContext, input_encrypted);
+    std::cout << "Starting inference:" << std::endl;
+    std::clock_t c_start = std::clock();
+    auto output_encrypted =
+        mlp(cryptoContext, input_encrypted, secretKey, publicKey);
+    std::clock_t c_end = std::clock();
+    double time_elapsed_ms = 1000.0 * (c_end - c_start) / CLOCKS_PER_SEC;
+    std::cout << "CPU time used: " << time_elapsed_ms << " ms\n";
     std::vector<float> output =
         mlp__decrypt__result0(cryptoContext, output_encrypted, secretKey);
 
