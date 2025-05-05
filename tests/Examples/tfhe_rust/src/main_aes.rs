@@ -1,4 +1,5 @@
 #[allow(unused_imports)]
+use std::time::Instant;
 use tfhe::shortint::parameters::get_parameters_from_message_and_carry;
 use tfhe::shortint::*;
 
@@ -79,7 +80,6 @@ pub fn aes_decrypt_block(
         block = inv_mix_columns_rs_lib::inv_mix_columns(&server_key, &block);
         block = inv_shift_rows_rs_lib::inv_shift_rows(&block);
         block = inv_sub_bytes_rs_lib::inv_sub_bytes(&server_key, &block);
-        let output = decrypt_block(&block, &client_key);
     }
     block = add_round_key_rs_lib::add_round_key(&server_key, &block, &key[0]);
     block
@@ -112,8 +112,14 @@ fn main() {
         ct_vec_expanded_key.try_into().expect("Failed to convert to array");
 
     println!("input: {:?}", block);
+    let mut t = Instant::now();
     let aes_encrypted = aes_encrypt_block(&server_key, &ct_block, &ct_expaned_key, 9);
+    let mut run = t.elapsed().as_millis();
+    println!("{:?} aes encryption time", run);
+    t = Instant::now();
     let aes_decrypted = aes_decrypt_block(&server_key, &aes_encrypted, &ct_expaned_key, 9);
+     run = t.elapsed().as_millis();
+    println!("{:?} aes decryption time", run);
     let output = decrypt_block(&aes_decrypted, &client_key);
     println!("output: {:?}", output);
 }

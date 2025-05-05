@@ -391,6 +391,15 @@ class TextualMlirEmitter:
             assign.value.name
         )
         return ""
+      case ir.Expr(op="unary"):
+        emitted_expr, const = self.emit_unary(assign.value)
+        ty = self.typemap.get(assign.target.name)
+        name = self.get_or_create_name(assign.target)
+        return (
+            f"{const}"
+            f"{name} = {emitted_expr} :"
+            f" {mlirType(ty)} {mlirLoc(assign.loc)}"
+        )
       case ir.Expr(op="binop"):
         emitted_expr, ext, ty = self.emit_binop(assign.value)
         name = self.get_or_create_name(assign.target)
@@ -479,6 +488,20 @@ class TextualMlirEmitter:
       return self.get_name(lhs), tmp, ext, lhs_type
     return tmp, self.get_name(rhs), ext, rhs_type
 
+  def emit_unary(self, unaryop):
+    import ipdb
+
+    ipdb.set_trace()
+    ty = self.typemap.get(str(unaryop.value))
+    ones = "1" * ty.bitwidth
+    constname = self.get_next_name()
+    const = f"{constname} = arith.constant {ones}  : {ty}"
+    ssa_val = self.get_name(unaryop.value)
+    match unaryop.fn:
+      case operator.invert:
+        return f"arith.xori {constname}, {ssa_val}", const
+    raise NotImplementedError("Unsupported unary op: " + unaryop.fn.__name__)
+
   def emit_binop(self, binop):
     # This should be the same, otherwise MLIR will complain
     suffix = arithSuffix(self.typemap.get(str(binop.lhs)))
@@ -502,6 +525,9 @@ class TextualMlirEmitter:
         return f"arith.sub{suffix} {lhs_ssa}, {rhs_ssa}", ext, ty
       case operator.lshift:
         return f"arith.shl{suffix} {lhs_ssa}, {rhs_ssa}", ext, ty
+      case operator.rshift:
+        suffix = "si" if suffix == "i" else "ui"
+        return f"arith.shr{suffix} {lhs_ssa}, {rhs_ssa}", ext, ty
       case operator.and_:
         return f"arith.and{suffix} {lhs_ssa}, {rhs_ssa}", ext, ty
       case operator.xor:

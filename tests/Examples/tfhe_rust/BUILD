@@ -161,6 +161,8 @@ tfhe_rs_lib(
 tfhe_rs_lib(
     name = "sub_bytes",
     heir_opt_flags = [
+        "--inline",
+        "--symbol-dce",
         "--mlir-to-cggi",
         "--scheme-to-tfhe-rs",
     ],
