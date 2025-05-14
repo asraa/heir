@@ -1,0 +1,32 @@
+[package]
+name = "aes"
+version = "0.1.0"
+edition = "2021"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+tfhe = { path = "../../tfhe-rs/tfhe", features = [
+    "shortint",
+    "integer",
+    "experimental-force_fft_algo_dif4"
+] }
+rand = "0.8.5"
+rand_chacha = "0.3.1"
+itertools = "0.11.0"
+proc-macro2 = "=1.0.79"
+chrono = "0.4"
+env_logger = "0.11.5"
+
+[features]
+fpga = ["tfhe/fpga"]
+emulate_fpga = ["tfhe/emulate_fpga"]
+
+[[bin]]
+name = "add-round-key-cpu"
+path = "src/add_round_key_cpu.rs"
+
+[[bin]]
+name = "add-round-key-fpga"
+path = "src/add_round_key_fpga.rs"
+required-features = ["fpga"]
