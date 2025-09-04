@@ -90,10 +90,21 @@ int main(int argc, char *argv[]) {
     auto ms_int = duration_cast<milliseconds>(t2 - t1);
     std::cout << "FHE computation time: " << ms_int.count() << "ms\n";
 
+    
     torch::Tensor label_tensor = batch.target;
     int64_t label = label_tensor.item<int64_t>();
     auto max_id = argmax<10>(output.data());
     std::cout << "max_id: " << max_id << ", label: " << label << std::endl;
+    
+    // float max = 0;
+    // float min = 0;
+    // for (auto out : output) {
+    //   if (out >= max)
+    //     max = out;
+    //   if (out <= min)
+    //     min = out;
+    // }
+    // std::cout << "max: " << max << " min: " << min << std::endl;
 
     total--;
   }

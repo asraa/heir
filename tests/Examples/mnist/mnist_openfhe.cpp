@@ -11,21 +11,21 @@ using PlaintextT = Plaintext;
 using PrivateKeyT = PrivateKey<DCRTPoly>;
 using PublicKeyT = PublicKey<DCRTPoly>;
 
-std::vector<CiphertextT> mnist(CryptoContextT cc, std::vector<float> v0, std::vector<float> v1, std::vector<float> v2, std::vector<float> v3, std::vector<CiphertextT> v4) {
+std::vector<MutableCiphertextT> mnist(CryptoContextT cc, std::vector<float> v0, std::vector<float> v1, std::vector<float> v2, std::vector<float> v3, std::vector<MutableCiphertextT> v4) {
   [[maybe_unused]] size_t v5 = 511;
   [[maybe_unused]] size_t v6 = 783;
   [[maybe_unused]] size_t v7 = 1535;
-  [[maybe_unused]] size_t v8 = 6;
-  [[maybe_unused]] size_t v9 = 9;
-  [[maybe_unused]] size_t v10 = 1018;
-  [[maybe_unused]] size_t v11 = 16;
-  std::vector<float> v12(16384, 0);
-  float v13 = 0.038310006260871887;
-  float v14 = 0.5;
-  float v15 = 0.93702799081802368;
-  float v16 = 3.9769232503716317E-17;
-  float v17 = -0.50627744197845459;
-  float v18 = -1.5903312252962446E-16;
+  [[maybe_unused]] size_t v8 = 1018;
+  std::vector<float> v9(16384, 0);
+  float v10 = 0.484813392162323;
+  float v11 = 0.48995956778526306;
+  float v12 = 0.072850659489631653;
+  float v13 = 0.00075039814691990614;
+  float v14 = -0.00024069790379144251;
+  float v15 = -0.0000063046363720786758;
+  [[maybe_unused]] size_t v16 = 16;
+  [[maybe_unused]] size_t v17 = 9;
+  [[maybe_unused]] size_t v18 = 6;
   float v19 = 0;
   std::vector<float> v20(1024, 0);
   [[maybe_unused]] size_t v21 = 1807;
@@ -51,6 +51,7 @@ std::vector<CiphertextT> mnist(CryptoContextT cc, std::vector<float> v0, std::ve
         size_t v44 = v6 - v43;
         float v45 = v0[v44 + 784 * (v39)];
         v28[v32 + 1024 * (v29)] = v45;
+      } else {
       }
     }
   }
@@ -58,8 +59,9 @@ std::vector<CiphertextT> mnist(CryptoContextT cc, std::vector<float> v0, std::ve
   for (auto v48 = 0; v48 < 1024; ++v48) {
     v47[v48 + 1024 * (0)] = v19;
   }
+  std::vector<float> v51(std::begin(v28) + 0 * 1024, std::begin(v28) + 0 * 1024 + 1024);
   const auto& ct = v4[0];
-  std::vector<float> v51(std::begin(v28) + 0 * 512, std::begin(v28) + 0 * 512 + 1024);
+  const auto& digit_decomp = cc->EvalFastRotationPrecompute(ct);
   std::vector<double> v52(std::begin(v51), std::end(v51));
   auto pt_filled_n = cc->GetCryptoParameters()->GetElementParams()->GetRingDimension() / 2;
   auto pt_filled = v52;
@@ -70,8 +72,8 @@ std::vector<CiphertextT> mnist(CryptoContextT cc, std::vector<float> v0, std::ve
   }
   auto pt = cc->MakeCKKSPackedPlaintext(pt_filled);
   const auto& ct1 = cc->EvalMult(ct, pt);
-  std::vector<float> v53(std::begin(v28) + 1 * 512, std::begin(v28) + 1 * 512 + 1024);
-  const auto& ct2 = cc->EvalRotate(ct, 1);
+  std::vector<float> v53(std::begin(v28) + 1 * 1024, std::begin(v28) + 1 * 1024 + 1024);
+  const auto& ct2 = cc->EvalFastRotation(ct, 1, 2 * cc->GetRingDimension(), digit_decomp);
   std::vector<double> v54(std::begin(v53), std::end(v53));
   auto pt1_filled_n = cc->GetCryptoParameters()->GetElementParams()->GetRingDimension() / 2;
   auto pt1_filled = v54;
@@ -82,8 +84,8 @@ std::vector<CiphertextT> mnist(CryptoContextT cc, std::vector<float> v0, std::ve
   }
   auto pt1 = cc->MakeCKKSPackedPlaintext(pt1_filled);
   const auto& ct3 = cc->EvalMult(ct2, pt1);
-  std::vector<float> v55(std::begin(v28) + 2 * 512, std::begin(v28) + 2 * 512 + 1024);
-  const auto& ct4 = cc->EvalRotate(ct, 2);
+  std::vector<float> v55(std::begin(v28) + 2 * 1024, std::begin(v28) + 2 * 1024 + 1024);
+  const auto& ct4 = cc->EvalFastRotation(ct, 2, 2 * cc->GetRingDimension(), digit_decomp);
   std::vector<double> v56(std::begin(v55), std::end(v55));
   auto pt2_filled_n = cc->GetCryptoParameters()->GetElementParams()->GetRingDimension() / 2;
   auto pt2_filled = v56;
@@ -94,8 +96,8 @@ std::vector<CiphertextT> mnist(CryptoContextT cc, std::vector<float> v0, std::ve
   }
   auto pt2 = cc->MakeCKKSPackedPlaintext(pt2_filled);
   const auto& ct5 = cc->EvalMult(ct4, pt2);
-  std::vector<float> v57(std::begin(v28) + 3 * 512, std::begin(v28) + 3 * 512 + 1024);
-  const auto& ct6 = cc->EvalRotate(ct, 3);
+  std::vector<float> v57(std::begin(v28) + 3 * 1024, std::begin(v28) + 3 * 1024 + 1024);
+  const auto& ct6 = cc->EvalFastRotation(ct, 3, 2 * cc->GetRingDimension(), digit_decomp);
   std::vector<double> v58(std::begin(v57), std::end(v57));
   auto pt3_filled_n = cc->GetCryptoParameters()->GetElementParams()->GetRingDimension() / 2;
   auto pt3_filled = v58;
@@ -106,8 +108,8 @@ std::vector<CiphertextT> mnist(CryptoContextT cc, std::vector<float> v0, std::ve
   }
   auto pt3 = cc->MakeCKKSPackedPlaintext(pt3_filled);
   const auto& ct7 = cc->EvalMult(ct6, pt3);
-  std::vector<float> v59(std::begin(v28) + 4 * 512, std::begin(v28) + 4 * 512 + 1024);
-  const auto& ct8 = cc->EvalRotate(ct, 4);
+  std::vector<float> v59(std::begin(v28) + 4 * 1024, std::begin(v28) + 4 * 1024 + 1024);
+  const auto& ct8 = cc->EvalFastRotation(ct, 4, 2 * cc->GetRingDimension(), digit_decomp);
   std::vector<double> v60(std::begin(v59), std::end(v59));
   auto pt4_filled_n = cc->GetCryptoParameters()->GetElementParams()->GetRingDimension() / 2;
   auto pt4_filled = v60;
@@ -118,8 +120,8 @@ std::vector<CiphertextT> mnist(CryptoContextT cc, std::vector<float> v0, std::ve
   }
   auto pt4 = cc->MakeCKKSPackedPlaintext(pt4_filled);
   const auto& ct9 = cc->EvalMult(ct8, pt4);
-  std::vector<float> v61(std::begin(v28) + 5 * 512, std::begin(v28) + 5 * 512 + 1024);
-  const auto& ct10 = cc->EvalRotate(ct, 5);
+  std::vector<float> v61(std::begin(v28) + 5 * 1024, std::begin(v28) + 5 * 1024 + 1024);
+  const auto& ct10 = cc->EvalFastRotation(ct, 5, 2 * cc->GetRingDimension(), digit_decomp);
   std::vector<double> v62(std::begin(v61), std::end(v61));
   auto pt5_filled_n = cc->GetCryptoParameters()->GetElementParams()->GetRingDimension() / 2;
   auto pt5_filled = v62;
@@ -130,8 +132,8 @@ std::vector<CiphertextT> mnist(CryptoContextT cc, std::vector<float> v0, std::ve
   }
   auto pt5 = cc->MakeCKKSPackedPlaintext(pt5_filled);
   const auto& ct11 = cc->EvalMult(ct10, pt5);
-  std::vector<float> v63(std::begin(v28) + 6 * 512, std::begin(v28) + 6 * 512 + 1024);
-  const auto& ct12 = cc->EvalRotate(ct, 6);
+  std::vector<float> v63(std::begin(v28) + 6 * 1024, std::begin(v28) + 6 * 1024 + 1024);
+  const auto& ct12 = cc->EvalFastRotation(ct, 6, 2 * cc->GetRingDimension(), digit_decomp);
   std::vector<double> v64(std::begin(v63), std::end(v63));
   auto pt6_filled_n = cc->GetCryptoParameters()->GetElementParams()->GetRingDimension() / 2;
   auto pt6_filled = v64;
@@ -142,8 +144,8 @@ std::vector<CiphertextT> mnist(CryptoContextT cc, std::vector<float> v0, std::ve
   }
   auto pt6 = cc->MakeCKKSPackedPlaintext(pt6_filled);
   const auto& ct13 = cc->EvalMult(ct12, pt6);
-  std::vector<float> v65(std::begin(v28) + 7 * 512, std::begin(v28) + 7 * 512 + 1024);
-  const auto& ct14 = cc->EvalRotate(ct, 7);
+  std::vector<float> v65(std::begin(v28) + 7 * 1024, std::begin(v28) + 7 * 1024 + 1024);
+  const auto& ct14 = cc->EvalFastRotation(ct, 7, 2 * cc->GetRingDimension(), digit_decomp);
   std::vector<double> v66(std::begin(v65), std::end(v65));
   auto pt7_filled_n = cc->GetCryptoParameters()->GetElementParams()->GetRingDimension() / 2;
   auto pt7_filled = v66;
@@ -154,8 +156,8 @@ std::vector<CiphertextT> mnist(CryptoContextT cc, std::vector<float> v0, std::ve
   }
   auto pt7 = cc->MakeCKKSPackedPlaintext(pt7_filled);
   const auto& ct15 = cc->EvalMult(ct14, pt7);
-  std::vector<float> v67(std::begin(v28) + 8 * 512, std::begin(v28) + 8 * 512 + 1024);
-  const auto& ct16 = cc->EvalRotate(ct, 8);
+  std::vector<float> v67(std::begin(v28) + 8 * 1024, std::begin(v28) + 8 * 1024 + 1024);
+  const auto& ct16 = cc->EvalFastRotation(ct, 8, 2 * cc->GetRingDimension(), digit_decomp);
   std::vector<double> v68(std::begin(v67), std::end(v67));
   auto pt8_filled_n = cc->GetCryptoParameters()->GetElementParams()->GetRingDimension() / 2;
   auto pt8_filled = v68;
@@ -166,8 +168,8 @@ std::vector<CiphertextT> mnist(CryptoContextT cc, std::vector<float> v0, std::ve
   }
   auto pt8 = cc->MakeCKKSPackedPlaintext(pt8_filled);
   const auto& ct17 = cc->EvalMult(ct16, pt8);
-  std::vector<float> v69(std::begin(v28) + 9 * 512, std::begin(v28) + 9 * 512 + 1024);
-  const auto& ct18 = cc->EvalRotate(ct, 9);
+  std::vector<float> v69(std::begin(v28) + 9 * 1024, std::begin(v28) + 9 * 1024 + 1024);
+  const auto& ct18 = cc->EvalFastRotation(ct, 9, 2 * cc->GetRingDimension(), digit_decomp);
   std::vector<double> v70(std::begin(v69), std::end(v69));
   auto pt9_filled_n = cc->GetCryptoParameters()->GetElementParams()->GetRingDimension() / 2;
   auto pt9_filled = v70;
@@ -178,8 +180,8 @@ std::vector<CiphertextT> mnist(CryptoContextT cc, std::vector<float> v0, std::ve
   }
   auto pt9 = cc->MakeCKKSPackedPlaintext(pt9_filled);
   const auto& ct19 = cc->EvalMult(ct18, pt9);
-  std::vector<float> v71(std::begin(v28) + 10 * 512, std::begin(v28) + 10 * 512 + 1024);
-  const auto& ct20 = cc->EvalRotate(ct, 10);
+  std::vector<float> v71(std::begin(v28) + 10 * 1024, std::begin(v28) + 10 * 1024 + 1024);
+  const auto& ct20 = cc->EvalFastRotation(ct, 10, 2 * cc->GetRingDimension(), digit_decomp);
   std::vector<double> v72(std::begin(v71), std::end(v71));
   auto pt10_filled_n = cc->GetCryptoParameters()->GetElementParams()->GetRingDimension() / 2;
   auto pt10_filled = v72;
@@ -190,8 +192,8 @@ std::vector<CiphertextT> mnist(CryptoContextT cc, std::vector<float> v0, std::ve
   }
   auto pt10 = cc->MakeCKKSPackedPlaintext(pt10_filled);
   const auto& ct21 = cc->EvalMult(ct20, pt10);
-  std::vector<float> v73(std::begin(v28) + 11 * 512, std::begin(v28) + 11 * 512 + 1024);
-  const auto& ct22 = cc->EvalRotate(ct, 11);
+  std::vector<float> v73(std::begin(v28) + 11 * 1024, std::begin(v28) + 11 * 1024 + 1024);
+  const auto& ct22 = cc->EvalFastRotation(ct, 11, 2 * cc->GetRingDimension(), digit_decomp);
   std::vector<double> v74(std::begin(v73), std::end(v73));
   auto pt11_filled_n = cc->GetCryptoParameters()->GetElementParams()->GetRingDimension() / 2;
   auto pt11_filled = v74;
@@ -202,8 +204,8 @@ std::vector<CiphertextT> mnist(CryptoContextT cc, std::vector<float> v0, std::ve
   }
   auto pt11 = cc->MakeCKKSPackedPlaintext(pt11_filled);
   const auto& ct23 = cc->EvalMult(ct22, pt11);
-  std::vector<float> v75(std::begin(v28) + 12 * 512, std::begin(v28) + 12 * 512 + 1024);
-  const auto& ct24 = cc->EvalRotate(ct, 12);
+  std::vector<float> v75(std::begin(v28) + 12 * 1024, std::begin(v28) + 12 * 1024 + 1024);
+  const auto& ct24 = cc->EvalFastRotation(ct, 12, 2 * cc->GetRingDimension(), digit_decomp);
   std::vector<double> v76(std::begin(v75), std::end(v75));
   auto pt12_filled_n = cc->GetCryptoParameters()->GetElementParams()->GetRingDimension() / 2;
   auto pt12_filled = v76;
@@ -214,8 +216,8 @@ std::vector<CiphertextT> mnist(CryptoContextT cc, std::vector<float> v0, std::ve
   }
   auto pt12 = cc->MakeCKKSPackedPlaintext(pt12_filled);
   const auto& ct25 = cc->EvalMult(ct24, pt12);
-  std::vector<float> v77(std::begin(v28) + 13 * 512, std::begin(v28) + 13 * 512 + 1024);
-  const auto& ct26 = cc->EvalRotate(ct, 13);
+  std::vector<float> v77(std::begin(v28) + 13 * 1024, std::begin(v28) + 13 * 1024 + 1024);
+  const auto& ct26 = cc->EvalFastRotation(ct, 13, 2 * cc->GetRingDimension(), digit_decomp);
   std::vector<double> v78(std::begin(v77), std::end(v77));
   auto pt13_filled_n = cc->GetCryptoParameters()->GetElementParams()->GetRingDimension() / 2;
   auto pt13_filled = v78;
@@ -226,8 +228,8 @@ std::vector<CiphertextT> mnist(CryptoContextT cc, std::vector<float> v0, std::ve
   }
   auto pt13 = cc->MakeCKKSPackedPlaintext(pt13_filled);
   const auto& ct27 = cc->EvalMult(ct26, pt13);
-  std::vector<float> v79(std::begin(v28) + 14 * 512, std::begin(v28) + 14 * 512 + 1024);
-  const auto& ct28 = cc->EvalRotate(ct, 14);
+  std::vector<float> v79(std::begin(v28) + 14 * 1024, std::begin(v28) + 14 * 1024 + 1024);
+  const auto& ct28 = cc->EvalFastRotation(ct, 14, 2 * cc->GetRingDimension(), digit_decomp);
   std::vector<double> v80(std::begin(v79), std::end(v79));
   auto pt14_filled_n = cc->GetCryptoParameters()->GetElementParams()->GetRingDimension() / 2;
   auto pt14_filled = v80;
@@ -238,8 +240,8 @@ std::vector<CiphertextT> mnist(CryptoContextT cc, std::vector<float> v0, std::ve
   }
   auto pt14 = cc->MakeCKKSPackedPlaintext(pt14_filled);
   const auto& ct29 = cc->EvalMult(ct28, pt14);
-  std::vector<float> v81(std::begin(v28) + 15 * 512, std::begin(v28) + 15 * 512 + 1024);
-  const auto& ct30 = cc->EvalRotate(ct, 15);
+  std::vector<float> v81(std::begin(v28) + 15 * 1024, std::begin(v28) + 15 * 1024 + 1024);
+  const auto& ct30 = cc->EvalFastRotation(ct, 15, 2 * cc->GetRingDimension(), digit_decomp);
   std::vector<double> v82(std::begin(v81), std::end(v81));
   auto pt15_filled_n = cc->GetCryptoParameters()->GetElementParams()->GetRingDimension() / 2;
   auto pt15_filled = v82;
@@ -265,7 +267,7 @@ std::vector<CiphertextT> mnist(CryptoContextT cc, std::vector<float> v0, std::ve
   const auto& ct44 = cc->EvalAdd(ct42, ct43);
   const auto& ct45 = cc->EvalAdd(ct41, ct44);
   const auto& ct46 = cc->EvalAdd(ct38, ct45);
-  std::vector<float> v83(std::begin(v28) + 16 * 512, std::begin(v28) + 16 * 512 + 1024);
+  std::vector<float> v83(std::begin(v28) + 16 * 1024, std::begin(v28) + 16 * 1024 + 1024);
   std::vector<float> v84(1008);
   std::copy(v83.begin() + 0, v83.begin() + 0 + 1008, v84.begin());
   std::vector<float> v85(16);
@@ -283,7 +285,7 @@ std::vector<CiphertextT> mnist(CryptoContextT cc, std::vector<float> v0, std::ve
   }
   auto pt16 = cc->MakeCKKSPackedPlaintext(pt16_filled);
   const auto& ct47 = cc->EvalMult(ct, pt16);
-  std::vector<float> v90(std::begin(v28) + 17 * 512, std::begin(v28) + 17 * 512 + 1024);
+  std::vector<float> v90(std::begin(v28) + 17 * 1024, std::begin(v28) + 17 * 1024 + 1024);
   std::vector<float> v91(1008);
   std::copy(v90.begin() + 0, v90.begin() + 0 + 1008, v91.begin());
   std::vector<float> v92(16);
@@ -300,7 +302,7 @@ std::vector<CiphertextT> mnist(CryptoContextT cc, std::vector<float> v0, std::ve
   }
   auto pt17 = cc->MakeCKKSPackedPlaintext(pt17_filled);
   const auto& ct48 = cc->EvalMult(ct2, pt17);
-  std::vector<float> v96(std::begin(v28) + 18 * 512, std::begin(v28) + 18 * 512 + 1024);
+  std::vector<float> v96(std::begin(v28) + 18 * 1024, std::begin(v28) + 18 * 1024 + 1024);
   std::vector<float> v97(1008);
   std::copy(v96.begin() + 0, v96.begin() + 0 + 1008, v97.begin());
   std::vector<float> v98(16);
@@ -317,7 +319,7 @@ std::vector<CiphertextT> mnist(CryptoContextT cc, std::vector<float> v0, std::ve
   }
   auto pt18 = cc->MakeCKKSPackedPlaintext(pt18_filled);
   const auto& ct49 = cc->EvalMult(ct4, pt18);
-  std::vector<float> v102(std::begin(v28) + 19 * 512, std::begin(v28) + 19 * 512 + 1024);
+  std::vector<float> v102(std::begin(v28) + 19 * 1024, std::begin(v28) + 19 * 1024 + 1024);
   std::vector<float> v103(1008);
   std::copy(v102.begin() + 0, v102.begin() + 0 + 1008, v103.begin());
   std::vector<float> v104(16);
@@ -334,7 +336,7 @@ std::vector<CiphertextT> mnist(CryptoContextT cc, std::vector<float> v0, std::ve
   }
   auto pt19 = cc->MakeCKKSPackedPlaintext(pt19_filled);
   const auto& ct50 = cc->EvalMult(ct6, pt19);
-  std::vector<float> v108(std::begin(v28) + 20 * 512, std::begin(v28) + 20 * 512 + 1024);
+  std::vector<float> v108(std::begin(v28) + 20 * 1024, std::begin(v28) + 20 * 1024 + 1024);
   std::vector<float> v109(1008);
   std::copy(v108.begin() + 0, v108.begin() + 0 + 1008, v109.begin());
   std::vector<float> v110(16);
@@ -351,7 +353,7 @@ std::vector<CiphertextT> mnist(CryptoContextT cc, std::vector<float> v0, std::ve
   }
   auto pt20 = cc->MakeCKKSPackedPlaintext(pt20_filled);
   const auto& ct51 = cc->EvalMult(ct8, pt20);
-  std::vector<float> v114(std::begin(v28) + 21 * 512, std::begin(v28) + 21 * 512 + 1024);
+  std::vector<float> v114(std::begin(v28) + 21 * 1024, std::begin(v28) + 21 * 1024 + 1024);
   std::vector<float> v115(1008);
   std::copy(v114.begin() + 0, v114.begin() + 0 + 1008, v115.begin());
   std::vector<float> v116(16);
@@ -368,7 +370,7 @@ std::vector<CiphertextT> mnist(CryptoContextT cc, std::vector<float> v0, std::ve
   }
   auto pt21 = cc->MakeCKKSPackedPlaintext(pt21_filled);
   const auto& ct52 = cc->EvalMult(ct10, pt21);
-  std::vector<float> v120(std::begin(v28) + 22 * 512, std::begin(v28) + 22 * 512 + 1024);
+  std::vector<float> v120(std::begin(v28) + 22 * 1024, std::begin(v28) + 22 * 1024 + 1024);
   std::vector<float> v121(1008);
   std::copy(v120.begin() + 0, v120.begin() + 0 + 1008, v121.begin());
   std::vector<float> v122(16);
@@ -385,7 +387,7 @@ std::vector<CiphertextT> mnist(CryptoContextT cc, std::vector<float> v0, std::ve
   }
   auto pt22 = cc->MakeCKKSPackedPlaintext(pt22_filled);
   const auto& ct53 = cc->EvalMult(ct12, pt22);
-  std::vector<float> v126(std::begin(v28) + 23 * 512, std::begin(v28) + 23 * 512 + 1024);
+  std::vector<float> v126(std::begin(v28) + 23 * 1024, std::begin(v28) + 23 * 1024 + 1024);
   std::vector<float> v127(1008);
   std::copy(v126.begin() + 0, v126.begin() + 0 + 1008, v127.begin());
   std::vector<float> v128(16);
@@ -402,7 +404,7 @@ std::vector<CiphertextT> mnist(CryptoContextT cc, std::vector<float> v0, std::ve
   }
   auto pt23 = cc->MakeCKKSPackedPlaintext(pt23_filled);
   const auto& ct54 = cc->EvalMult(ct14, pt23);
-  std::vector<float> v132(std::begin(v28) + 24 * 512, std::begin(v28) + 24 * 512 + 1024);
+  std::vector<float> v132(std::begin(v28) + 24 * 1024, std::begin(v28) + 24 * 1024 + 1024);
   std::vector<float> v133(1008);
   std::copy(v132.begin() + 0, v132.begin() + 0 + 1008, v133.begin());
   std::vector<float> v134(16);
@@ -419,7 +421,7 @@ std::vector<CiphertextT> mnist(CryptoContextT cc, std::vector<float> v0, std::ve
   }
   auto pt24 = cc->MakeCKKSPackedPlaintext(pt24_filled);
   const auto& ct55 = cc->EvalMult(ct16, pt24);
-  std::vector<float> v138(std::begin(v28) + 25 * 512, std::begin(v28) + 25 * 512 + 1024);
+  std::vector<float> v138(std::begin(v28) + 25 * 1024, std::begin(v28) + 25 * 1024 + 1024);
   std::vector<float> v139(1008);
   std::copy(v138.begin() + 0, v138.begin() + 0 + 1008, v139.begin());
   std::vector<float> v140(16);
@@ -436,7 +438,7 @@ std::vector<CiphertextT> mnist(CryptoContextT cc, std::vector<float> v0, std::ve
   }
   auto pt25 = cc->MakeCKKSPackedPlaintext(pt25_filled);
   const auto& ct56 = cc->EvalMult(ct18, pt25);
-  std::vector<float> v144(std::begin(v28) + 26 * 512, std::begin(v28) + 26 * 512 + 1024);
+  std::vector<float> v144(std::begin(v28) + 26 * 1024, std::begin(v28) + 26 * 1024 + 1024);
   std::vector<float> v145(1008);
   std::copy(v144.begin() + 0, v144.begin() + 0 + 1008, v145.begin());
   std::vector<float> v146(16);
@@ -453,7 +455,7 @@ std::vector<CiphertextT> mnist(CryptoContextT cc, std::vector<float> v0, std::ve
   }
   auto pt26 = cc->MakeCKKSPackedPlaintext(pt26_filled);
   const auto& ct57 = cc->EvalMult(ct20, pt26);
-  std::vector<float> v150(std::begin(v28) + 27 * 512, std::begin(v28) + 27 * 512 + 1024);
+  std::vector<float> v150(std::begin(v28) + 27 * 1024, std::begin(v28) + 27 * 1024 + 1024);
   std::vector<float> v151(1008);
   std::copy(v150.begin() + 0, v150.begin() + 0 + 1008, v151.begin());
   std::vector<float> v152(16);
@@ -470,7 +472,7 @@ std::vector<CiphertextT> mnist(CryptoContextT cc, std::vector<float> v0, std::ve
   }
   auto pt27 = cc->MakeCKKSPackedPlaintext(pt27_filled);
   const auto& ct58 = cc->EvalMult(ct22, pt27);
-  std::vector<float> v156(std::begin(v28) + 28 * 512, std::begin(v28) + 28 * 512 + 1024);
+  std::vector<float> v156(std::begin(v28) + 28 * 1024, std::begin(v28) + 28 * 1024 + 1024);
   std::vector<float> v157(1008);
   std::copy(v156.begin() + 0, v156.begin() + 0 + 1008, v157.begin());
   std::vector<float> v158(16);
@@ -487,7 +489,7 @@ std::vector<CiphertextT> mnist(CryptoContextT cc, std::vector<float> v0, std::ve
   }
   auto pt28 = cc->MakeCKKSPackedPlaintext(pt28_filled);
   const auto& ct59 = cc->EvalMult(ct24, pt28);
-  std::vector<float> v162(std::begin(v28) + 29 * 512, std::begin(v28) + 29 * 512 + 1024);
+  std::vector<float> v162(std::begin(v28) + 29 * 1024, std::begin(v28) + 29 * 1024 + 1024);
   std::vector<float> v163(1008);
   std::copy(v162.begin() + 0, v162.begin() + 0 + 1008, v163.begin());
   std::vector<float> v164(16);
@@ -504,7 +506,7 @@ std::vector<CiphertextT> mnist(CryptoContextT cc, std::vector<float> v0, std::ve
   }
   auto pt29 = cc->MakeCKKSPackedPlaintext(pt29_filled);
   const auto& ct60 = cc->EvalMult(ct26, pt29);
-  std::vector<float> v168(std::begin(v28) + 30 * 512, std::begin(v28) + 30 * 512 + 1024);
+  std::vector<float> v168(std::begin(v28) + 30 * 1024, std::begin(v28) + 30 * 1024 + 1024);
   std::vector<float> v169(1008);
   std::copy(v168.begin() + 0, v168.begin() + 0 + 1008, v169.begin());
   std::vector<float> v170(16);
@@ -521,7 +523,7 @@ std::vector<CiphertextT> mnist(CryptoContextT cc, std::vector<float> v0, std::ve
   }
   auto pt30 = cc->MakeCKKSPackedPlaintext(pt30_filled);
   const auto& ct61 = cc->EvalMult(ct28, pt30);
-  std::vector<float> v174(std::begin(v28) + 31 * 512, std::begin(v28) + 31 * 512 + 1024);
+  std::vector<float> v174(std::begin(v28) + 31 * 1024, std::begin(v28) + 31 * 1024 + 1024);
   std::vector<float> v175(1008);
   std::copy(v174.begin() + 0, v174.begin() + 0 + 1008, v175.begin());
   std::vector<float> v176(16);
@@ -554,7 +556,7 @@ std::vector<CiphertextT> mnist(CryptoContextT cc, std::vector<float> v0, std::ve
   const auto& ct76 = cc->EvalAdd(ct72, ct75);
   const auto& ct77 = cc->EvalAdd(ct69, ct76);
   const auto& ct78 = cc->EvalRotate(ct77, 16);
-  std::vector<float> v180(std::begin(v28) + 32 * 512, std::begin(v28) + 32 * 512 + 1024);
+  std::vector<float> v180(std::begin(v28) + 32 * 1024, std::begin(v28) + 32 * 1024 + 1024);
   std::vector<float> v181(992);
   std::copy(v180.begin() + 0, v180.begin() + 0 + 992, v181.begin());
   std::vector<float> v182(32);
@@ -571,7 +573,7 @@ std::vector<CiphertextT> mnist(CryptoContextT cc, std::vector<float> v0, std::ve
   }
   auto pt32 = cc->MakeCKKSPackedPlaintext(pt32_filled);
   const auto& ct79 = cc->EvalMult(ct, pt32);
-  std::vector<float> v186(std::begin(v28) + 33 * 512, std::begin(v28) + 33 * 512 + 1024);
+  std::vector<float> v186(std::begin(v28) + 33 * 1024, std::begin(v28) + 33 * 1024 + 1024);
   std::vector<float> v187(992);
   std::copy(v186.begin() + 0, v186.begin() + 0 + 992, v187.begin());
   std::vector<float> v188(32);
@@ -588,7 +590,7 @@ std::vector<CiphertextT> mnist(CryptoContextT cc, std::vector<float> v0, std::ve
   }
   auto pt33 = cc->MakeCKKSPackedPlaintext(pt33_filled);
   const auto& ct80 = cc->EvalMult(ct2, pt33);
-  std::vector<float> v192(std::begin(v28) + 34 * 512, std::begin(v28) + 34 * 512 + 1024);
+  std::vector<float> v192(std::begin(v28) + 34 * 1024, std::begin(v28) + 34 * 1024 + 1024);
   std::vector<float> v193(992);
   std::copy(v192.begin() + 0, v192.begin() + 0 + 992, v193.begin());
   std::vector<float> v194(32);
@@ -605,7 +607,7 @@ std::vector<CiphertextT> mnist(CryptoContextT cc, std::vector<float> v0, std::ve
   }
   auto pt34 = cc->MakeCKKSPackedPlaintext(pt34_filled);
   const auto& ct81 = cc->EvalMult(ct4, pt34);
-  std::vector<float> v198(std::begin(v28) + 35 * 512, std::begin(v28) + 35 * 512 + 1024);
+  std::vector<float> v198(std::begin(v28) + 35 * 1024, std::begin(v28) + 35 * 1024 + 1024);
   std::vector<float> v199(992);
   std::copy(v198.begin() + 0, v198.begin() + 0 + 992, v199.begin());
   std::vector<float> v200(32);
@@ -622,7 +624,7 @@ std::vector<CiphertextT> mnist(CryptoContextT cc, std::vector<float> v0, std::ve
   }
   auto pt35 = cc->MakeCKKSPackedPlaintext(pt35_filled);
   const auto& ct82 = cc->EvalMult(ct6, pt35);
-  std::vector<float> v204(std::begin(v28) + 36 * 512, std::begin(v28) + 36 * 512 + 1024);
+  std::vector<float> v204(std::begin(v28) + 36 * 1024, std::begin(v28) + 36 * 1024 + 1024);
   std::vector<float> v205(992);
   std::copy(v204.begin() + 0, v204.begin() + 0 + 992, v205.begin());
   std::vector<float> v206(32);
@@ -639,7 +641,7 @@ std::vector<CiphertextT> mnist(CryptoContextT cc, std::vector<float> v0, std::ve
   }
   auto pt36 = cc->MakeCKKSPackedPlaintext(pt36_filled);
   const auto& ct83 = cc->EvalMult(ct8, pt36);
-  std::vector<float> v210(std::begin(v28) + 37 * 512, std::begin(v28) + 37 * 512 + 1024);
+  std::vector<float> v210(std::begin(v28) + 37 * 1024, std::begin(v28) + 37 * 1024 + 1024);
   std::vector<float> v211(992);
   std::copy(v210.begin() + 0, v210.begin() + 0 + 992, v211.begin());
   std::vector<float> v212(32);
@@ -656,7 +658,7 @@ std::vector<CiphertextT> mnist(CryptoContextT cc, std::vector<float> v0, std::ve
   }
   auto pt37 = cc->MakeCKKSPackedPlaintext(pt37_filled);
   const auto& ct84 = cc->EvalMult(ct10, pt37);
-  std::vector<float> v216(std::begin(v28) + 38 * 512, std::begin(v28) + 38 * 512 + 1024);
+  std::vector<float> v216(std::begin(v28) + 38 * 1024, std::begin(v28) + 38 * 1024 + 1024);
   std::vector<float> v217(992);
   std::copy(v216.begin() + 0, v216.begin() + 0 + 992, v217.begin());
   std::vector<float> v218(32);
@@ -673,7 +675,7 @@ std::vector<CiphertextT> mnist(CryptoContextT cc, std::vector<float> v0, std::ve
   }
   auto pt38 = cc->MakeCKKSPackedPlaintext(pt38_filled);
   const auto& ct85 = cc->EvalMult(ct12, pt38);
-  std::vector<float> v222(std::begin(v28) + 39 * 512, std::begin(v28) + 39 * 512 + 1024);
+  std::vector<float> v222(std::begin(v28) + 39 * 1024, std::begin(v28) + 39 * 1024 + 1024);
   std::vector<float> v223(992);
   std::copy(v222.begin() + 0, v222.begin() + 0 + 992, v223.begin());
   std::vector<float> v224(32);
@@ -690,7 +692,7 @@ std::vector<CiphertextT> mnist(CryptoContextT cc, std::vector<float> v0, std::ve
   }
   auto pt39 = cc->MakeCKKSPackedPlaintext(pt39_filled);
   const auto& ct86 = cc->EvalMult(ct14, pt39);
-  std::vector<float> v228(std::begin(v28) + 40 * 512, std::begin(v28) + 40 * 512 + 1024);
+  std::vector<float> v228(std::begin(v28) + 40 * 1024, std::begin(v28) + 40 * 1024 + 1024);
   std::vector<float> v229(992);
   std::copy(v228.begin() + 0, v228.begin() + 0 + 992, v229.begin());
   std::vector<float> v230(32);
@@ -707,7 +709,7 @@ std::vector<CiphertextT> mnist(CryptoContextT cc, std::vector<float> v0, std::ve
   }
   auto pt40 = cc->MakeCKKSPackedPlaintext(pt40_filled);
   const auto& ct87 = cc->EvalMult(ct16, pt40);
-  std::vector<float> v234(std::begin(v28) + 41 * 512, std::begin(v28) + 41 * 512 + 1024);
+  std::vector<float> v234(std::begin(v28) + 41 * 1024, std::begin(v28) + 41 * 1024 + 1024);
   std::vector<float> v235(992);
   std::copy(v234.begin() + 0, v234.begin() + 0 + 992, v235.begin());
   std::vector<float> v236(32);
@@ -724,7 +726,7 @@ std::vector<CiphertextT> mnist(CryptoContextT cc, std::vector<float> v0, std::ve
   }
   auto pt41 = cc->MakeCKKSPackedPlaintext(pt41_filled);
   const auto& ct88 = cc->EvalMult(ct18, pt41);
-  std::vector<float> v240(std::begin(v28) + 42 * 512, std::begin(v28) + 42 * 512 + 1024);
+  std::vector<float> v240(std::begin(v28) + 42 * 1024, std::begin(v28) + 42 * 1024 + 1024);
   std::vector<float> v241(992);
   std::copy(v240.begin() + 0, v240.begin() + 0 + 992, v241.begin());
   std::vector<float> v242(32);
@@ -741,7 +743,7 @@ std::vector<CiphertextT> mnist(CryptoContextT cc, std::vector<float> v0, std::ve
   }
   auto pt42 = cc->MakeCKKSPackedPlaintext(pt42_filled);
   const auto& ct89 = cc->EvalMult(ct20, pt42);
-  std::vector<float> v246(std::begin(v28) + 43 * 512, std::begin(v28) + 43 * 512 + 1024);
+  std::vector<float> v246(std::begin(v28) + 43 * 1024, std::begin(v28) + 43 * 1024 + 1024);
   std::vector<float> v247(992);
   std::copy(v246.begin() + 0, v246.begin() + 0 + 992, v247.begin());
   std::vector<float> v248(32);
@@ -758,7 +760,7 @@ std::vector<CiphertextT> mnist(CryptoContextT cc, std::vector<float> v0, std::ve
   }
   auto pt43 = cc->MakeCKKSPackedPlaintext(pt43_filled);
   const auto& ct90 = cc->EvalMult(ct22, pt43);
-  std::vector<float> v252(std::begin(v28) + 44 * 512, std::begin(v28) + 44 * 512 + 1024);
+  std::vector<float> v252(std::begin(v28) + 44 * 1024, std::begin(v28) + 44 * 1024 + 1024);
   std::vector<float> v253(992);
   std::copy(v252.begin() + 0, v252.begin() + 0 + 992, v253.begin());
   std::vector<float> v254(32);
@@ -775,7 +777,7 @@ std::vector<CiphertextT> mnist(CryptoContextT cc, std::vector<float> v0, std::ve
   }
   auto pt44 = cc->MakeCKKSPackedPlaintext(pt44_filled);
   const auto& ct91 = cc->EvalMult(ct24, pt44);
-  std::vector<float> v258(std::begin(v28) + 45 * 512, std::begin(v28) + 45 * 512 + 1024);
+  std::vector<float> v258(std::begin(v28) + 45 * 1024, std::begin(v28) + 45 * 1024 + 1024);
   std::vector<float> v259(992);
   std::copy(v258.begin() + 0, v258.begin() + 0 + 992, v259.begin());
   std::vector<float> v260(32);
@@ -792,7 +794,7 @@ std::vector<CiphertextT> mnist(CryptoContextT cc, std::vector<float> v0, std::ve
   }
   auto pt45 = cc->MakeCKKSPackedPlaintext(pt45_filled);
   const auto& ct92 = cc->EvalMult(ct26, pt45);
-  std::vector<float> v264(std::begin(v28) + 46 * 512, std::begin(v28) + 46 * 512 + 1024);
+  std::vector<float> v264(std::begin(v28) + 46 * 1024, std::begin(v28) + 46 * 1024 + 1024);
   std::vector<float> v265(992);
   std::copy(v264.begin() + 0, v264.begin() + 0 + 992, v265.begin());
   std::vector<float> v266(32);
@@ -809,7 +811,7 @@ std::vector<CiphertextT> mnist(CryptoContextT cc, std::vector<float> v0, std::ve
   }
   auto pt46 = cc->MakeCKKSPackedPlaintext(pt46_filled);
   const auto& ct93 = cc->EvalMult(ct28, pt46);
-  std::vector<float> v270(std::begin(v28) + 47 * 512, std::begin(v28) + 47 * 512 + 1024);
+  std::vector<float> v270(std::begin(v28) + 47 * 1024, std::begin(v28) + 47 * 1024 + 1024);
   std::vector<float> v271(992);
   std::copy(v270.begin() + 0, v270.begin() + 0 + 992, v271.begin());
   std::vector<float> v272(32);
@@ -842,7 +844,7 @@ std::vector<CiphertextT> mnist(CryptoContextT cc, std::vector<float> v0, std::ve
   const auto& ct108 = cc->EvalAdd(ct104, ct107);
   const auto& ct109 = cc->EvalAdd(ct101, ct108);
   const auto& ct110 = cc->EvalRotate(ct109, 32);
-  std::vector<float> v276(std::begin(v28) + 48 * 512, std::begin(v28) + 48 * 512 + 1024);
+  std::vector<float> v276(std::begin(v28) + 48 * 1024, std::begin(v28) + 48 * 1024 + 1024);
   std::vector<float> v277(976);
   std::copy(v276.begin() + 0, v276.begin() + 0 + 976, v277.begin());
   std::vector<float> v278(48);
@@ -859,7 +861,7 @@ std::vector<CiphertextT> mnist(CryptoContextT cc, std::vector<float> v0, std::ve
   }
   auto pt48 = cc->MakeCKKSPackedPlaintext(pt48_filled);
   const auto& ct111 = cc->EvalMult(ct, pt48);
-  std::vector<float> v282(std::begin(v28) + 49 * 512, std::begin(v28) + 49 * 512 + 1024);
+  std::vector<float> v282(std::begin(v28) + 49 * 1024, std::begin(v28) + 49 * 1024 + 1024);
   std::vector<float> v283(976);
   std::copy(v282.begin() + 0, v282.begin() + 0 + 976, v283.begin());
   std::vector<float> v284(48);
@@ -876,7 +878,7 @@ std::vector<CiphertextT> mnist(CryptoContextT cc, std::vector<float> v0, std::ve
   }
   auto pt49 = cc->MakeCKKSPackedPlaintext(pt49_filled);
   const auto& ct112 = cc->EvalMult(ct2, pt49);
-  std::vector<float> v288(std::begin(v28) + 50 * 512, std::begin(v28) + 50 * 512 + 1024);
+  std::vector<float> v288(std::begin(v28) + 50 * 1024, std::begin(v28) + 50 * 1024 + 1024);
   std::vector<float> v289(976);
   std::copy(v288.begin() + 0, v288.begin() + 0 + 976, v289.begin());
   std::vector<float> v290(48);
@@ -893,7 +895,7 @@ std::vector<CiphertextT> mnist(CryptoContextT cc, std::vector<float> v0, std::ve
   }
   auto pt50 = cc->MakeCKKSPackedPlaintext(pt50_filled);
   const auto& ct113 = cc->EvalMult(ct4, pt50);
-  std::vector<float> v294(std::begin(v28) + 51 * 512, std::begin(v28) + 51 * 512 + 1024);
+  std::vector<float> v294(std::begin(v28) + 51 * 1024, std::begin(v28) + 51 * 1024 + 1024);
   std::vector<float> v295(976);
   std::copy(v294.begin() + 0, v294.begin() + 0 + 976, v295.begin());
   std::vector<float> v296(48);
@@ -910,7 +912,7 @@ std::vector<CiphertextT> mnist(CryptoContextT cc, std::vector<float> v0, std::ve
   }
   auto pt51 = cc->MakeCKKSPackedPlaintext(pt51_filled);
   const auto& ct114 = cc->EvalMult(ct6, pt51);
-  std::vector<float> v300(std::begin(v28) + 52 * 512, std::begin(v28) + 52 * 512 + 1024);
+  std::vector<float> v300(std::begin(v28) + 52 * 1024, std::begin(v28) + 52 * 1024 + 1024);
   std::vector<float> v301(976);
   std::copy(v300.begin() + 0, v300.begin() + 0 + 976, v301.begin());
   std::vector<float> v302(48);
@@ -927,7 +929,7 @@ std::vector<CiphertextT> mnist(CryptoContextT cc, std::vector<float> v0, std::ve
   }
   auto pt52 = cc->MakeCKKSPackedPlaintext(pt52_filled);
   const auto& ct115 = cc->EvalMult(ct8, pt52);
-  std::vector<float> v306(std::begin(v28) + 53 * 512, std::begin(v28) + 53 * 512 + 1024);
+  std::vector<float> v306(std::begin(v28) + 53 * 1024, std::begin(v28) + 53 * 1024 + 1024);
   std::vector<float> v307(976);
   std::copy(v306.begin() + 0, v306.begin() + 0 + 976, v307.begin());
   std::vector<float> v308(48);
@@ -944,7 +946,7 @@ std::vector<CiphertextT> mnist(CryptoContextT cc, std::vector<float> v0, std::ve
   }
   auto pt53 = cc->MakeCKKSPackedPlaintext(pt53_filled);
   const auto& ct116 = cc->EvalMult(ct10, pt53);
-  std::vector<float> v312(std::begin(v28) + 54 * 512, std::begin(v28) + 54 * 512 + 1024);
+  std::vector<float> v312(std::begin(v28) + 54 * 1024, std::begin(v28) + 54 * 1024 + 1024);
   std::vector<float> v313(976);
   std::copy(v312.begin() + 0, v312.begin() + 0 + 976, v313.begin());
   std::vector<float> v314(48);
@@ -961,7 +963,7 @@ std::vector<CiphertextT> mnist(CryptoContextT cc, std::vector<float> v0, std::ve
   }
   auto pt54 = cc->MakeCKKSPackedPlaintext(pt54_filled);
   const auto& ct117 = cc->EvalMult(ct12, pt54);
-  std::vector<float> v318(std::begin(v28) + 55 * 512, std::begin(v28) + 55 * 512 + 1024);
+  std::vector<float> v318(std::begin(v28) + 55 * 1024, std::begin(v28) + 55 * 1024 + 1024);
   std::vector<float> v319(976);
   std::copy(v318.begin() + 0, v318.begin() + 0 + 976, v319.begin());
   std::vector<float> v320(48);
@@ -978,7 +980,7 @@ std::vector<CiphertextT> mnist(CryptoContextT cc, std::vector<float> v0, std::ve
   }
   auto pt55 = cc->MakeCKKSPackedPlaintext(pt55_filled);
   const auto& ct118 = cc->EvalMult(ct14, pt55);
-  std::vector<float> v324(std::begin(v28) + 56 * 512, std::begin(v28) + 56 * 512 + 1024);
+  std::vector<float> v324(std::begin(v28) + 56 * 1024, std::begin(v28) + 56 * 1024 + 1024);
   std::vector<float> v325(976);
   std::copy(v324.begin() + 0, v324.begin() + 0 + 976, v325.begin());
   std::vector<float> v326(48);
@@ -995,7 +997,7 @@ std::vector<CiphertextT> mnist(CryptoContextT cc, std::vector<float> v0, std::ve
   }
   auto pt56 = cc->MakeCKKSPackedPlaintext(pt56_filled);
   const auto& ct119 = cc->EvalMult(ct16, pt56);
-  std::vector<float> v330(std::begin(v28) + 57 * 512, std::begin(v28) + 57 * 512 + 1024);
+  std::vector<float> v330(std::begin(v28) + 57 * 1024, std::begin(v28) + 57 * 1024 + 1024);
   std::vector<float> v331(976);
   std::copy(v330.begin() + 0, v330.begin() + 0 + 976, v331.begin());
   std::vector<float> v332(48);
@@ -1012,7 +1014,7 @@ std::vector<CiphertextT> mnist(CryptoContextT cc, std::vector<float> v0, std::ve
   }
   auto pt57 = cc->MakeCKKSPackedPlaintext(pt57_filled);
   const auto& ct120 = cc->EvalMult(ct18, pt57);
-  std::vector<float> v336(std::begin(v28) + 58 * 512, std::begin(v28) + 58 * 512 + 1024);
+  std::vector<float> v336(std::begin(v28) + 58 * 1024, std::begin(v28) + 58 * 1024 + 1024);
   std::vector<float> v337(976);
   std::copy(v336.begin() + 0, v336.begin() + 0 + 976, v337.begin());
   std::vector<float> v338(48);
@@ -1029,7 +1031,7 @@ std::vector<CiphertextT> mnist(CryptoContextT cc, std::vector<float> v0, std::ve
   }
   auto pt58 = cc->MakeCKKSPackedPlaintext(pt58_filled);
   const auto& ct121 = cc->EvalMult(ct20, pt58);
-  std::vector<float> v342(std::begin(v28) + 59 * 512, std::begin(v28) + 59 * 512 + 1024);
+  std::vector<float> v342(std::begin(v28) + 59 * 1024, std::begin(v28) + 59 * 1024 + 1024);
   std::vector<float> v343(976);
   std::copy(v342.begin() + 0, v342.begin() + 0 + 976, v343.begin());
   std::vector<float> v344(48);
@@ -1046,7 +1048,7 @@ std::vector<CiphertextT> mnist(CryptoContextT cc, std::vector<float> v0, std::ve
   }
   auto pt59 = cc->MakeCKKSPackedPlaintext(pt59_filled);
   const auto& ct122 = cc->EvalMult(ct22, pt59);
-  std::vector<float> v348(std::begin(v28) + 60 * 512, std::begin(v28) + 60 * 512 + 1024);
+  std::vector<float> v348(std::begin(v28) + 60 * 1024, std::begin(v28) + 60 * 1024 + 1024);
   std::vector<float> v349(976);
   std::copy(v348.begin() + 0, v348.begin() + 0 + 976, v349.begin());
   std::vector<float> v350(48);
@@ -1063,7 +1065,7 @@ std::vector<CiphertextT> mnist(CryptoContextT cc, std::vector<float> v0, std::ve
   }
   auto pt60 = cc->MakeCKKSPackedPlaintext(pt60_filled);
   const auto& ct123 = cc->EvalMult(ct24, pt60);
-  std::vector<float> v354(std::begin(v28) + 61 * 512, std::begin(v28) + 61 * 512 + 1024);
+  std::vector<float> v354(std::begin(v28) + 61 * 1024, std::begin(v28) + 61 * 1024 + 1024);
   std::vector<float> v355(976);
   std::copy(v354.begin() + 0, v354.begin() + 0 + 976, v355.begin());
   std::vector<float> v356(48);
@@ -1080,7 +1082,7 @@ std::vector<CiphertextT> mnist(CryptoContextT cc, std::vector<float> v0, std::ve
   }
   auto pt61 = cc->MakeCKKSPackedPlaintext(pt61_filled);
   const auto& ct124 = cc->EvalMult(ct26, pt61);
-  std::vector<float> v360(std::begin(v28) + 62 * 512, std::begin(v28) + 62 * 512 + 1024);
+  std::vector<float> v360(std::begin(v28) + 62 * 1024, std::begin(v28) + 62 * 1024 + 1024);
   std::vector<float> v361(976);
   std::copy(v360.begin() + 0, v360.begin() + 0 + 976, v361.begin());
   std::vector<float> v362(48);
@@ -1097,7 +1099,7 @@ std::vector<CiphertextT> mnist(CryptoContextT cc, std::vector<float> v0, std::ve
   }
   auto pt62 = cc->MakeCKKSPackedPlaintext(pt62_filled);
   const auto& ct125 = cc->EvalMult(ct28, pt62);
-  std::vector<float> v366(std::begin(v28) + 63 * 512, std::begin(v28) + 63 * 512 + 1024);
+  std::vector<float> v366(std::begin(v28) + 63 * 1024, std::begin(v28) + 63 * 1024 + 1024);
   std::vector<float> v367(976);
   std::copy(v366.begin() + 0, v366.begin() + 0 + 976, v367.begin());
   std::vector<float> v368(48);
@@ -1130,7 +1132,7 @@ std::vector<CiphertextT> mnist(CryptoContextT cc, std::vector<float> v0, std::ve
   const auto& ct140 = cc->EvalAdd(ct136, ct139);
   const auto& ct141 = cc->EvalAdd(ct133, ct140);
   const auto& ct142 = cc->EvalRotate(ct141, 48);
-  std::vector<float> v372(std::begin(v28) + 64 * 512, std::begin(v28) + 64 * 512 + 1024);
+  std::vector<float> v372(std::begin(v28) + 64 * 1024, std::begin(v28) + 64 * 1024 + 1024);
   std::vector<float> v373(960);
   std::copy(v372.begin() + 0, v372.begin() + 0 + 960, v373.begin());
   std::vector<float> v374(64);
@@ -1147,7 +1149,7 @@ std::vector<CiphertextT> mnist(CryptoContextT cc, std::vector<float> v0, std::ve
   }
   auto pt64 = cc->MakeCKKSPackedPlaintext(pt64_filled);
   const auto& ct143 = cc->EvalMult(ct, pt64);
-  std::vector<float> v378(std::begin(v28) + 65 * 512, std::begin(v28) + 65 * 512 + 1024);
+  std::vector<float> v378(std::begin(v28) + 65 * 1024, std::begin(v28) + 65 * 1024 + 1024);
   std::vector<float> v379(960);
   std::copy(v378.begin() + 0, v378.begin() + 0 + 960, v379.begin());
   std::vector<float> v380(64);
@@ -1164,7 +1166,7 @@ std::vector<CiphertextT> mnist(CryptoContextT cc, std::vector<float> v0, std::ve
   }
   auto pt65 = cc->MakeCKKSPackedPlaintext(pt65_filled);
   const auto& ct144 = cc->EvalMult(ct2, pt65);
-  std::vector<float> v384(std::begin(v28) + 66 * 512, std::begin(v28) + 66 * 512 + 1024);
+  std::vector<float> v384(std::begin(v28) + 66 * 1024, std::begin(v28) + 66 * 1024 + 1024);
   std::vector<float> v385(960);
   std::copy(v384.begin() + 0, v384.begin() + 0 + 960, v385.begin());
   std::vector<float> v386(64);
@@ -1181,7 +1183,7 @@ std::vector<CiphertextT> mnist(CryptoContextT cc, std::vector<float> v0, std::ve
   }
   auto pt66 = cc->MakeCKKSPackedPlaintext(pt66_filled);
   const auto& ct145 = cc->EvalMult(ct4, pt66);
-  std::vector<float> v390(std::begin(v28) + 67 * 512, std::begin(v28) + 67 * 512 + 1024);
+  std::vector<float> v390(std::begin(v28) + 67 * 1024, std::begin(v28) + 67 * 1024 + 1024);
   std::vector<float> v391(960);
   std::copy(v390.begin() + 0, v390.begin() + 0 + 960, v391.begin());
   std::vector<float> v392(64);
@@ -1198,7 +1200,7 @@ std::vector<CiphertextT> mnist(CryptoContextT cc, std::vector<float> v0, std::ve
   }
   auto pt67 = cc->MakeCKKSPackedPlaintext(pt67_filled);
   const auto& ct146 = cc->EvalMult(ct6, pt67);
-  std::vector<float> v396(std::begin(v28) + 68 * 512, std::begin(v28) + 68 * 512 + 1024);
+  std::vector<float> v396(std::begin(v28) + 68 * 1024, std::begin(v28) + 68 * 1024 + 1024);
   std::vector<float> v397(960);
   std::copy(v396.begin() + 0, v396.begin() + 0 + 960, v397.begin());
   std::vector<float> v398(64);
@@ -1215,7 +1217,7 @@ std::vector<CiphertextT> mnist(CryptoContextT cc, std::vector<float> v0, std::ve
   }
   auto pt68 = cc->MakeCKKSPackedPlaintext(pt68_filled);
   const auto& ct147 = cc->EvalMult(ct8, pt68);
-  std::vector<float> v402(std::begin(v28) + 69 * 512, std::begin(v28) + 69 * 512 + 1024);
+  std::vector<float> v402(std::begin(v28) + 69 * 1024, std::begin(v28) + 69 * 1024 + 1024);
   std::vector<float> v403(960);
   std::copy(v402.begin() + 0, v402.begin() + 0 + 960, v403.begin());
   std::vector<float> v404(64);
@@ -1232,7 +1234,7 @@ std::vector<CiphertextT> mnist(CryptoContextT cc, std::vector<float> v0, std::ve
   }
   auto pt69 = cc->MakeCKKSPackedPlaintext(pt69_filled);
   const auto& ct148 = cc->EvalMult(ct10, pt69);
-  std::vector<float> v408(std::begin(v28) + 70 * 512, std::begin(v28) + 70 * 512 + 1024);
+  std::vector<float> v408(std::begin(v28) + 70 * 1024, std::begin(v28) + 70 * 1024 + 1024);
   std::vector<float> v409(960);
   std::copy(v408.begin() + 0, v408.begin() + 0 + 960, v409.begin());
   std::vector<float> v410(64);
@@ -1249,7 +1251,7 @@ std::vector<CiphertextT> mnist(CryptoContextT cc, std::vector<float> v0, std::ve
   }
   auto pt70 = cc->MakeCKKSPackedPlaintext(pt70_filled);
   const auto& ct149 = cc->EvalMult(ct12, pt70);
-  std::vector<float> v414(std::begin(v28) + 71 * 512, std::begin(v28) + 71 * 512 + 1024);
+  std::vector<float> v414(std::begin(v28) + 71 * 1024, std::begin(v28) + 71 * 1024 + 1024);
   std::vector<float> v415(960);
   std::copy(v414.begin() + 0, v414.begin() + 0 + 960, v415.begin());
   std::vector<float> v416(64);
@@ -1266,7 +1268,7 @@ std::vector<CiphertextT> mnist(CryptoContextT cc, std::vector<float> v0, std::ve
   }
   auto pt71 = cc->MakeCKKSPackedPlaintext(pt71_filled);
   const auto& ct150 = cc->EvalMult(ct14, pt71);
-  std::vector<float> v420(std::begin(v28) + 72 * 512, std::begin(v28) + 72 * 512 + 1024);
+  std::vector<float> v420(std::begin(v28) + 72 * 1024, std::begin(v28) + 72 * 1024 + 1024);
   std::vector<float> v421(960);
   std::copy(v420.begin() + 0, v420.begin() + 0 + 960, v421.begin());
   std::vector<float> v422(64);
@@ -1283,7 +1285,7 @@ std::vector<CiphertextT> mnist(CryptoContextT cc, std::vector<float> v0, std::ve
   }
   auto pt72 = cc->MakeCKKSPackedPlaintext(pt72_filled);
   const auto& ct151 = cc->EvalMult(ct16, pt72);
-  std::vector<float> v426(std::begin(v28) + 73 * 512, std::begin(v28) + 73 * 512 + 1024);
+  std::vector<float> v426(std::begin(v28) + 73 * 1024, std::begin(v28) + 73 * 1024 + 1024);
   std::vector<float> v427(960);
   std::copy(v426.begin() + 0, v426.begin() + 0 + 960, v427.begin());
   std::vector<float> v428(64);
@@ -1300,7 +1302,7 @@ std::vector<CiphertextT> mnist(CryptoContextT cc, std::vector<float> v0, std::ve
   }
   auto pt73 = cc->MakeCKKSPackedPlaintext(pt73_filled);
   const auto& ct152 = cc->EvalMult(ct18, pt73);
-  std::vector<float> v432(std::begin(v28) + 74 * 512, std::begin(v28) + 74 * 512 + 1024);
+  std::vector<float> v432(std::begin(v28) + 74 * 1024, std::begin(v28) + 74 * 1024 + 1024);
   std::vector<float> v433(960);
   std::copy(v432.begin() + 0, v432.begin() + 0 + 960, v433.begin());
   std::vector<float> v434(64);
@@ -1317,7 +1319,7 @@ std::vector<CiphertextT> mnist(CryptoContextT cc, std::vector<float> v0, std::ve
   }
   auto pt74 = cc->MakeCKKSPackedPlaintext(pt74_filled);
   const auto& ct153 = cc->EvalMult(ct20, pt74);
-  std::vector<float> v438(std::begin(v28) + 75 * 512, std::begin(v28) + 75 * 512 + 1024);
+  std::vector<float> v438(std::begin(v28) + 75 * 1024, std::begin(v28) + 75 * 1024 + 1024);
   std::vector<float> v439(960);
   std::copy(v438.begin() + 0, v438.begin() + 0 + 960, v439.begin());
   std::vector<float> v440(64);
@@ -1334,7 +1336,7 @@ std::vector<CiphertextT> mnist(CryptoContextT cc, std::vector<float> v0, std::ve
   }
   auto pt75 = cc->MakeCKKSPackedPlaintext(pt75_filled);
   const auto& ct154 = cc->EvalMult(ct22, pt75);
-  std::vector<float> v444(std::begin(v28) + 76 * 512, std::begin(v28) + 76 * 512 + 1024);
+  std::vector<float> v444(std::begin(v28) + 76 * 1024, std::begin(v28) + 76 * 1024 + 1024);
   std::vector<float> v445(960);
   std::copy(v444.begin() + 0, v444.begin() + 0 + 960, v445.begin());
   std::vector<float> v446(64);
@@ -1351,7 +1353,7 @@ std::vector<CiphertextT> mnist(CryptoContextT cc, std::vector<float> v0, std::ve
   }
   auto pt76 = cc->MakeCKKSPackedPlaintext(pt76_filled);
   const auto& ct155 = cc->EvalMult(ct24, pt76);
-  std::vector<float> v450(std::begin(v28) + 77 * 512, std::begin(v28) + 77 * 512 + 1024);
+  std::vector<float> v450(std::begin(v28) + 77 * 1024, std::begin(v28) + 77 * 1024 + 1024);
   std::vector<float> v451(960);
   std::copy(v450.begin() + 0, v450.begin() + 0 + 960, v451.begin());
   std::vector<float> v452(64);
@@ -1368,7 +1370,7 @@ std::vector<CiphertextT> mnist(CryptoContextT cc, std::vector<float> v0, std::ve
   }
   auto pt77 = cc->MakeCKKSPackedPlaintext(pt77_filled);
   const auto& ct156 = cc->EvalMult(ct26, pt77);
-  std::vector<float> v456(std::begin(v28) + 78 * 512, std::begin(v28) + 78 * 512 + 1024);
+  std::vector<float> v456(std::begin(v28) + 78 * 1024, std::begin(v28) + 78 * 1024 + 1024);
   std::vector<float> v457(960);
   std::copy(v456.begin() + 0, v456.begin() + 0 + 960, v457.begin());
   std::vector<float> v458(64);
@@ -1385,7 +1387,7 @@ std::vector<CiphertextT> mnist(CryptoContextT cc, std::vector<float> v0, std::ve
   }
   auto pt78 = cc->MakeCKKSPackedPlaintext(pt78_filled);
   const auto& ct157 = cc->EvalMult(ct28, pt78);
-  std::vector<float> v462(std::begin(v28) + 79 * 512, std::begin(v28) + 79 * 512 + 1024);
+  std::vector<float> v462(std::begin(v28) + 79 * 1024, std::begin(v28) + 79 * 1024 + 1024);
   std::vector<float> v463(960);
   std::copy(v462.begin() + 0, v462.begin() + 0 + 960, v463.begin());
   std::vector<float> v464(64);
@@ -1418,7 +1420,7 @@ std::vector<CiphertextT> mnist(CryptoContextT cc, std::vector<float> v0, std::ve
   const auto& ct172 = cc->EvalAdd(ct168, ct171);
   const auto& ct173 = cc->EvalAdd(ct165, ct172);
   const auto& ct174 = cc->EvalRotate(ct173, 64);
-  std::vector<float> v468(std::begin(v28) + 80 * 512, std::begin(v28) + 80 * 512 + 1024);
+  std::vector<float> v468(std::begin(v28) + 80 * 1024, std::begin(v28) + 80 * 1024 + 1024);
   std::vector<float> v469(944);
   std::copy(v468.begin() + 0, v468.begin() + 0 + 944, v469.begin());
   std::vector<float> v470(80);
@@ -1435,7 +1437,7 @@ std::vector<CiphertextT> mnist(CryptoContextT cc, std::vector<float> v0, std::ve
   }
   auto pt80 = cc->MakeCKKSPackedPlaintext(pt80_filled);
   const auto& ct175 = cc->EvalMult(ct, pt80);
-  std::vector<float> v474(std::begin(v28) + 81 * 512, std::begin(v28) + 81 * 512 + 1024);
+  std::vector<float> v474(std::begin(v28) + 81 * 1024, std::begin(v28) + 81 * 1024 + 1024);
   std::vector<float> v475(944);
   std::copy(v474.begin() + 0, v474.begin() + 0 + 944, v475.begin());
   std::vector<float> v476(80);
@@ -1452,7 +1454,7 @@ std::vector<CiphertextT> mnist(CryptoContextT cc, std::vector<float> v0, std::ve
   }
   auto pt81 = cc->MakeCKKSPackedPlaintext(pt81_filled);
   const auto& ct176 = cc->EvalMult(ct2, pt81);
-  std::vector<float> v480(std::begin(v28) + 82 * 512, std::begin(v28) + 82 * 512 + 1024);
+  std::vector<float> v480(std::begin(v28) + 82 * 1024, std::begin(v28) + 82 * 1024 + 1024);
   std::vector<float> v481(944);
   std::copy(v480.begin() + 0, v480.begin() + 0 + 944, v481.begin());
   std::vector<float> v482(80);
@@ -1469,7 +1471,7 @@ std::vector<CiphertextT> mnist(CryptoContextT cc, std::vector<float> v0, std::ve
   }
   auto pt82 = cc->MakeCKKSPackedPlaintext(pt82_filled);
   const auto& ct177 = cc->EvalMult(ct4, pt82);
-  std::vector<float> v486(std::begin(v28) + 83 * 512, std::begin(v28) + 83 * 512 + 1024);
+  std::vector<float> v486(std::begin(v28) + 83 * 1024, std::begin(v28) + 83 * 1024 + 1024);
   std::vector<float> v487(944);
   std::copy(v486.begin() + 0, v486.begin() + 0 + 944, v487.begin());
   std::vector<float> v488(80);
@@ -1486,7 +1488,7 @@ std::vector<CiphertextT> mnist(CryptoContextT cc, std::vector<float> v0, std::ve
   }
   auto pt83 = cc->MakeCKKSPackedPlaintext(pt83_filled);
   const auto& ct178 = cc->EvalMult(ct6, pt83);
-  std::vector<float> v492(std::begin(v28) + 84 * 512, std::begin(v28) + 84 * 512 + 1024);
+  std::vector<float> v492(std::begin(v28) + 84 * 1024, std::begin(v28) + 84 * 1024 + 1024);
   std::vector<float> v493(944);
   std::copy(v492.begin() + 0, v492.begin() + 0 + 944, v493.begin());
   std::vector<float> v494(80);
@@ -1503,7 +1505,7 @@ std::vector<CiphertextT> mnist(CryptoContextT cc, std::vector<float> v0, std::ve
   }
   auto pt84 = cc->MakeCKKSPackedPlaintext(pt84_filled);
   const auto& ct179 = cc->EvalMult(ct8, pt84);
-  std::vector<float> v498(std::begin(v28) + 85 * 512, std::begin(v28) + 85 * 512 + 1024);
+  std::vector<float> v498(std::begin(v28) + 85 * 1024, std::begin(v28) + 85 * 1024 + 1024);
   std::vector<float> v499(944);
   std::copy(v498.begin() + 0, v498.begin() + 0 + 944, v499.begin());
   std::vector<float> v500(80);
@@ -1520,7 +1522,7 @@ std::vector<CiphertextT> mnist(CryptoContextT cc, std::vector<float> v0, std::ve
   }
   auto pt85 = cc->MakeCKKSPackedPlaintext(pt85_filled);
   const auto& ct180 = cc->EvalMult(ct10, pt85);
-  std::vector<float> v504(std::begin(v28) + 86 * 512, std::begin(v28) + 86 * 512 + 1024);
+  std::vector<float> v504(std::begin(v28) + 86 * 1024, std::begin(v28) + 86 * 1024 + 1024);
   std::vector<float> v505(944);
   std::copy(v504.begin() + 0, v504.begin() + 0 + 944, v505.begin());
   std::vector<float> v506(80);
@@ -1537,7 +1539,7 @@ std::vector<CiphertextT> mnist(CryptoContextT cc, std::vector<float> v0, std::ve
   }
   auto pt86 = cc->MakeCKKSPackedPlaintext(pt86_filled);
   const auto& ct181 = cc->EvalMult(ct12, pt86);
-  std::vector<float> v510(std::begin(v28) + 87 * 512, std::begin(v28) + 87 * 512 + 1024);
+  std::vector<float> v510(std::begin(v28) + 87 * 1024, std::begin(v28) + 87 * 1024 + 1024);
   std::vector<float> v511(944);
   std::copy(v510.begin() + 0, v510.begin() + 0 + 944, v511.begin());
   std::vector<float> v512(80);
@@ -1554,7 +1556,7 @@ std::vector<CiphertextT> mnist(CryptoContextT cc, std::vector<float> v0, std::ve
   }
   auto pt87 = cc->MakeCKKSPackedPlaintext(pt87_filled);
   const auto& ct182 = cc->EvalMult(ct14, pt87);
-  std::vector<float> v516(std::begin(v28) + 88 * 512, std::begin(v28) + 88 * 512 + 1024);
+  std::vector<float> v516(std::begin(v28) + 88 * 1024, std::begin(v28) + 88 * 1024 + 1024);
   std::vector<float> v517(944);
   std::copy(v516.begin() + 0, v516.begin() + 0 + 944, v517.begin());
   std::vector<float> v518(80);
@@ -1571,7 +1573,7 @@ std::vector<CiphertextT> mnist(CryptoContextT cc, std::vector<float> v0, std::ve
   }
   auto pt88 = cc->MakeCKKSPackedPlaintext(pt88_filled);
   const auto& ct183 = cc->EvalMult(ct16, pt88);
-  std::vector<float> v522(std::begin(v28) + 89 * 512, std::begin(v28) + 89 * 512 + 1024);
+  std::vector<float> v522(std::begin(v28) + 89 * 1024, std::begin(v28) + 89 * 1024 + 1024);
   std::vector<float> v523(944);
   std::copy(v522.begin() + 0, v522.begin() + 0 + 944, v523.begin());
   std::vector<float> v524(80);
@@ -1588,7 +1590,7 @@ std::vector<CiphertextT> mnist(CryptoContextT cc, std::vector<float> v0, std::ve
   }
   auto pt89 = cc->MakeCKKSPackedPlaintext(pt89_filled);
   const auto& ct184 = cc->EvalMult(ct18, pt89);
-  std::vector<float> v528(std::begin(v28) + 90 * 512, std::begin(v28) + 90 * 512 + 1024);
+  std::vector<float> v528(std::begin(v28) + 90 * 1024, std::begin(v28) + 90 * 1024 + 1024);
   std::vector<float> v529(944);
   std::copy(v528.begin() + 0, v528.begin() + 0 + 944, v529.begin());
   std::vector<float> v530(80);
@@ -1605,7 +1607,7 @@ std::vector<CiphertextT> mnist(CryptoContextT cc, std::vector<float> v0, std::ve
   }
   auto pt90 = cc->MakeCKKSPackedPlaintext(pt90_filled);
   const auto& ct185 = cc->EvalMult(ct20, pt90);
-  std::vector<float> v534(std::begin(v28) + 91 * 512, std::begin(v28) + 91 * 512 + 1024);
+  std::vector<float> v534(std::begin(v28) + 91 * 1024, std::begin(v28) + 91 * 1024 + 1024);
   std::vector<float> v535(944);
   std::copy(v534.begin() + 0, v534.begin() + 0 + 944, v535.begin());
   std::vector<float> v536(80);
@@ -1622,7 +1624,7 @@ std::vector<CiphertextT> mnist(CryptoContextT cc, std::vector<float> v0, std::ve
   }
   auto pt91 = cc->MakeCKKSPackedPlaintext(pt91_filled);
   const auto& ct186 = cc->EvalMult(ct22, pt91);
-  std::vector<float> v540(std::begin(v28) + 92 * 512, std::begin(v28) + 92 * 512 + 1024);
+  std::vector<float> v540(std::begin(v28) + 92 * 1024, std::begin(v28) + 92 * 1024 + 1024);
   std::vector<float> v541(944);
   std::copy(v540.begin() + 0, v540.begin() + 0 + 944, v541.begin());
   std::vector<float> v542(80);
@@ -1639,7 +1641,7 @@ std::vector<CiphertextT> mnist(CryptoContextT cc, std::vector<float> v0, std::ve
   }
   auto pt92 = cc->MakeCKKSPackedPlaintext(pt92_filled);
   const auto& ct187 = cc->EvalMult(ct24, pt92);
-  std::vector<float> v546(std::begin(v28) + 93 * 512, std::begin(v28) + 93 * 512 + 1024);
+  std::vector<float> v546(std::begin(v28) + 93 * 1024, std::begin(v28) + 93 * 1024 + 1024);
   std::vector<float> v547(944);
   std::copy(v546.begin() + 0, v546.begin() + 0 + 944, v547.begin());
   std::vector<float> v548(80);
@@ -1656,7 +1658,7 @@ std::vector<CiphertextT> mnist(CryptoContextT cc, std::vector<float> v0, std::ve
   }
   auto pt93 = cc->MakeCKKSPackedPlaintext(pt93_filled);
   const auto& ct188 = cc->EvalMult(ct26, pt93);
-  std::vector<float> v552(std::begin(v28) + 94 * 512, std::begin(v28) + 94 * 512 + 1024);
+  std::vector<float> v552(std::begin(v28) + 94 * 1024, std::begin(v28) + 94 * 1024 + 1024);
   std::vector<float> v553(944);
   std::copy(v552.begin() + 0, v552.begin() + 0 + 944, v553.begin());
   std::vector<float> v554(80);
@@ -1673,7 +1675,7 @@ std::vector<CiphertextT> mnist(CryptoContextT cc, std::vector<float> v0, std::ve
   }
   auto pt94 = cc->MakeCKKSPackedPlaintext(pt94_filled);
   const auto& ct189 = cc->EvalMult(ct28, pt94);
-  std::vector<float> v558(std::begin(v28) + 95 * 512, std::begin(v28) + 95 * 512 + 1024);
+  std::vector<float> v558(std::begin(v28) + 95 * 1024, std::begin(v28) + 95 * 1024 + 1024);
   std::vector<float> v559(944);
   std::copy(v558.begin() + 0, v558.begin() + 0 + 944, v559.begin());
   std::vector<float> v560(80);
@@ -1706,7 +1708,7 @@ std::vector<CiphertextT> mnist(CryptoContextT cc, std::vector<float> v0, std::ve
   const auto& ct204 = cc->EvalAdd(ct200, ct203);
   const auto& ct205 = cc->EvalAdd(ct197, ct204);
   const auto& ct206 = cc->EvalRotate(ct205, 80);
-  std::vector<float> v564(std::begin(v28) + 96 * 512, std::begin(v28) + 96 * 512 + 1024);
+  std::vector<float> v564(std::begin(v28) + 96 * 1024, std::begin(v28) + 96 * 1024 + 1024);
   std::vector<float> v565(928);
   std::copy(v564.begin() + 0, v564.begin() + 0 + 928, v565.begin());
   std::vector<float> v566(96);
@@ -1723,7 +1725,7 @@ std::vector<CiphertextT> mnist(CryptoContextT cc, std::vector<float> v0, std::ve
   }
   auto pt96 = cc->MakeCKKSPackedPlaintext(pt96_filled);
   const auto& ct207 = cc->EvalMult(ct, pt96);
-  std::vector<float> v570(std::begin(v28) + 97 * 512, std::begin(v28) + 97 * 512 + 1024);
+  std::vector<float> v570(std::begin(v28) + 97 * 1024, std::begin(v28) + 97 * 1024 + 1024);
   std::vector<float> v571(928);
   std::copy(v570.begin() + 0, v570.begin() + 0 + 928, v571.begin());
   std::vector<float> v572(96);
@@ -1740,7 +1742,7 @@ std::vector<CiphertextT> mnist(CryptoContextT cc, std::vector<float> v0, std::ve
   }
   auto pt97 = cc->MakeCKKSPackedPlaintext(pt97_filled);
   const auto& ct208 = cc->EvalMult(ct2, pt97);
-  std::vector<float> v576(std::begin(v28) + 98 * 512, std::begin(v28) + 98 * 512 + 1024);
+  std::vector<float> v576(std::begin(v28) + 98 * 1024, std::begin(v28) + 98 * 1024 + 1024);
   std::vector<float> v577(928);
   std::copy(v576.begin() + 0, v576.begin() + 0 + 928, v577.begin());
   std::vector<float> v578(96);
@@ -1757,7 +1759,7 @@ std::vector<CiphertextT> mnist(CryptoContextT cc, std::vector<float> v0, std::ve
   }
   auto pt98 = cc->MakeCKKSPackedPlaintext(pt98_filled);
   const auto& ct209 = cc->EvalMult(ct4, pt98);
-  std::vector<float> v582(std::begin(v28) + 99 * 512, std::begin(v28) + 99 * 512 + 1024);
+  std::vector<float> v582(std::begin(v28) + 99 * 1024, std::begin(v28) + 99 * 1024 + 1024);
   std::vector<float> v583(928);
   std::copy(v582.begin() + 0, v582.begin() + 0 + 928, v583.begin());
   std::vector<float> v584(96);
@@ -1774,7 +1776,7 @@ std::vector<CiphertextT> mnist(CryptoContextT cc, std::vector<float> v0, std::ve
   }
   auto pt99 = cc->MakeCKKSPackedPlaintext(pt99_filled);
   const auto& ct210 = cc->EvalMult(ct6, pt99);
-  std::vector<float> v588(std::begin(v28) + 100 * 512, std::begin(v28) + 100 * 512 + 1024);
+  std::vector<float> v588(std::begin(v28) + 100 * 1024, std::begin(v28) + 100 * 1024 + 1024);
   std::vector<float> v589(928);
   std::copy(v588.begin() + 0, v588.begin() + 0 + 928, v589.begin());
   std::vector<float> v590(96);
@@ -1791,7 +1793,7 @@ std::vector<CiphertextT> mnist(CryptoContextT cc, std::vector<float> v0, std::ve
   }
   auto pt100 = cc->MakeCKKSPackedPlaintext(pt100_filled);
   const auto& ct211 = cc->EvalMult(ct8, pt100);
-  std::vector<float> v594(std::begin(v28) + 101 * 512, std::begin(v28) + 101 * 512 + 1024);
+  std::vector<float> v594(std::begin(v28) + 101 * 1024, std::begin(v28) + 101 * 1024 + 1024);
   std::vector<float> v595(928);
   std::copy(v594.begin() + 0, v594.begin() + 0 + 928, v595.begin());
   std::vector<float> v596(96);
@@ -1808,7 +1810,7 @@ std::vector<CiphertextT> mnist(CryptoContextT cc, std::vector<float> v0, std::ve
   }
   auto pt101 = cc->MakeCKKSPackedPlaintext(pt101_filled);
   const auto& ct212 = cc->EvalMult(ct10, pt101);
-  std::vector<float> v600(std::begin(v28) + 102 * 512, std::begin(v28) + 102 * 512 + 1024);
+  std::vector<float> v600(std::begin(v28) + 102 * 1024, std::begin(v28) + 102 * 1024 + 1024);
   std::vector<float> v601(928);
   std::copy(v600.begin() + 0, v600.begin() + 0 + 928, v601.begin());
   std::vector<float> v602(96);
@@ -1825,7 +1827,7 @@ std::vector<CiphertextT> mnist(CryptoContextT cc, std::vector<float> v0, std::ve
   }
   auto pt102 = cc->MakeCKKSPackedPlaintext(pt102_filled);
   const auto& ct213 = cc->EvalMult(ct12, pt102);
-  std::vector<float> v606(std::begin(v28) + 103 * 512, std::begin(v28) + 103 * 512 + 1024);
+  std::vector<float> v606(std::begin(v28) + 103 * 1024, std::begin(v28) + 103 * 1024 + 1024);
   std::vector<float> v607(928);
   std::copy(v606.begin() + 0, v606.begin() + 0 + 928, v607.begin());
   std::vector<float> v608(96);
@@ -1842,7 +1844,7 @@ std::vector<CiphertextT> mnist(CryptoContextT cc, std::vector<float> v0, std::ve
   }
   auto pt103 = cc->MakeCKKSPackedPlaintext(pt103_filled);
   const auto& ct214 = cc->EvalMult(ct14, pt103);
-  std::vector<float> v612(std::begin(v28) + 104 * 512, std::begin(v28) + 104 * 512 + 1024);
+  std::vector<float> v612(std::begin(v28) + 104 * 1024, std::begin(v28) + 104 * 1024 + 1024);
   std::vector<float> v613(928);
   std::copy(v612.begin() + 0, v612.begin() + 0 + 928, v613.begin());
   std::vector<float> v614(96);
@@ -1859,7 +1861,7 @@ std::vector<CiphertextT> mnist(CryptoContextT cc, std::vector<float> v0, std::ve
   }
   auto pt104 = cc->MakeCKKSPackedPlaintext(pt104_filled);
   const auto& ct215 = cc->EvalMult(ct16, pt104);
-  std::vector<float> v618(std::begin(v28) + 105 * 512, std::begin(v28) + 105 * 512 + 1024);
+  std::vector<float> v618(std::begin(v28) + 105 * 1024, std::begin(v28) + 105 * 1024 + 1024);
   std::vector<float> v619(928);
   std::copy(v618.begin() + 0, v618.begin() + 0 + 928, v619.begin());
   std::vector<float> v620(96);
@@ -1876,7 +1878,7 @@ std::vector<CiphertextT> mnist(CryptoContextT cc, std::vector<float> v0, std::ve
   }
   auto pt105 = cc->MakeCKKSPackedPlaintext(pt105_filled);
   const auto& ct216 = cc->EvalMult(ct18, pt105);
-  std::vector<float> v624(std::begin(v28) + 106 * 512, std::begin(v28) + 106 * 512 + 1024);
+  std::vector<float> v624(std::begin(v28) + 106 * 1024, std::begin(v28) + 106 * 1024 + 1024);
   std::vector<float> v625(928);
   std::copy(v624.begin() + 0, v624.begin() + 0 + 928, v625.begin());
   std::vector<float> v626(96);
@@ -1893,7 +1895,7 @@ std::vector<CiphertextT> mnist(CryptoContextT cc, std::vector<float> v0, std::ve
   }
   auto pt106 = cc->MakeCKKSPackedPlaintext(pt106_filled);
   const auto& ct217 = cc->EvalMult(ct20, pt106);
-  std::vector<float> v630(std::begin(v28) + 107 * 512, std::begin(v28) + 107 * 512 + 1024);
+  std::vector<float> v630(std::begin(v28) + 107 * 1024, std::begin(v28) + 107 * 1024 + 1024);
   std::vector<float> v631(928);
   std::copy(v630.begin() + 0, v630.begin() + 0 + 928, v631.begin());
   std::vector<float> v632(96);
@@ -1910,7 +1912,7 @@ std::vector<CiphertextT> mnist(CryptoContextT cc, std::vector<float> v0, std::ve
   }
   auto pt107 = cc->MakeCKKSPackedPlaintext(pt107_filled);
   const auto& ct218 = cc->EvalMult(ct22, pt107);
-  std::vector<float> v636(std::begin(v28) + 108 * 512, std::begin(v28) + 108 * 512 + 1024);
+  std::vector<float> v636(std::begin(v28) + 108 * 1024, std::begin(v28) + 108 * 1024 + 1024);
   std::vector<float> v637(928);
   std::copy(v636.begin() + 0, v636.begin() + 0 + 928, v637.begin());
   std::vector<float> v638(96);
@@ -1927,7 +1929,7 @@ std::vector<CiphertextT> mnist(CryptoContextT cc, std::vector<float> v0, std::ve
   }
   auto pt108 = cc->MakeCKKSPackedPlaintext(pt108_filled);
   const auto& ct219 = cc->EvalMult(ct24, pt108);
-  std::vector<float> v642(std::begin(v28) + 109 * 512, std::begin(v28) + 109 * 512 + 1024);
+  std::vector<float> v642(std::begin(v28) + 109 * 1024, std::begin(v28) + 109 * 1024 + 1024);
   std::vector<float> v643(928);
   std::copy(v642.begin() + 0, v642.begin() + 0 + 928, v643.begin());
   std::vector<float> v644(96);
@@ -1944,7 +1946,7 @@ std::vector<CiphertextT> mnist(CryptoContextT cc, std::vector<float> v0, std::ve
   }
   auto pt109 = cc->MakeCKKSPackedPlaintext(pt109_filled);
   const auto& ct220 = cc->EvalMult(ct26, pt109);
-  std::vector<float> v648(std::begin(v28) + 110 * 512, std::begin(v28) + 110 * 512 + 1024);
+  std::vector<float> v648(std::begin(v28) + 110 * 1024, std::begin(v28) + 110 * 1024 + 1024);
   std::vector<float> v649(928);
   std::copy(v648.begin() + 0, v648.begin() + 0 + 928, v649.begin());
   std::vector<float> v650(96);
@@ -1961,7 +1963,7 @@ std::vector<CiphertextT> mnist(CryptoContextT cc, std::vector<float> v0, std::ve
   }
   auto pt110 = cc->MakeCKKSPackedPlaintext(pt110_filled);
   const auto& ct221 = cc->EvalMult(ct28, pt110);
-  std::vector<float> v654(std::begin(v28) + 111 * 512, std::begin(v28) + 111 * 512 + 1024);
+  std::vector<float> v654(std::begin(v28) + 111 * 1024, std::begin(v28) + 111 * 1024 + 1024);
   std::vector<float> v655(928);
   std::copy(v654.begin() + 0, v654.begin() + 0 + 928, v655.begin());
   std::vector<float> v656(96);
@@ -1994,7 +1996,7 @@ std::vector<CiphertextT> mnist(CryptoContextT cc, std::vector<float> v0, std::ve
   const auto& ct236 = cc->EvalAdd(ct232, ct235);
   const auto& ct237 = cc->EvalAdd(ct229, ct236);
   const auto& ct238 = cc->EvalRotate(ct237, 96);
-  std::vector<float> v660(std::begin(v28) + 112 * 512, std::begin(v28) + 112 * 512 + 1024);
+  std::vector<float> v660(std::begin(v28) + 112 * 1024, std::begin(v28) + 112 * 1024 + 1024);
   std::vector<float> v661(912);
   std::copy(v660.begin() + 0, v660.begin() + 0 + 912, v661.begin());
   std::vector<float> v662(112);
@@ -2011,7 +2013,7 @@ std::vector<CiphertextT> mnist(CryptoContextT cc, std::vector<float> v0, std::ve
   }
   auto pt112 = cc->MakeCKKSPackedPlaintext(pt112_filled);
   const auto& ct239 = cc->EvalMult(ct, pt112);
-  std::vector<float> v666(std::begin(v28) + 113 * 512, std::begin(v28) + 113 * 512 + 1024);
+  std::vector<float> v666(std::begin(v28) + 113 * 1024, std::begin(v28) + 113 * 1024 + 1024);
   std::vector<float> v667(912);
   std::copy(v666.begin() + 0, v666.begin() + 0 + 912, v667.begin());
   std::vector<float> v668(112);
@@ -2028,7 +2030,7 @@ std::vector<CiphertextT> mnist(CryptoContextT cc, std::vector<float> v0, std::ve
   }
   auto pt113 = cc->MakeCKKSPackedPlaintext(pt113_filled);
   const auto& ct240 = cc->EvalMult(ct2, pt113);
-  std::vector<float> v672(std::begin(v28) + 114 * 512, std::begin(v28) + 114 * 512 + 1024);
+  std::vector<float> v672(std::begin(v28) + 114 * 1024, std::begin(v28) + 114 * 1024 + 1024);
   std::vector<float> v673(912);
   std::copy(v672.begin() + 0, v672.begin() + 0 + 912, v673.begin());
   std::vector<float> v674(112);
@@ -2045,7 +2047,7 @@ std::vector<CiphertextT> mnist(CryptoContextT cc, std::vector<float> v0, std::ve
   }
   auto pt114 = cc->MakeCKKSPackedPlaintext(pt114_filled);
   const auto& ct241 = cc->EvalMult(ct4, pt114);
-  std::vector<float> v678(std::begin(v28) + 115 * 512, std::begin(v28) + 115 * 512 + 1024);
+  std::vector<float> v678(std::begin(v28) + 115 * 1024, std::begin(v28) + 115 * 1024 + 1024);
   std::vector<float> v679(912);
   std::copy(v678.begin() + 0, v678.begin() + 0 + 912, v679.begin());
   std::vector<float> v680(112);
@@ -2062,7 +2064,7 @@ std::vector<CiphertextT> mnist(CryptoContextT cc, std::vector<float> v0, std::ve
   }
   auto pt115 = cc->MakeCKKSPackedPlaintext(pt115_filled);
   const auto& ct242 = cc->EvalMult(ct6, pt115);
-  std::vector<float> v684(std::begin(v28) + 116 * 512, std::begin(v28) + 116 * 512 + 1024);
+  std::vector<float> v684(std::begin(v28) + 116 * 1024, std::begin(v28) + 116 * 1024 + 1024);
   std::vector<float> v685(912);
   std::copy(v684.begin() + 0, v684.begin() + 0 + 912, v685.begin());
   std::vector<float> v686(112);
@@ -2079,7 +2081,7 @@ std::vector<CiphertextT> mnist(CryptoContextT cc, std::vector<float> v0, std::ve
   }
   auto pt116 = cc->MakeCKKSPackedPlaintext(pt116_filled);
   const auto& ct243 = cc->EvalMult(ct8, pt116);
-  std::vector<float> v690(std::begin(v28) + 117 * 512, std::begin(v28) + 117 * 512 + 1024);
+  std::vector<float> v690(std::begin(v28) + 117 * 1024, std::begin(v28) + 117 * 1024 + 1024);
   std::vector<float> v691(912);
   std::copy(v690.begin() + 0, v690.begin() + 0 + 912, v691.begin());
   std::vector<float> v692(112);
@@ -2096,7 +2098,7 @@ std::vector<CiphertextT> mnist(CryptoContextT cc, std::vector<float> v0, std::ve
   }
   auto pt117 = cc->MakeCKKSPackedPlaintext(pt117_filled);
   const auto& ct244 = cc->EvalMult(ct10, pt117);
-  std::vector<float> v696(std::begin(v28) + 118 * 512, std::begin(v28) + 118 * 512 + 1024);
+  std::vector<float> v696(std::begin(v28) + 118 * 1024, std::begin(v28) + 118 * 1024 + 1024);
   std::vector<float> v697(912);
   std::copy(v696.begin() + 0, v696.begin() + 0 + 912, v697.begin());
   std::vector<float> v698(112);
@@ -2113,7 +2115,7 @@ std::vector<CiphertextT> mnist(CryptoContextT cc, std::vector<float> v0, std::ve
   }
   auto pt118 = cc->MakeCKKSPackedPlaintext(pt118_filled);
   const auto& ct245 = cc->EvalMult(ct12, pt118);
-  std::vector<float> v702(std::begin(v28) + 119 * 512, std::begin(v28) + 119 * 512 + 1024);
+  std::vector<float> v702(std::begin(v28) + 119 * 1024, std::begin(v28) + 119 * 1024 + 1024);
   std::vector<float> v703(912);
   std::copy(v702.begin() + 0, v702.begin() + 0 + 912, v703.begin());
   std::vector<float> v704(112);
@@ -2130,7 +2132,7 @@ std::vector<CiphertextT> mnist(CryptoContextT cc, std::vector<float> v0, std::ve
   }
   auto pt119 = cc->MakeCKKSPackedPlaintext(pt119_filled);
   const auto& ct246 = cc->EvalMult(ct14, pt119);
-  std::vector<float> v708(std::begin(v28) + 120 * 512, std::begin(v28) + 120 * 512 + 1024);
+  std::vector<float> v708(std::begin(v28) + 120 * 1024, std::begin(v28) + 120 * 1024 + 1024);
   std::vector<float> v709(912);
   std::copy(v708.begin() + 0, v708.begin() + 0 + 912, v709.begin());
   std::vector<float> v710(112);
@@ -2147,7 +2149,7 @@ std::vector<CiphertextT> mnist(CryptoContextT cc, std::vector<float> v0, std::ve
   }
   auto pt120 = cc->MakeCKKSPackedPlaintext(pt120_filled);
   const auto& ct247 = cc->EvalMult(ct16, pt120);
-  std::vector<float> v714(std::begin(v28) + 121 * 512, std::begin(v28) + 121 * 512 + 1024);
+  std::vector<float> v714(std::begin(v28) + 121 * 1024, std::begin(v28) + 121 * 1024 + 1024);
   std::vector<float> v715(912);
   std::copy(v714.begin() + 0, v714.begin() + 0 + 912, v715.begin());
   std::vector<float> v716(112);
@@ -2164,7 +2166,7 @@ std::vector<CiphertextT> mnist(CryptoContextT cc, std::vector<float> v0, std::ve
   }
   auto pt121 = cc->MakeCKKSPackedPlaintext(pt121_filled);
   const auto& ct248 = cc->EvalMult(ct18, pt121);
-  std::vector<float> v720(std::begin(v28) + 122 * 512, std::begin(v28) + 122 * 512 + 1024);
+  std::vector<float> v720(std::begin(v28) + 122 * 1024, std::begin(v28) + 122 * 1024 + 1024);
   std::vector<float> v721(912);
   std::copy(v720.begin() + 0, v720.begin() + 0 + 912, v721.begin());
   std::vector<float> v722(112);
@@ -2181,7 +2183,7 @@ std::vector<CiphertextT> mnist(CryptoContextT cc, std::vector<float> v0, std::ve
   }
   auto pt122 = cc->MakeCKKSPackedPlaintext(pt122_filled);
   const auto& ct249 = cc->EvalMult(ct20, pt122);
-  std::vector<float> v726(std::begin(v28) + 123 * 512, std::begin(v28) + 123 * 512 + 1024);
+  std::vector<float> v726(std::begin(v28) + 123 * 1024, std::begin(v28) + 123 * 1024 + 1024);
   std::vector<float> v727(912);
   std::copy(v726.begin() + 0, v726.begin() + 0 + 912, v727.begin());
   std::vector<float> v728(112);
@@ -2198,7 +2200,7 @@ std::vector<CiphertextT> mnist(CryptoContextT cc, std::vector<float> v0, std::ve
   }
   auto pt123 = cc->MakeCKKSPackedPlaintext(pt123_filled);
   const auto& ct250 = cc->EvalMult(ct22, pt123);
-  std::vector<float> v732(std::begin(v28) + 124 * 512, std::begin(v28) + 124 * 512 + 1024);
+  std::vector<float> v732(std::begin(v28) + 124 * 1024, std::begin(v28) + 124 * 1024 + 1024);
   std::vector<float> v733(912);
   std::copy(v732.begin() + 0, v732.begin() + 0 + 912, v733.begin());
   std::vector<float> v734(112);
@@ -2215,7 +2217,7 @@ std::vector<CiphertextT> mnist(CryptoContextT cc, std::vector<float> v0, std::ve
   }
   auto pt124 = cc->MakeCKKSPackedPlaintext(pt124_filled);
   const auto& ct251 = cc->EvalMult(ct24, pt124);
-  std::vector<float> v738(std::begin(v28) + 125 * 512, std::begin(v28) + 125 * 512 + 1024);
+  std::vector<float> v738(std::begin(v28) + 125 * 1024, std::begin(v28) + 125 * 1024 + 1024);
   std::vector<float> v739(912);
   std::copy(v738.begin() + 0, v738.begin() + 0 + 912, v739.begin());
   std::vector<float> v740(112);
@@ -2232,7 +2234,7 @@ std::vector<CiphertextT> mnist(CryptoContextT cc, std::vector<float> v0, std::ve
   }
   auto pt125 = cc->MakeCKKSPackedPlaintext(pt125_filled);
   const auto& ct252 = cc->EvalMult(ct26, pt125);
-  std::vector<float> v744(std::begin(v28) + 126 * 512, std::begin(v28) + 126 * 512 + 1024);
+  std::vector<float> v744(std::begin(v28) + 126 * 1024, std::begin(v28) + 126 * 1024 + 1024);
   std::vector<float> v745(912);
   std::copy(v744.begin() + 0, v744.begin() + 0 + 912, v745.begin());
   std::vector<float> v746(112);
@@ -2249,7 +2251,7 @@ std::vector<CiphertextT> mnist(CryptoContextT cc, std::vector<float> v0, std::ve
   }
   auto pt126 = cc->MakeCKKSPackedPlaintext(pt126_filled);
   const auto& ct253 = cc->EvalMult(ct28, pt126);
-  std::vector<float> v750(std::begin(v28) + 127 * 512, std::begin(v28) + 127 * 512 + 1024);
+  std::vector<float> v750(std::begin(v28) + 127 * 1024, std::begin(v28) + 127 * 1024 + 1024);
   std::vector<float> v751(912);
   std::copy(v750.begin() + 0, v750.begin() + 0 + 912, v751.begin());
   std::vector<float> v752(112);
@@ -2282,7 +2284,7 @@ std::vector<CiphertextT> mnist(CryptoContextT cc, std::vector<float> v0, std::ve
   const auto& ct268 = cc->EvalAdd(ct264, ct267);
   const auto& ct269 = cc->EvalAdd(ct261, ct268);
   const auto& ct270 = cc->EvalRotate(ct269, 112);
-  std::vector<float> v756(std::begin(v28) + 128 * 512, std::begin(v28) + 128 * 512 + 1024);
+  std::vector<float> v756(std::begin(v28) + 128 * 1024, std::begin(v28) + 128 * 1024 + 1024);
   std::vector<float> v757(896);
   std::copy(v756.begin() + 0, v756.begin() + 0 + 896, v757.begin());
   std::vector<float> v758(128);
@@ -2299,7 +2301,7 @@ std::vector<CiphertextT> mnist(CryptoContextT cc, std::vector<float> v0, std::ve
   }
   auto pt128 = cc->MakeCKKSPackedPlaintext(pt128_filled);
   const auto& ct271 = cc->EvalMult(ct, pt128);
-  std::vector<float> v762(std::begin(v28) + 129 * 512, std::begin(v28) + 129 * 512 + 1024);
+  std::vector<float> v762(std::begin(v28) + 129 * 1024, std::begin(v28) + 129 * 1024 + 1024);
   std::vector<float> v763(896);
   std::copy(v762.begin() + 0, v762.begin() + 0 + 896, v763.begin());
   std::vector<float> v764(128);
@@ -2316,7 +2318,7 @@ std::vector<CiphertextT> mnist(CryptoContextT cc, std::vector<float> v0, std::ve
   }
   auto pt129 = cc->MakeCKKSPackedPlaintext(pt129_filled);
   const auto& ct272 = cc->EvalMult(ct2, pt129);
-  std::vector<float> v768(std::begin(v28) + 130 * 512, std::begin(v28) + 130 * 512 + 1024);
+  std::vector<float> v768(std::begin(v28) + 130 * 1024, std::begin(v28) + 130 * 1024 + 1024);
   std::vector<float> v769(896);
   std::copy(v768.begin() + 0, v768.begin() + 0 + 896, v769.begin());
   std::vector<float> v770(128);
@@ -2333,7 +2335,7 @@ std::vector<CiphertextT> mnist(CryptoContextT cc, std::vector<float> v0, std::ve
   }
   auto pt130 = cc->MakeCKKSPackedPlaintext(pt130_filled);
   const auto& ct273 = cc->EvalMult(ct4, pt130);
-  std::vector<float> v774(std::begin(v28) + 131 * 512, std::begin(v28) + 131 * 512 + 1024);
+  std::vector<float> v774(std::begin(v28) + 131 * 1024, std::begin(v28) + 131 * 1024 + 1024);
   std::vector<float> v775(896);
   std::copy(v774.begin() + 0, v774.begin() + 0 + 896, v775.begin());
   std::vector<float> v776(128);
@@ -2350,7 +2352,7 @@ std::vector<CiphertextT> mnist(CryptoContextT cc, std::vector<float> v0, std::ve
   }
   auto pt131 = cc->MakeCKKSPackedPlaintext(pt131_filled);
   const auto& ct274 = cc->EvalMult(ct6, pt131);
-  std::vector<float> v780(std::begin(v28) + 132 * 512, std::begin(v28) + 132 * 512 + 1024);
+  std::vector<float> v780(std::begin(v28) + 132 * 1024, std::begin(v28) + 132 * 1024 + 1024);
   std::vector<float> v781(896);
   std::copy(v780.begin() + 0, v780.begin() + 0 + 896, v781.begin());
   std::vector<float> v782(128);
@@ -2367,7 +2369,7 @@ std::vector<CiphertextT> mnist(CryptoContextT cc, std::vector<float> v0, std::ve
   }
   auto pt132 = cc->MakeCKKSPackedPlaintext(pt132_filled);
   const auto& ct275 = cc->EvalMult(ct8, pt132);
-  std::vector<float> v786(std::begin(v28) + 133 * 512, std::begin(v28) + 133 * 512 + 1024);
+  std::vector<float> v786(std::begin(v28) + 133 * 1024, std::begin(v28) + 133 * 1024 + 1024);
   std::vector<float> v787(896);
   std::copy(v786.begin() + 0, v786.begin() + 0 + 896, v787.begin());
   std::vector<float> v788(128);
@@ -2384,7 +2386,7 @@ std::vector<CiphertextT> mnist(CryptoContextT cc, std::vector<float> v0, std::ve
   }
   auto pt133 = cc->MakeCKKSPackedPlaintext(pt133_filled);
   const auto& ct276 = cc->EvalMult(ct10, pt133);
-  std::vector<float> v792(std::begin(v28) + 134 * 512, std::begin(v28) + 134 * 512 + 1024);
+  std::vector<float> v792(std::begin(v28) + 134 * 1024, std::begin(v28) + 134 * 1024 + 1024);
   std::vector<float> v793(896);
   std::copy(v792.begin() + 0, v792.begin() + 0 + 896, v793.begin());
   std::vector<float> v794(128);
@@ -2401,7 +2403,7 @@ std::vector<CiphertextT> mnist(CryptoContextT cc, std::vector<float> v0, std::ve
   }
   auto pt134 = cc->MakeCKKSPackedPlaintext(pt134_filled);
   const auto& ct277 = cc->EvalMult(ct12, pt134);
-  std::vector<float> v798(std::begin(v28) + 135 * 512, std::begin(v28) + 135 * 512 + 1024);
+  std::vector<float> v798(std::begin(v28) + 135 * 1024, std::begin(v28) + 135 * 1024 + 1024);
   std::vector<float> v799(896);
   std::copy(v798.begin() + 0, v798.begin() + 0 + 896, v799.begin());
   std::vector<float> v800(128);
@@ -2418,7 +2420,7 @@ std::vector<CiphertextT> mnist(CryptoContextT cc, std::vector<float> v0, std::ve
   }
   auto pt135 = cc->MakeCKKSPackedPlaintext(pt135_filled);
   const auto& ct278 = cc->EvalMult(ct14, pt135);
-  std::vector<float> v804(std::begin(v28) + 136 * 512, std::begin(v28) + 136 * 512 + 1024);
+  std::vector<float> v804(std::begin(v28) + 136 * 1024, std::begin(v28) + 136 * 1024 + 1024);
   std::vector<float> v805(896);
   std::copy(v804.begin() + 0, v804.begin() + 0 + 896, v805.begin());
   std::vector<float> v806(128);
@@ -2435,7 +2437,7 @@ std::vector<CiphertextT> mnist(CryptoContextT cc, std::vector<float> v0, std::ve
   }
   auto pt136 = cc->MakeCKKSPackedPlaintext(pt136_filled);
   const auto& ct279 = cc->EvalMult(ct16, pt136);
-  std::vector<float> v810(std::begin(v28) + 137 * 512, std::begin(v28) + 137 * 512 + 1024);
+  std::vector<float> v810(std::begin(v28) + 137 * 1024, std::begin(v28) + 137 * 1024 + 1024);
   std::vector<float> v811(896);
   std::copy(v810.begin() + 0, v810.begin() + 0 + 896, v811.begin());
   std::vector<float> v812(128);
@@ -2452,7 +2454,7 @@ std::vector<CiphertextT> mnist(CryptoContextT cc, std::vector<float> v0, std::ve
   }
   auto pt137 = cc->MakeCKKSPackedPlaintext(pt137_filled);
   const auto& ct280 = cc->EvalMult(ct18, pt137);
-  std::vector<float> v816(std::begin(v28) + 138 * 512, std::begin(v28) + 138 * 512 + 1024);
+  std::vector<float> v816(std::begin(v28) + 138 * 1024, std::begin(v28) + 138 * 1024 + 1024);
   std::vector<float> v817(896);
   std::copy(v816.begin() + 0, v816.begin() + 0 + 896, v817.begin());
   std::vector<float> v818(128);
@@ -2469,7 +2471,7 @@ std::vector<CiphertextT> mnist(CryptoContextT cc, std::vector<float> v0, std::ve
   }
   auto pt138 = cc->MakeCKKSPackedPlaintext(pt138_filled);
   const auto& ct281 = cc->EvalMult(ct20, pt138);
-  std::vector<float> v822(std::begin(v28) + 139 * 512, std::begin(v28) + 139 * 512 + 1024);
+  std::vector<float> v822(std::begin(v28) + 139 * 1024, std::begin(v28) + 139 * 1024 + 1024);
   std::vector<float> v823(896);
   std::copy(v822.begin() + 0, v822.begin() + 0 + 896, v823.begin());
   std::vector<float> v824(128);
@@ -2486,7 +2488,7 @@ std::vector<CiphertextT> mnist(CryptoContextT cc, std::vector<float> v0, std::ve
   }
   auto pt139 = cc->MakeCKKSPackedPlaintext(pt139_filled);
   const auto& ct282 = cc->EvalMult(ct22, pt139);
-  std::vector<float> v828(std::begin(v28) + 140 * 512, std::begin(v28) + 140 * 512 + 1024);
+  std::vector<float> v828(std::begin(v28) + 140 * 1024, std::begin(v28) + 140 * 1024 + 1024);
   std::vector<float> v829(896);
   std::copy(v828.begin() + 0, v828.begin() + 0 + 896, v829.begin());
   std::vector<float> v830(128);
@@ -2503,7 +2505,7 @@ std::vector<CiphertextT> mnist(CryptoContextT cc, std::vector<float> v0, std::ve
   }
   auto pt140 = cc->MakeCKKSPackedPlaintext(pt140_filled);
   const auto& ct283 = cc->EvalMult(ct24, pt140);
-  std::vector<float> v834(std::begin(v28) + 141 * 512, std::begin(v28) + 141 * 512 + 1024);
+  std::vector<float> v834(std::begin(v28) + 141 * 1024, std::begin(v28) + 141 * 1024 + 1024);
   std::vector<float> v835(896);
   std::copy(v834.begin() + 0, v834.begin() + 0 + 896, v835.begin());
   std::vector<float> v836(128);
@@ -2520,7 +2522,7 @@ std::vector<CiphertextT> mnist(CryptoContextT cc, std::vector<float> v0, std::ve
   }
   auto pt141 = cc->MakeCKKSPackedPlaintext(pt141_filled);
   const auto& ct284 = cc->EvalMult(ct26, pt141);
-  std::vector<float> v840(std::begin(v28) + 142 * 512, std::begin(v28) + 142 * 512 + 1024);
+  std::vector<float> v840(std::begin(v28) + 142 * 1024, std::begin(v28) + 142 * 1024 + 1024);
   std::vector<float> v841(896);
   std::copy(v840.begin() + 0, v840.begin() + 0 + 896, v841.begin());
   std::vector<float> v842(128);
@@ -2537,7 +2539,7 @@ std::vector<CiphertextT> mnist(CryptoContextT cc, std::vector<float> v0, std::ve
   }
   auto pt142 = cc->MakeCKKSPackedPlaintext(pt142_filled);
   const auto& ct285 = cc->EvalMult(ct28, pt142);
-  std::vector<float> v846(std::begin(v28) + 143 * 512, std::begin(v28) + 143 * 512 + 1024);
+  std::vector<float> v846(std::begin(v28) + 143 * 1024, std::begin(v28) + 143 * 1024 + 1024);
   std::vector<float> v847(896);
   std::copy(v846.begin() + 0, v846.begin() + 0 + 896, v847.begin());
   std::vector<float> v848(128);
@@ -2570,7 +2572,7 @@ std::vector<CiphertextT> mnist(CryptoContextT cc, std::vector<float> v0, std::ve
   const auto& ct300 = cc->EvalAdd(ct296, ct299);
   const auto& ct301 = cc->EvalAdd(ct293, ct300);
   const auto& ct302 = cc->EvalRotate(ct301, 128);
-  std::vector<float> v852(std::begin(v28) + 144 * 512, std::begin(v28) + 144 * 512 + 1024);
+  std::vector<float> v852(std::begin(v28) + 144 * 1024, std::begin(v28) + 144 * 1024 + 1024);
   std::vector<float> v853(880);
   std::copy(v852.begin() + 0, v852.begin() + 0 + 880, v853.begin());
   std::vector<float> v854(144);
@@ -2587,7 +2589,7 @@ std::vector<CiphertextT> mnist(CryptoContextT cc, std::vector<float> v0, std::ve
   }
   auto pt144 = cc->MakeCKKSPackedPlaintext(pt144_filled);
   const auto& ct303 = cc->EvalMult(ct, pt144);
-  std::vector<float> v858(std::begin(v28) + 145 * 512, std::begin(v28) + 145 * 512 + 1024);
+  std::vector<float> v858(std::begin(v28) + 145 * 1024, std::begin(v28) + 145 * 1024 + 1024);
   std::vector<float> v859(880);
   std::copy(v858.begin() + 0, v858.begin() + 0 + 880, v859.begin());
   std::vector<float> v860(144);
@@ -2604,7 +2606,7 @@ std::vector<CiphertextT> mnist(CryptoContextT cc, std::vector<float> v0, std::ve
   }
   auto pt145 = cc->MakeCKKSPackedPlaintext(pt145_filled);
   const auto& ct304 = cc->EvalMult(ct2, pt145);
-  std::vector<float> v864(std::begin(v28) + 146 * 512, std::begin(v28) + 146 * 512 + 1024);
+  std::vector<float> v864(std::begin(v28) + 146 * 1024, std::begin(v28) + 146 * 1024 + 1024);
   std::vector<float> v865(880);
   std::copy(v864.begin() + 0, v864.begin() + 0 + 880, v865.begin());
   std::vector<float> v866(144);
@@ -2621,7 +2623,7 @@ std::vector<CiphertextT> mnist(CryptoContextT cc, std::vector<float> v0, std::ve
   }
   auto pt146 = cc->MakeCKKSPackedPlaintext(pt146_filled);
   const auto& ct305 = cc->EvalMult(ct4, pt146);
-  std::vector<float> v870(std::begin(v28) + 147 * 512, std::begin(v28) + 147 * 512 + 1024);
+  std::vector<float> v870(std::begin(v28) + 147 * 1024, std::begin(v28) + 147 * 1024 + 1024);
   std::vector<float> v871(880);
   std::copy(v870.begin() + 0, v870.begin() + 0 + 880, v871.begin());
   std::vector<float> v872(144);
@@ -2638,7 +2640,7 @@ std::vector<CiphertextT> mnist(CryptoContextT cc, std::vector<float> v0, std::ve
   }
   auto pt147 = cc->MakeCKKSPackedPlaintext(pt147_filled);
   const auto& ct306 = cc->EvalMult(ct6, pt147);
-  std::vector<float> v876(std::begin(v28) + 148 * 512, std::begin(v28) + 148 * 512 + 1024);
+  std::vector<float> v876(std::begin(v28) + 148 * 1024, std::begin(v28) + 148 * 1024 + 1024);
   std::vector<float> v877(880);
   std::copy(v876.begin() + 0, v876.begin() + 0 + 880, v877.begin());
   std::vector<float> v878(144);
@@ -2655,7 +2657,7 @@ std::vector<CiphertextT> mnist(CryptoContextT cc, std::vector<float> v0, std::ve
   }
   auto pt148 = cc->MakeCKKSPackedPlaintext(pt148_filled);
   const auto& ct307 = cc->EvalMult(ct8, pt148);
-  std::vector<float> v882(std::begin(v28) + 149 * 512, std::begin(v28) + 149 * 512 + 1024);
+  std::vector<float> v882(std::begin(v28) + 149 * 1024, std::begin(v28) + 149 * 1024 + 1024);
   std::vector<float> v883(880);
   std::copy(v882.begin() + 0, v882.begin() + 0 + 880, v883.begin());
   std::vector<float> v884(144);
@@ -2672,7 +2674,7 @@ std::vector<CiphertextT> mnist(CryptoContextT cc, std::vector<float> v0, std::ve
   }
   auto pt149 = cc->MakeCKKSPackedPlaintext(pt149_filled);
   const auto& ct308 = cc->EvalMult(ct10, pt149);
-  std::vector<float> v888(std::begin(v28) + 150 * 512, std::begin(v28) + 150 * 512 + 1024);
+  std::vector<float> v888(std::begin(v28) + 150 * 1024, std::begin(v28) + 150 * 1024 + 1024);
   std::vector<float> v889(880);
   std::copy(v888.begin() + 0, v888.begin() + 0 + 880, v889.begin());
   std::vector<float> v890(144);
@@ -2689,7 +2691,7 @@ std::vector<CiphertextT> mnist(CryptoContextT cc, std::vector<float> v0, std::ve
   }
   auto pt150 = cc->MakeCKKSPackedPlaintext(pt150_filled);
   const auto& ct309 = cc->EvalMult(ct12, pt150);
-  std::vector<float> v894(std::begin(v28) + 151 * 512, std::begin(v28) + 151 * 512 + 1024);
+  std::vector<float> v894(std::begin(v28) + 151 * 1024, std::begin(v28) + 151 * 1024 + 1024);
   std::vector<float> v895(880);
   std::copy(v894.begin() + 0, v894.begin() + 0 + 880, v895.begin());
   std::vector<float> v896(144);
@@ -2706,7 +2708,7 @@ std::vector<CiphertextT> mnist(CryptoContextT cc, std::vector<float> v0, std::ve
   }
   auto pt151 = cc->MakeCKKSPackedPlaintext(pt151_filled);
   const auto& ct310 = cc->EvalMult(ct14, pt151);
-  std::vector<float> v900(std::begin(v28) + 152 * 512, std::begin(v28) + 152 * 512 + 1024);
+  std::vector<float> v900(std::begin(v28) + 152 * 1024, std::begin(v28) + 152 * 1024 + 1024);
   std::vector<float> v901(880);
   std::copy(v900.begin() + 0, v900.begin() + 0 + 880, v901.begin());
   std::vector<float> v902(144);
@@ -2723,7 +2725,7 @@ std::vector<CiphertextT> mnist(CryptoContextT cc, std::vector<float> v0, std::ve
   }
   auto pt152 = cc->MakeCKKSPackedPlaintext(pt152_filled);
   const auto& ct311 = cc->EvalMult(ct16, pt152);
-  std::vector<float> v906(std::begin(v28) + 153 * 512, std::begin(v28) + 153 * 512 + 1024);
+  std::vector<float> v906(std::begin(v28) + 153 * 1024, std::begin(v28) + 153 * 1024 + 1024);
   std::vector<float> v907(880);
   std::copy(v906.begin() + 0, v906.begin() + 0 + 880, v907.begin());
   std::vector<float> v908(144);
@@ -2740,7 +2742,7 @@ std::vector<CiphertextT> mnist(CryptoContextT cc, std::vector<float> v0, std::ve
   }
   auto pt153 = cc->MakeCKKSPackedPlaintext(pt153_filled);
   const auto& ct312 = cc->EvalMult(ct18, pt153);
-  std::vector<float> v912(std::begin(v28) + 154 * 512, std::begin(v28) + 154 * 512 + 1024);
+  std::vector<float> v912(std::begin(v28) + 154 * 1024, std::begin(v28) + 154 * 1024 + 1024);
   std::vector<float> v913(880);
   std::copy(v912.begin() + 0, v912.begin() + 0 + 880, v913.begin());
   std::vector<float> v914(144);
@@ -2757,7 +2759,7 @@ std::vector<CiphertextT> mnist(CryptoContextT cc, std::vector<float> v0, std::ve
   }
   auto pt154 = cc->MakeCKKSPackedPlaintext(pt154_filled);
   const auto& ct313 = cc->EvalMult(ct20, pt154);
-  std::vector<float> v918(std::begin(v28) + 155 * 512, std::begin(v28) + 155 * 512 + 1024);
+  std::vector<float> v918(std::begin(v28) + 155 * 1024, std::begin(v28) + 155 * 1024 + 1024);
   std::vector<float> v919(880);
   std::copy(v918.begin() + 0, v918.begin() + 0 + 880, v919.begin());
   std::vector<float> v920(144);
@@ -2774,7 +2776,7 @@ std::vector<CiphertextT> mnist(CryptoContextT cc, std::vector<float> v0, std::ve
   }
   auto pt155 = cc->MakeCKKSPackedPlaintext(pt155_filled);
   const auto& ct314 = cc->EvalMult(ct22, pt155);
-  std::vector<float> v924(std::begin(v28) + 156 * 512, std::begin(v28) + 156 * 512 + 1024);
+  std::vector<float> v924(std::begin(v28) + 156 * 1024, std::begin(v28) + 156 * 1024 + 1024);
   std::vector<float> v925(880);
   std::copy(v924.begin() + 0, v924.begin() + 0 + 880, v925.begin());
   std::vector<float> v926(144);
@@ -2791,7 +2793,7 @@ std::vector<CiphertextT> mnist(CryptoContextT cc, std::vector<float> v0, std::ve
   }
   auto pt156 = cc->MakeCKKSPackedPlaintext(pt156_filled);
   const auto& ct315 = cc->EvalMult(ct24, pt156);
-  std::vector<float> v930(std::begin(v28) + 157 * 512, std::begin(v28) + 157 * 512 + 1024);
+  std::vector<float> v930(std::begin(v28) + 157 * 1024, std::begin(v28) + 157 * 1024 + 1024);
   std::vector<float> v931(880);
   std::copy(v930.begin() + 0, v930.begin() + 0 + 880, v931.begin());
   std::vector<float> v932(144);
@@ -2808,7 +2810,7 @@ std::vector<CiphertextT> mnist(CryptoContextT cc, std::vector<float> v0, std::ve
   }
   auto pt157 = cc->MakeCKKSPackedPlaintext(pt157_filled);
   const auto& ct316 = cc->EvalMult(ct26, pt157);
-  std::vector<float> v936(std::begin(v28) + 158 * 512, std::begin(v28) + 158 * 512 + 1024);
+  std::vector<float> v936(std::begin(v28) + 158 * 1024, std::begin(v28) + 158 * 1024 + 1024);
   std::vector<float> v937(880);
   std::copy(v936.begin() + 0, v936.begin() + 0 + 880, v937.begin());
   std::vector<float> v938(144);
@@ -2825,7 +2827,7 @@ std::vector<CiphertextT> mnist(CryptoContextT cc, std::vector<float> v0, std::ve
   }
   auto pt158 = cc->MakeCKKSPackedPlaintext(pt158_filled);
   const auto& ct317 = cc->EvalMult(ct28, pt158);
-  std::vector<float> v942(std::begin(v28) + 159 * 512, std::begin(v28) + 159 * 512 + 1024);
+  std::vector<float> v942(std::begin(v28) + 159 * 1024, std::begin(v28) + 159 * 1024 + 1024);
   std::vector<float> v943(880);
   std::copy(v942.begin() + 0, v942.begin() + 0 + 880, v943.begin());
   std::vector<float> v944(144);
@@ -2858,7 +2860,7 @@ std::vector<CiphertextT> mnist(CryptoContextT cc, std::vector<float> v0, std::ve
   const auto& ct332 = cc->EvalAdd(ct328, ct331);
   const auto& ct333 = cc->EvalAdd(ct325, ct332);
   const auto& ct334 = cc->EvalRotate(ct333, 144);
-  std::vector<float> v948(std::begin(v28) + 160 * 512, std::begin(v28) + 160 * 512 + 1024);
+  std::vector<float> v948(std::begin(v28) + 160 * 1024, std::begin(v28) + 160 * 1024 + 1024);
   std::vector<float> v949(864);
   std::copy(v948.begin() + 0, v948.begin() + 0 + 864, v949.begin());
   std::vector<float> v950(160);
@@ -2875,7 +2877,7 @@ std::vector<CiphertextT> mnist(CryptoContextT cc, std::vector<float> v0, std::ve
   }
   auto pt160 = cc->MakeCKKSPackedPlaintext(pt160_filled);
   const auto& ct335 = cc->EvalMult(ct, pt160);
-  std::vector<float> v954(std::begin(v28) + 161 * 512, std::begin(v28) + 161 * 512 + 1024);
+  std::vector<float> v954(std::begin(v28) + 161 * 1024, std::begin(v28) + 161 * 1024 + 1024);
   std::vector<float> v955(864);
   std::copy(v954.begin() + 0, v954.begin() + 0 + 864, v955.begin());
   std::vector<float> v956(160);
@@ -2892,7 +2894,7 @@ std::vector<CiphertextT> mnist(CryptoContextT cc, std::vector<float> v0, std::ve
   }
   auto pt161 = cc->MakeCKKSPackedPlaintext(pt161_filled);
   const auto& ct336 = cc->EvalMult(ct2, pt161);
-  std::vector<float> v960(std::begin(v28) + 162 * 512, std::begin(v28) + 162 * 512 + 1024);
+  std::vector<float> v960(std::begin(v28) + 162 * 1024, std::begin(v28) + 162 * 1024 + 1024);
   std::vector<float> v961(864);
   std::copy(v960.begin() + 0, v960.begin() + 0 + 864, v961.begin());
   std::vector<float> v962(160);
@@ -2909,7 +2911,7 @@ std::vector<CiphertextT> mnist(CryptoContextT cc, std::vector<float> v0, std::ve
   }
   auto pt162 = cc->MakeCKKSPackedPlaintext(pt162_filled);
   const auto& ct337 = cc->EvalMult(ct4, pt162);
-  std::vector<float> v966(std::begin(v28) + 163 * 512, std::begin(v28) + 163 * 512 + 1024);
+  std::vector<float> v966(std::begin(v28) + 163 * 1024, std::begin(v28) + 163 * 1024 + 1024);
   std::vector<float> v967(864);
   std::copy(v966.begin() + 0, v966.begin() + 0 + 864, v967.begin());
   std::vector<float> v968(160);
@@ -2926,7 +2928,7 @@ std::vector<CiphertextT> mnist(CryptoContextT cc, std::vector<float> v0, std::ve
   }
   auto pt163 = cc->MakeCKKSPackedPlaintext(pt163_filled);
   const auto& ct338 = cc->EvalMult(ct6, pt163);
-  std::vector<float> v972(std::begin(v28) + 164 * 512, std::begin(v28) + 164 * 512 + 1024);
+  std::vector<float> v972(std::begin(v28) + 164 * 1024, std::begin(v28) + 164 * 1024 + 1024);
   std::vector<float> v973(864);
   std::copy(v972.begin() + 0, v972.begin() + 0 + 864, v973.begin());
   std::vector<float> v974(160);
@@ -2943,7 +2945,7 @@ std::vector<CiphertextT> mnist(CryptoContextT cc, std::vector<float> v0, std::ve
   }
   auto pt164 = cc->MakeCKKSPackedPlaintext(pt164_filled);
   const auto& ct339 = cc->EvalMult(ct8, pt164);
-  std::vector<float> v978(std::begin(v28) + 165 * 512, std::begin(v28) + 165 * 512 + 1024);
+  std::vector<float> v978(std::begin(v28) + 165 * 1024, std::begin(v28) + 165 * 1024 + 1024);
   std::vector<float> v979(864);
   std::copy(v978.begin() + 0, v978.begin() + 0 + 864, v979.begin());
   std::vector<float> v980(160);
@@ -2960,7 +2962,7 @@ std::vector<CiphertextT> mnist(CryptoContextT cc, std::vector<float> v0, std::ve
   }
   auto pt165 = cc->MakeCKKSPackedPlaintext(pt165_filled);
   const auto& ct340 = cc->EvalMult(ct10, pt165);
-  std::vector<float> v984(std::begin(v28) + 166 * 512, std::begin(v28) + 166 * 512 + 1024);
+  std::vector<float> v984(std::begin(v28) + 166 * 1024, std::begin(v28) + 166 * 1024 + 1024);
   std::vector<float> v985(864);
   std::copy(v984.begin() + 0, v984.begin() + 0 + 864, v985.begin());
   std::vector<float> v986(160);
@@ -2977,7 +2979,7 @@ std::vector<CiphertextT> mnist(CryptoContextT cc, std::vector<float> v0, std::ve
   }
   auto pt166 = cc->MakeCKKSPackedPlaintext(pt166_filled);
   const auto& ct341 = cc->EvalMult(ct12, pt166);
-  std::vector<float> v990(std::begin(v28) + 167 * 512, std::begin(v28) + 167 * 512 + 1024);
+  std::vector<float> v990(std::begin(v28) + 167 * 1024, std::begin(v28) + 167 * 1024 + 1024);
   std::vector<float> v991(864);
   std::copy(v990.begin() + 0, v990.begin() + 0 + 864, v991.begin());
   std::vector<float> v992(160);
@@ -2994,7 +2996,7 @@ std::vector<CiphertextT> mnist(CryptoContextT cc, std::vector<float> v0, std::ve
   }
   auto pt167 = cc->MakeCKKSPackedPlaintext(pt167_filled);
   const auto& ct342 = cc->EvalMult(ct14, pt167);
-  std::vector<float> v996(std::begin(v28) + 168 * 512, std::begin(v28) + 168 * 512 + 1024);
+  std::vector<float> v996(std::begin(v28) + 168 * 1024, std::begin(v28) + 168 * 1024 + 1024);
   std::vector<float> v997(864);
   std::copy(v996.begin() + 0, v996.begin() + 0 + 864, v997.begin());
   std::vector<float> v998(160);
@@ -3011,7 +3013,7 @@ std::vector<CiphertextT> mnist(CryptoContextT cc, std::vector<float> v0, std::ve
   }
   auto pt168 = cc->MakeCKKSPackedPlaintext(pt168_filled);
   const auto& ct343 = cc->EvalMult(ct16, pt168);
-  std::vector<float> v1002(std::begin(v28) + 169 * 512, std::begin(v28) + 169 * 512 + 1024);
+  std::vector<float> v1002(std::begin(v28) + 169 * 1024, std::begin(v28) + 169 * 1024 + 1024);
   std::vector<float> v1003(864);
   std::copy(v1002.begin() + 0, v1002.begin() + 0 + 864, v1003.begin());
   std::vector<float> v1004(160);
@@ -3028,7 +3030,7 @@ std::vector<CiphertextT> mnist(CryptoContextT cc, std::vector<float> v0, std::ve
   }
   auto pt169 = cc->MakeCKKSPackedPlaintext(pt169_filled);
   const auto& ct344 = cc->EvalMult(ct18, pt169);
-  std::vector<float> v1008(std::begin(v28) + 170 * 512, std::begin(v28) + 170 * 512 + 1024);
+  std::vector<float> v1008(std::begin(v28) + 170 * 1024, std::begin(v28) + 170 * 1024 + 1024);
   std::vector<float> v1009(864);
   std::copy(v1008.begin() + 0, v1008.begin() + 0 + 864, v1009.begin());
   std::vector<float> v1010(160);
@@ -3045,7 +3047,7 @@ std::vector<CiphertextT> mnist(CryptoContextT cc, std::vector<float> v0, std::ve
   }
   auto pt170 = cc->MakeCKKSPackedPlaintext(pt170_filled);
   const auto& ct345 = cc->EvalMult(ct20, pt170);
-  std::vector<float> v1014(std::begin(v28) + 171 * 512, std::begin(v28) + 171 * 512 + 1024);
+  std::vector<float> v1014(std::begin(v28) + 171 * 1024, std::begin(v28) + 171 * 1024 + 1024);
   std::vector<float> v1015(864);
   std::copy(v1014.begin() + 0, v1014.begin() + 0 + 864, v1015.begin());
   std::vector<float> v1016(160);
@@ -3062,7 +3064,7 @@ std::vector<CiphertextT> mnist(CryptoContextT cc, std::vector<float> v0, std::ve
   }
   auto pt171 = cc->MakeCKKSPackedPlaintext(pt171_filled);
   const auto& ct346 = cc->EvalMult(ct22, pt171);
-  std::vector<float> v1020(std::begin(v28) + 172 * 512, std::begin(v28) + 172 * 512 + 1024);
+  std::vector<float> v1020(std::begin(v28) + 172 * 1024, std::begin(v28) + 172 * 1024 + 1024);
   std::vector<float> v1021(864);
   std::copy(v1020.begin() + 0, v1020.begin() + 0 + 864, v1021.begin());
   std::vector<float> v1022(160);
@@ -3079,7 +3081,7 @@ std::vector<CiphertextT> mnist(CryptoContextT cc, std::vector<float> v0, std::ve
   }
   auto pt172 = cc->MakeCKKSPackedPlaintext(pt172_filled);
   const auto& ct347 = cc->EvalMult(ct24, pt172);
-  std::vector<float> v1026(std::begin(v28) + 173 * 512, std::begin(v28) + 173 * 512 + 1024);
+  std::vector<float> v1026(std::begin(v28) + 173 * 1024, std::begin(v28) + 173 * 1024 + 1024);
   std::vector<float> v1027(864);
   std::copy(v1026.begin() + 0, v1026.begin() + 0 + 864, v1027.begin());
   std::vector<float> v1028(160);
@@ -3096,7 +3098,7 @@ std::vector<CiphertextT> mnist(CryptoContextT cc, std::vector<float> v0, std::ve
   }
   auto pt173 = cc->MakeCKKSPackedPlaintext(pt173_filled);
   const auto& ct348 = cc->EvalMult(ct26, pt173);
-  std::vector<float> v1032(std::begin(v28) + 174 * 512, std::begin(v28) + 174 * 512 + 1024);
+  std::vector<float> v1032(std::begin(v28) + 174 * 1024, std::begin(v28) + 174 * 1024 + 1024);
   std::vector<float> v1033(864);
   std::copy(v1032.begin() + 0, v1032.begin() + 0 + 864, v1033.begin());
   std::vector<float> v1034(160);
@@ -3113,7 +3115,7 @@ std::vector<CiphertextT> mnist(CryptoContextT cc, std::vector<float> v0, std::ve
   }
   auto pt174 = cc->MakeCKKSPackedPlaintext(pt174_filled);
   const auto& ct349 = cc->EvalMult(ct28, pt174);
-  std::vector<float> v1038(std::begin(v28) + 175 * 512, std::begin(v28) + 175 * 512 + 1024);
+  std::vector<float> v1038(std::begin(v28) + 175 * 1024, std::begin(v28) + 175 * 1024 + 1024);
   std::vector<float> v1039(864);
   std::copy(v1038.begin() + 0, v1038.begin() + 0 + 864, v1039.begin());
   std::vector<float> v1040(160);
@@ -3146,7 +3148,7 @@ std::vector<CiphertextT> mnist(CryptoContextT cc, std::vector<float> v0, std::ve
   const auto& ct364 = cc->EvalAdd(ct360, ct363);
   const auto& ct365 = cc->EvalAdd(ct357, ct364);
   const auto& ct366 = cc->EvalRotate(ct365, 160);
-  std::vector<float> v1044(std::begin(v28) + 176 * 512, std::begin(v28) + 176 * 512 + 1024);
+  std::vector<float> v1044(std::begin(v28) + 176 * 1024, std::begin(v28) + 176 * 1024 + 1024);
   std::vector<float> v1045(848);
   std::copy(v1044.begin() + 0, v1044.begin() + 0 + 848, v1045.begin());
   std::vector<float> v1046(176);
@@ -3163,7 +3165,7 @@ std::vector<CiphertextT> mnist(CryptoContextT cc, std::vector<float> v0, std::ve
   }
   auto pt176 = cc->MakeCKKSPackedPlaintext(pt176_filled);
   const auto& ct367 = cc->EvalMult(ct, pt176);
-  std::vector<float> v1050(std::begin(v28) + 177 * 512, std::begin(v28) + 177 * 512 + 1024);
+  std::vector<float> v1050(std::begin(v28) + 177 * 1024, std::begin(v28) + 177 * 1024 + 1024);
   std::vector<float> v1051(848);
   std::copy(v1050.begin() + 0, v1050.begin() + 0 + 848, v1051.begin());
   std::vector<float> v1052(176);
@@ -3180,7 +3182,7 @@ std::vector<CiphertextT> mnist(CryptoContextT cc, std::vector<float> v0, std::ve
   }
   auto pt177 = cc->MakeCKKSPackedPlaintext(pt177_filled);
   const auto& ct368 = cc->EvalMult(ct2, pt177);
-  std::vector<float> v1056(std::begin(v28) + 178 * 512, std::begin(v28) + 178 * 512 + 1024);
+  std::vector<float> v1056(std::begin(v28) + 178 * 1024, std::begin(v28) + 178 * 1024 + 1024);
   std::vector<float> v1057(848);
   std::copy(v1056.begin() + 0, v1056.begin() + 0 + 848, v1057.begin());
   std::vector<float> v1058(176);
@@ -3197,7 +3199,7 @@ std::vector<CiphertextT> mnist(CryptoContextT cc, std::vector<float> v0, std::ve
   }
   auto pt178 = cc->MakeCKKSPackedPlaintext(pt178_filled);
   const auto& ct369 = cc->EvalMult(ct4, pt178);
-  std::vector<float> v1062(std::begin(v28) + 179 * 512, std::begin(v28) + 179 * 512 + 1024);
+  std::vector<float> v1062(std::begin(v28) + 179 * 1024, std::begin(v28) + 179 * 1024 + 1024);
   std::vector<float> v1063(848);
   std::copy(v1062.begin() + 0, v1062.begin() + 0 + 848, v1063.begin());
   std::vector<float> v1064(176);
@@ -3214,7 +3216,7 @@ std::vector<CiphertextT> mnist(CryptoContextT cc, std::vector<float> v0, std::ve
   }
   auto pt179 = cc->MakeCKKSPackedPlaintext(pt179_filled);
   const auto& ct370 = cc->EvalMult(ct6, pt179);
-  std::vector<float> v1068(std::begin(v28) + 180 * 512, std::begin(v28) + 180 * 512 + 1024);
+  std::vector<float> v1068(std::begin(v28) + 180 * 1024, std::begin(v28) + 180 * 1024 + 1024);
   std::vector<float> v1069(848);
   std::copy(v1068.begin() + 0, v1068.begin() + 0 + 848, v1069.begin());
   std::vector<float> v1070(176);
@@ -3231,7 +3233,7 @@ std::vector<CiphertextT> mnist(CryptoContextT cc, std::vector<float> v0, std::ve
   }
   auto pt180 = cc->MakeCKKSPackedPlaintext(pt180_filled);
   const auto& ct371 = cc->EvalMult(ct8, pt180);
-  std::vector<float> v1074(std::begin(v28) + 181 * 512, std::begin(v28) + 181 * 512 + 1024);
+  std::vector<float> v1074(std::begin(v28) + 181 * 1024, std::begin(v28) + 181 * 1024 + 1024);
   std::vector<float> v1075(848);
   std::copy(v1074.begin() + 0, v1074.begin() + 0 + 848, v1075.begin());
   std::vector<float> v1076(176);
@@ -3248,7 +3250,7 @@ std::vector<CiphertextT> mnist(CryptoContextT cc, std::vector<float> v0, std::ve
   }
   auto pt181 = cc->MakeCKKSPackedPlaintext(pt181_filled);
   const auto& ct372 = cc->EvalMult(ct10, pt181);
-  std::vector<float> v1080(std::begin(v28) + 182 * 512, std::begin(v28) + 182 * 512 + 1024);
+  std::vector<float> v1080(std::begin(v28) + 182 * 1024, std::begin(v28) + 182 * 1024 + 1024);
   std::vector<float> v1081(848);
   std::copy(v1080.begin() + 0, v1080.begin() + 0 + 848, v1081.begin());
   std::vector<float> v1082(176);
@@ -3265,7 +3267,7 @@ std::vector<CiphertextT> mnist(CryptoContextT cc, std::vector<float> v0, std::ve
   }
   auto pt182 = cc->MakeCKKSPackedPlaintext(pt182_filled);
   const auto& ct373 = cc->EvalMult(ct12, pt182);
-  std::vector<float> v1086(std::begin(v28) + 183 * 512, std::begin(v28) + 183 * 512 + 1024);
+  std::vector<float> v1086(std::begin(v28) + 183 * 1024, std::begin(v28) + 183 * 1024 + 1024);
   std::vector<float> v1087(848);
   std::copy(v1086.begin() + 0, v1086.begin() + 0 + 848, v1087.begin());
   std::vector<float> v1088(176);
@@ -3282,7 +3284,7 @@ std::vector<CiphertextT> mnist(CryptoContextT cc, std::vector<float> v0, std::ve
   }
   auto pt183 = cc->MakeCKKSPackedPlaintext(pt183_filled);
   const auto& ct374 = cc->EvalMult(ct14, pt183);
-  std::vector<float> v1092(std::begin(v28) + 184 * 512, std::begin(v28) + 184 * 512 + 1024);
+  std::vector<float> v1092(std::begin(v28) + 184 * 1024, std::begin(v28) + 184 * 1024 + 1024);
   std::vector<float> v1093(848);
   std::copy(v1092.begin() + 0, v1092.begin() + 0 + 848, v1093.begin());
   std::vector<float> v1094(176);
@@ -3299,7 +3301,7 @@ std::vector<CiphertextT> mnist(CryptoContextT cc, std::vector<float> v0, std::ve
   }
   auto pt184 = cc->MakeCKKSPackedPlaintext(pt184_filled);
   const auto& ct375 = cc->EvalMult(ct16, pt184);
-  std::vector<float> v1098(std::begin(v28) + 185 * 512, std::begin(v28) + 185 * 512 + 1024);
+  std::vector<float> v1098(std::begin(v28) + 185 * 1024, std::begin(v28) + 185 * 1024 + 1024);
   std::vector<float> v1099(848);
   std::copy(v1098.begin() + 0, v1098.begin() + 0 + 848, v1099.begin());
   std::vector<float> v1100(176);
@@ -3316,7 +3318,7 @@ std::vector<CiphertextT> mnist(CryptoContextT cc, std::vector<float> v0, std::ve
   }
   auto pt185 = cc->MakeCKKSPackedPlaintext(pt185_filled);
   const auto& ct376 = cc->EvalMult(ct18, pt185);
-  std::vector<float> v1104(std::begin(v28) + 186 * 512, std::begin(v28) + 186 * 512 + 1024);
+  std::vector<float> v1104(std::begin(v28) + 186 * 1024, std::begin(v28) + 186 * 1024 + 1024);
   std::vector<float> v1105(848);
   std::copy(v1104.begin() + 0, v1104.begin() + 0 + 848, v1105.begin());
   std::vector<float> v1106(176);
@@ -3333,7 +3335,7 @@ std::vector<CiphertextT> mnist(CryptoContextT cc, std::vector<float> v0, std::ve
   }
   auto pt186 = cc->MakeCKKSPackedPlaintext(pt186_filled);
   const auto& ct377 = cc->EvalMult(ct20, pt186);
-  std::vector<float> v1110(std::begin(v28) + 187 * 512, std::begin(v28) + 187 * 512 + 1024);
+  std::vector<float> v1110(std::begin(v28) + 187 * 1024, std::begin(v28) + 187 * 1024 + 1024);
   std::vector<float> v1111(848);
   std::copy(v1110.begin() + 0, v1110.begin() + 0 + 848, v1111.begin());
   std::vector<float> v1112(176);
@@ -3350,7 +3352,7 @@ std::vector<CiphertextT> mnist(CryptoContextT cc, std::vector<float> v0, std::ve
   }
   auto pt187 = cc->MakeCKKSPackedPlaintext(pt187_filled);
   const auto& ct378 = cc->EvalMult(ct22, pt187);
-  std::vector<float> v1116(std::begin(v28) + 188 * 512, std::begin(v28) + 188 * 512 + 1024);
+  std::vector<float> v1116(std::begin(v28) + 188 * 1024, std::begin(v28) + 188 * 1024 + 1024);
   std::vector<float> v1117(848);
   std::copy(v1116.begin() + 0, v1116.begin() + 0 + 848, v1117.begin());
   std::vector<float> v1118(176);
@@ -3367,7 +3369,7 @@ std::vector<CiphertextT> mnist(CryptoContextT cc, std::vector<float> v0, std::ve
   }
   auto pt188 = cc->MakeCKKSPackedPlaintext(pt188_filled);
   const auto& ct379 = cc->EvalMult(ct24, pt188);
-  std::vector<float> v1122(std::begin(v28) + 189 * 512, std::begin(v28) + 189 * 512 + 1024);
+  std::vector<float> v1122(std::begin(v28) + 189 * 1024, std::begin(v28) + 189 * 1024 + 1024);
   std::vector<float> v1123(848);
   std::copy(v1122.begin() + 0, v1122.begin() + 0 + 848, v1123.begin());
   std::vector<float> v1124(176);
@@ -3384,7 +3386,7 @@ std::vector<CiphertextT> mnist(CryptoContextT cc, std::vector<float> v0, std::ve
   }
   auto pt189 = cc->MakeCKKSPackedPlaintext(pt189_filled);
   const auto& ct380 = cc->EvalMult(ct26, pt189);
-  std::vector<float> v1128(std::begin(v28) + 190 * 512, std::begin(v28) + 190 * 512 + 1024);
+  std::vector<float> v1128(std::begin(v28) + 190 * 1024, std::begin(v28) + 190 * 1024 + 1024);
   std::vector<float> v1129(848);
   std::copy(v1128.begin() + 0, v1128.begin() + 0 + 848, v1129.begin());
   std::vector<float> v1130(176);
@@ -3401,7 +3403,7 @@ std::vector<CiphertextT> mnist(CryptoContextT cc, std::vector<float> v0, std::ve
   }
   auto pt190 = cc->MakeCKKSPackedPlaintext(pt190_filled);
   const auto& ct381 = cc->EvalMult(ct28, pt190);
-  std::vector<float> v1134(std::begin(v28) + 191 * 512, std::begin(v28) + 191 * 512 + 1024);
+  std::vector<float> v1134(std::begin(v28) + 191 * 1024, std::begin(v28) + 191 * 1024 + 1024);
   std::vector<float> v1135(848);
   std::copy(v1134.begin() + 0, v1134.begin() + 0 + 848, v1135.begin());
   std::vector<float> v1136(176);
@@ -3434,7 +3436,7 @@ std::vector<CiphertextT> mnist(CryptoContextT cc, std::vector<float> v0, std::ve
   const auto& ct396 = cc->EvalAdd(ct392, ct395);
   const auto& ct397 = cc->EvalAdd(ct389, ct396);
   const auto& ct398 = cc->EvalRotate(ct397, 176);
-  std::vector<float> v1140(std::begin(v28) + 192 * 512, std::begin(v28) + 192 * 512 + 1024);
+  std::vector<float> v1140(std::begin(v28) + 192 * 1024, std::begin(v28) + 192 * 1024 + 1024);
   std::vector<float> v1141(832);
   std::copy(v1140.begin() + 0, v1140.begin() + 0 + 832, v1141.begin());
   std::vector<float> v1142(192);
@@ -3451,7 +3453,7 @@ std::vector<CiphertextT> mnist(CryptoContextT cc, std::vector<float> v0, std::ve
   }
   auto pt192 = cc->MakeCKKSPackedPlaintext(pt192_filled);
   const auto& ct399 = cc->EvalMult(ct, pt192);
-  std::vector<float> v1146(std::begin(v28) + 193 * 512, std::begin(v28) + 193 * 512 + 1024);
+  std::vector<float> v1146(std::begin(v28) + 193 * 1024, std::begin(v28) + 193 * 1024 + 1024);
   std::vector<float> v1147(832);
   std::copy(v1146.begin() + 0, v1146.begin() + 0 + 832, v1147.begin());
   std::vector<float> v1148(192);
@@ -3468,7 +3470,7 @@ std::vector<CiphertextT> mnist(CryptoContextT cc, std::vector<float> v0, std::ve
   }
   auto pt193 = cc->MakeCKKSPackedPlaintext(pt193_filled);
   const auto& ct400 = cc->EvalMult(ct2, pt193);
-  std::vector<float> v1152(std::begin(v28) + 194 * 512, std::begin(v28) + 194 * 512 + 1024);
+  std::vector<float> v1152(std::begin(v28) + 194 * 1024, std::begin(v28) + 194 * 1024 + 1024);
   std::vector<float> v1153(832);
   std::copy(v1152.begin() + 0, v1152.begin() + 0 + 832, v1153.begin());
   std::vector<float> v1154(192);
@@ -3485,7 +3487,7 @@ std::vector<CiphertextT> mnist(CryptoContextT cc, std::vector<float> v0, std::ve
   }
   auto pt194 = cc->MakeCKKSPackedPlaintext(pt194_filled);
   const auto& ct401 = cc->EvalMult(ct4, pt194);
-  std::vector<float> v1158(std::begin(v28) + 195 * 512, std::begin(v28) + 195 * 512 + 1024);
+  std::vector<float> v1158(std::begin(v28) + 195 * 1024, std::begin(v28) + 195 * 1024 + 1024);
   std::vector<float> v1159(832);
   std::copy(v1158.begin() + 0, v1158.begin() + 0 + 832, v1159.begin());
   std::vector<float> v1160(192);
@@ -3502,7 +3504,7 @@ std::vector<CiphertextT> mnist(CryptoContextT cc, std::vector<float> v0, std::ve
   }
   auto pt195 = cc->MakeCKKSPackedPlaintext(pt195_filled);
   const auto& ct402 = cc->EvalMult(ct6, pt195);
-  std::vector<float> v1164(std::begin(v28) + 196 * 512, std::begin(v28) + 196 * 512 + 1024);
+  std::vector<float> v1164(std::begin(v28) + 196 * 1024, std::begin(v28) + 196 * 1024 + 1024);
   std::vector<float> v1165(832);
   std::copy(v1164.begin() + 0, v1164.begin() + 0 + 832, v1165.begin());
   std::vector<float> v1166(192);
@@ -3519,7 +3521,7 @@ std::vector<CiphertextT> mnist(CryptoContextT cc, std::vector<float> v0, std::ve
   }
   auto pt196 = cc->MakeCKKSPackedPlaintext(pt196_filled);
   const auto& ct403 = cc->EvalMult(ct8, pt196);
-  std::vector<float> v1170(std::begin(v28) + 197 * 512, std::begin(v28) + 197 * 512 + 1024);
+  std::vector<float> v1170(std::begin(v28) + 197 * 1024, std::begin(v28) + 197 * 1024 + 1024);
   std::vector<float> v1171(832);
   std::copy(v1170.begin() + 0, v1170.begin() + 0 + 832, v1171.begin());
   std::vector<float> v1172(192);
@@ -3536,7 +3538,7 @@ std::vector<CiphertextT> mnist(CryptoContextT cc, std::vector<float> v0, std::ve
   }
   auto pt197 = cc->MakeCKKSPackedPlaintext(pt197_filled);
   const auto& ct404 = cc->EvalMult(ct10, pt197);
-  std::vector<float> v1176(std::begin(v28) + 198 * 512, std::begin(v28) + 198 * 512 + 1024);
+  std::vector<float> v1176(std::begin(v28) + 198 * 1024, std::begin(v28) + 198 * 1024 + 1024);
   std::vector<float> v1177(832);
   std::copy(v1176.begin() + 0, v1176.begin() + 0 + 832, v1177.begin());
   std::vector<float> v1178(192);
@@ -3553,7 +3555,7 @@ std::vector<CiphertextT> mnist(CryptoContextT cc, std::vector<float> v0, std::ve
   }
   auto pt198 = cc->MakeCKKSPackedPlaintext(pt198_filled);
   const auto& ct405 = cc->EvalMult(ct12, pt198);
-  std::vector<float> v1182(std::begin(v28) + 199 * 512, std::begin(v28) + 199 * 512 + 1024);
+  std::vector<float> v1182(std::begin(v28) + 199 * 1024, std::begin(v28) + 199 * 1024 + 1024);
   std::vector<float> v1183(832);
   std::copy(v1182.begin() + 0, v1182.begin() + 0 + 832, v1183.begin());
   std::vector<float> v1184(192);
@@ -3570,7 +3572,7 @@ std::vector<CiphertextT> mnist(CryptoContextT cc, std::vector<float> v0, std::ve
   }
   auto pt199 = cc->MakeCKKSPackedPlaintext(pt199_filled);
   const auto& ct406 = cc->EvalMult(ct14, pt199);
-  std::vector<float> v1188(std::begin(v28) + 200 * 512, std::begin(v28) + 200 * 512 + 1024);
+  std::vector<float> v1188(std::begin(v28) + 200 * 1024, std::begin(v28) + 200 * 1024 + 1024);
   std::vector<float> v1189(832);
   std::copy(v1188.begin() + 0, v1188.begin() + 0 + 832, v1189.begin());
   std::vector<float> v1190(192);
@@ -3587,7 +3589,7 @@ std::vector<CiphertextT> mnist(CryptoContextT cc, std::vector<float> v0, std::ve
   }
   auto pt200 = cc->MakeCKKSPackedPlaintext(pt200_filled);
   const auto& ct407 = cc->EvalMult(ct16, pt200);
-  std::vector<float> v1194(std::begin(v28) + 201 * 512, std::begin(v28) + 201 * 512 + 1024);
+  std::vector<float> v1194(std::begin(v28) + 201 * 1024, std::begin(v28) + 201 * 1024 + 1024);
   std::vector<float> v1195(832);
   std::copy(v1194.begin() + 0, v1194.begin() + 0 + 832, v1195.begin());
   std::vector<float> v1196(192);
@@ -3604,7 +3606,7 @@ std::vector<CiphertextT> mnist(CryptoContextT cc, std::vector<float> v0, std::ve
   }
   auto pt201 = cc->MakeCKKSPackedPlaintext(pt201_filled);
   const auto& ct408 = cc->EvalMult(ct18, pt201);
-  std::vector<float> v1200(std::begin(v28) + 202 * 512, std::begin(v28) + 202 * 512 + 1024);
+  std::vector<float> v1200(std::begin(v28) + 202 * 1024, std::begin(v28) + 202 * 1024 + 1024);
   std::vector<float> v1201(832);
   std::copy(v1200.begin() + 0, v1200.begin() + 0 + 832, v1201.begin());
   std::vector<float> v1202(192);
@@ -3621,7 +3623,7 @@ std::vector<CiphertextT> mnist(CryptoContextT cc, std::vector<float> v0, std::ve
   }
   auto pt202 = cc->MakeCKKSPackedPlaintext(pt202_filled);
   const auto& ct409 = cc->EvalMult(ct20, pt202);
-  std::vector<float> v1206(std::begin(v28) + 203 * 512, std::begin(v28) + 203 * 512 + 1024);
+  std::vector<float> v1206(std::begin(v28) + 203 * 1024, std::begin(v28) + 203 * 1024 + 1024);
   std::vector<float> v1207(832);
   std::copy(v1206.begin() + 0, v1206.begin() + 0 + 832, v1207.begin());
   std::vector<float> v1208(192);
@@ -3638,7 +3640,7 @@ std::vector<CiphertextT> mnist(CryptoContextT cc, std::vector<float> v0, std::ve
   }
   auto pt203 = cc->MakeCKKSPackedPlaintext(pt203_filled);
   const auto& ct410 = cc->EvalMult(ct22, pt203);
-  std::vector<float> v1212(std::begin(v28) + 204 * 512, std::begin(v28) + 204 * 512 + 1024);
+  std::vector<float> v1212(std::begin(v28) + 204 * 1024, std::begin(v28) + 204 * 1024 + 1024);
   std::vector<float> v1213(832);
   std::copy(v1212.begin() + 0, v1212.begin() + 0 + 832, v1213.begin());
   std::vector<float> v1214(192);
@@ -3655,7 +3657,7 @@ std::vector<CiphertextT> mnist(CryptoContextT cc, std::vector<float> v0, std::ve
   }
   auto pt204 = cc->MakeCKKSPackedPlaintext(pt204_filled);
   const auto& ct411 = cc->EvalMult(ct24, pt204);
-  std::vector<float> v1218(std::begin(v28) + 205 * 512, std::begin(v28) + 205 * 512 + 1024);
+  std::vector<float> v1218(std::begin(v28) + 205 * 1024, std::begin(v28) + 205 * 1024 + 1024);
   std::vector<float> v1219(832);
   std::copy(v1218.begin() + 0, v1218.begin() + 0 + 832, v1219.begin());
   std::vector<float> v1220(192);
@@ -3672,7 +3674,7 @@ std::vector<CiphertextT> mnist(CryptoContextT cc, std::vector<float> v0, std::ve
   }
   auto pt205 = cc->MakeCKKSPackedPlaintext(pt205_filled);
   const auto& ct412 = cc->EvalMult(ct26, pt205);
-  std::vector<float> v1224(std::begin(v28) + 206 * 512, std::begin(v28) + 206 * 512 + 1024);
+  std::vector<float> v1224(std::begin(v28) + 206 * 1024, std::begin(v28) + 206 * 1024 + 1024);
   std::vector<float> v1225(832);
   std::copy(v1224.begin() + 0, v1224.begin() + 0 + 832, v1225.begin());
   std::vector<float> v1226(192);
@@ -3689,7 +3691,7 @@ std::vector<CiphertextT> mnist(CryptoContextT cc, std::vector<float> v0, std::ve
   }
   auto pt206 = cc->MakeCKKSPackedPlaintext(pt206_filled);
   const auto& ct413 = cc->EvalMult(ct28, pt206);
-  std::vector<float> v1230(std::begin(v28) + 207 * 512, std::begin(v28) + 207 * 512 + 1024);
+  std::vector<float> v1230(std::begin(v28) + 207 * 1024, std::begin(v28) + 207 * 1024 + 1024);
   std::vector<float> v1231(832);
   std::copy(v1230.begin() + 0, v1230.begin() + 0 + 832, v1231.begin());
   std::vector<float> v1232(192);
@@ -3722,7 +3724,7 @@ std::vector<CiphertextT> mnist(CryptoContextT cc, std::vector<float> v0, std::ve
   const auto& ct428 = cc->EvalAdd(ct424, ct427);
   const auto& ct429 = cc->EvalAdd(ct421, ct428);
   const auto& ct430 = cc->EvalRotate(ct429, 192);
-  std::vector<float> v1236(std::begin(v28) + 208 * 512, std::begin(v28) + 208 * 512 + 1024);
+  std::vector<float> v1236(std::begin(v28) + 208 * 1024, std::begin(v28) + 208 * 1024 + 1024);
   std::vector<float> v1237(816);
   std::copy(v1236.begin() + 0, v1236.begin() + 0 + 816, v1237.begin());
   std::vector<float> v1238(208);
@@ -3739,7 +3741,7 @@ std::vector<CiphertextT> mnist(CryptoContextT cc, std::vector<float> v0, std::ve
   }
   auto pt208 = cc->MakeCKKSPackedPlaintext(pt208_filled);
   const auto& ct431 = cc->EvalMult(ct, pt208);
-  std::vector<float> v1242(std::begin(v28) + 209 * 512, std::begin(v28) + 209 * 512 + 1024);
+  std::vector<float> v1242(std::begin(v28) + 209 * 1024, std::begin(v28) + 209 * 1024 + 1024);
   std::vector<float> v1243(816);
   std::copy(v1242.begin() + 0, v1242.begin() + 0 + 816, v1243.begin());
   std::vector<float> v1244(208);
@@ -3756,7 +3758,7 @@ std::vector<CiphertextT> mnist(CryptoContextT cc, std::vector<float> v0, std::ve
   }
   auto pt209 = cc->MakeCKKSPackedPlaintext(pt209_filled);
   const auto& ct432 = cc->EvalMult(ct2, pt209);
-  std::vector<float> v1248(std::begin(v28) + 210 * 512, std::begin(v28) + 210 * 512 + 1024);
+  std::vector<float> v1248(std::begin(v28) + 210 * 1024, std::begin(v28) + 210 * 1024 + 1024);
   std::vector<float> v1249(816);
   std::copy(v1248.begin() + 0, v1248.begin() + 0 + 816, v1249.begin());
   std::vector<float> v1250(208);
@@ -3773,7 +3775,7 @@ std::vector<CiphertextT> mnist(CryptoContextT cc, std::vector<float> v0, std::ve
   }
   auto pt210 = cc->MakeCKKSPackedPlaintext(pt210_filled);
   const auto& ct433 = cc->EvalMult(ct4, pt210);
-  std::vector<float> v1254(std::begin(v28) + 211 * 512, std::begin(v28) + 211 * 512 + 1024);
+  std::vector<float> v1254(std::begin(v28) + 211 * 1024, std::begin(v28) + 211 * 1024 + 1024);
   std::vector<float> v1255(816);
   std::copy(v1254.begin() + 0, v1254.begin() + 0 + 816, v1255.begin());
   std::vector<float> v1256(208);
@@ -3790,7 +3792,7 @@ std::vector<CiphertextT> mnist(CryptoContextT cc, std::vector<float> v0, std::ve
   }
   auto pt211 = cc->MakeCKKSPackedPlaintext(pt211_filled);
   const auto& ct434 = cc->EvalMult(ct6, pt211);
-  std::vector<float> v1260(std::begin(v28) + 212 * 512, std::begin(v28) + 212 * 512 + 1024);
+  std::vector<float> v1260(std::begin(v28) + 212 * 1024, std::begin(v28) + 212 * 1024 + 1024);
   std::vector<float> v1261(816);
   std::copy(v1260.begin() + 0, v1260.begin() + 0 + 816, v1261.begin());
   std::vector<float> v1262(208);
@@ -3807,7 +3809,7 @@ std::vector<CiphertextT> mnist(CryptoContextT cc, std::vector<float> v0, std::ve
   }
   auto pt212 = cc->MakeCKKSPackedPlaintext(pt212_filled);
   const auto& ct435 = cc->EvalMult(ct8, pt212);
-  std::vector<float> v1266(std::begin(v28) + 213 * 512, std::begin(v28) + 213 * 512 + 1024);
+  std::vector<float> v1266(std::begin(v28) + 213 * 1024, std::begin(v28) + 213 * 1024 + 1024);
   std::vector<float> v1267(816);
   std::copy(v1266.begin() + 0, v1266.begin() + 0 + 816, v1267.begin());
   std::vector<float> v1268(208);
@@ -3824,7 +3826,7 @@ std::vector<CiphertextT> mnist(CryptoContextT cc, std::vector<float> v0, std::ve
   }
   auto pt213 = cc->MakeCKKSPackedPlaintext(pt213_filled);
   const auto& ct436 = cc->EvalMult(ct10, pt213);
-  std::vector<float> v1272(std::begin(v28) + 214 * 512, std::begin(v28) + 214 * 512 + 1024);
+  std::vector<float> v1272(std::begin(v28) + 214 * 1024, std::begin(v28) + 214 * 1024 + 1024);
   std::vector<float> v1273(816);
   std::copy(v1272.begin() + 0, v1272.begin() + 0 + 816, v1273.begin());
   std::vector<float> v1274(208);
@@ -3841,7 +3843,7 @@ std::vector<CiphertextT> mnist(CryptoContextT cc, std::vector<float> v0, std::ve
   }
   auto pt214 = cc->MakeCKKSPackedPlaintext(pt214_filled);
   const auto& ct437 = cc->EvalMult(ct12, pt214);
-  std::vector<float> v1278(std::begin(v28) + 215 * 512, std::begin(v28) + 215 * 512 + 1024);
+  std::vector<float> v1278(std::begin(v28) + 215 * 1024, std::begin(v28) + 215 * 1024 + 1024);
   std::vector<float> v1279(816);
   std::copy(v1278.begin() + 0, v1278.begin() + 0 + 816, v1279.begin());
   std::vector<float> v1280(208);
@@ -3858,7 +3860,7 @@ std::vector<CiphertextT> mnist(CryptoContextT cc, std::vector<float> v0, std::ve
   }
   auto pt215 = cc->MakeCKKSPackedPlaintext(pt215_filled);
   const auto& ct438 = cc->EvalMult(ct14, pt215);
-  std::vector<float> v1284(std::begin(v28) + 216 * 512, std::begin(v28) + 216 * 512 + 1024);
+  std::vector<float> v1284(std::begin(v28) + 216 * 1024, std::begin(v28) + 216 * 1024 + 1024);
   std::vector<float> v1285(816);
   std::copy(v1284.begin() + 0, v1284.begin() + 0 + 816, v1285.begin());
   std::vector<float> v1286(208);
@@ -3875,7 +3877,7 @@ std::vector<CiphertextT> mnist(CryptoContextT cc, std::vector<float> v0, std::ve
   }
   auto pt216 = cc->MakeCKKSPackedPlaintext(pt216_filled);
   const auto& ct439 = cc->EvalMult(ct16, pt216);
-  std::vector<float> v1290(std::begin(v28) + 217 * 512, std::begin(v28) + 217 * 512 + 1024);
+  std::vector<float> v1290(std::begin(v28) + 217 * 1024, std::begin(v28) + 217 * 1024 + 1024);
   std::vector<float> v1291(816);
   std::copy(v1290.begin() + 0, v1290.begin() + 0 + 816, v1291.begin());
   std::vector<float> v1292(208);
@@ -3892,7 +3894,7 @@ std::vector<CiphertextT> mnist(CryptoContextT cc, std::vector<float> v0, std::ve
   }
   auto pt217 = cc->MakeCKKSPackedPlaintext(pt217_filled);
   const auto& ct440 = cc->EvalMult(ct18, pt217);
-  std::vector<float> v1296(std::begin(v28) + 218 * 512, std::begin(v28) + 218 * 512 + 1024);
+  std::vector<float> v1296(std::begin(v28) + 218 * 1024, std::begin(v28) + 218 * 1024 + 1024);
   std::vector<float> v1297(816);
   std::copy(v1296.begin() + 0, v1296.begin() + 0 + 816, v1297.begin());
   std::vector<float> v1298(208);
@@ -3909,7 +3911,7 @@ std::vector<CiphertextT> mnist(CryptoContextT cc, std::vector<float> v0, std::ve
   }
   auto pt218 = cc->MakeCKKSPackedPlaintext(pt218_filled);
   const auto& ct441 = cc->EvalMult(ct20, pt218);
-  std::vector<float> v1302(std::begin(v28) + 219 * 512, std::begin(v28) + 219 * 512 + 1024);
+  std::vector<float> v1302(std::begin(v28) + 219 * 1024, std::begin(v28) + 219 * 1024 + 1024);
   std::vector<float> v1303(816);
   std::copy(v1302.begin() + 0, v1302.begin() + 0 + 816, v1303.begin());
   std::vector<float> v1304(208);
@@ -3926,7 +3928,7 @@ std::vector<CiphertextT> mnist(CryptoContextT cc, std::vector<float> v0, std::ve
   }
   auto pt219 = cc->MakeCKKSPackedPlaintext(pt219_filled);
   const auto& ct442 = cc->EvalMult(ct22, pt219);
-  std::vector<float> v1308(std::begin(v28) + 220 * 512, std::begin(v28) + 220 * 512 + 1024);
+  std::vector<float> v1308(std::begin(v28) + 220 * 1024, std::begin(v28) + 220 * 1024 + 1024);
   std::vector<float> v1309(816);
   std::copy(v1308.begin() + 0, v1308.begin() + 0 + 816, v1309.begin());
   std::vector<float> v1310(208);
@@ -3943,7 +3945,7 @@ std::vector<CiphertextT> mnist(CryptoContextT cc, std::vector<float> v0, std::ve
   }
   auto pt220 = cc->MakeCKKSPackedPlaintext(pt220_filled);
   const auto& ct443 = cc->EvalMult(ct24, pt220);
-  std::vector<float> v1314(std::begin(v28) + 221 * 512, std::begin(v28) + 221 * 512 + 1024);
+  std::vector<float> v1314(std::begin(v28) + 221 * 1024, std::begin(v28) + 221 * 1024 + 1024);
   std::vector<float> v1315(816);
   std::copy(v1314.begin() + 0, v1314.begin() + 0 + 816, v1315.begin());
   std::vector<float> v1316(208);
@@ -3960,7 +3962,7 @@ std::vector<CiphertextT> mnist(CryptoContextT cc, std::vector<float> v0, std::ve
   }
   auto pt221 = cc->MakeCKKSPackedPlaintext(pt221_filled);
   const auto& ct444 = cc->EvalMult(ct26, pt221);
-  std::vector<float> v1320(std::begin(v28) + 222 * 512, std::begin(v28) + 222 * 512 + 1024);
+  std::vector<float> v1320(std::begin(v28) + 222 * 1024, std::begin(v28) + 222 * 1024 + 1024);
   std::vector<float> v1321(816);
   std::copy(v1320.begin() + 0, v1320.begin() + 0 + 816, v1321.begin());
   std::vector<float> v1322(208);
@@ -3977,7 +3979,7 @@ std::vector<CiphertextT> mnist(CryptoContextT cc, std::vector<float> v0, std::ve
   }
   auto pt222 = cc->MakeCKKSPackedPlaintext(pt222_filled);
   const auto& ct445 = cc->EvalMult(ct28, pt222);
-  std::vector<float> v1326(std::begin(v28) + 223 * 512, std::begin(v28) + 223 * 512 + 1024);
+  std::vector<float> v1326(std::begin(v28) + 223 * 1024, std::begin(v28) + 223 * 1024 + 1024);
   std::vector<float> v1327(816);
   std::copy(v1326.begin() + 0, v1326.begin() + 0 + 816, v1327.begin());
   std::vector<float> v1328(208);
@@ -4010,7 +4012,7 @@ std::vector<CiphertextT> mnist(CryptoContextT cc, std::vector<float> v0, std::ve
   const auto& ct460 = cc->EvalAdd(ct456, ct459);
   const auto& ct461 = cc->EvalAdd(ct453, ct460);
   const auto& ct462 = cc->EvalRotate(ct461, 208);
-  std::vector<float> v1332(std::begin(v28) + 224 * 512, std::begin(v28) + 224 * 512 + 1024);
+  std::vector<float> v1332(std::begin(v28) + 224 * 1024, std::begin(v28) + 224 * 1024 + 1024);
   std::vector<float> v1333(800);
   std::copy(v1332.begin() + 0, v1332.begin() + 0 + 800, v1333.begin());
   std::vector<float> v1334(224);
@@ -4027,7 +4029,7 @@ std::vector<CiphertextT> mnist(CryptoContextT cc, std::vector<float> v0, std::ve
   }
   auto pt224 = cc->MakeCKKSPackedPlaintext(pt224_filled);
   const auto& ct463 = cc->EvalMult(ct, pt224);
-  std::vector<float> v1338(std::begin(v28) + 225 * 512, std::begin(v28) + 225 * 512 + 1024);
+  std::vector<float> v1338(std::begin(v28) + 225 * 1024, std::begin(v28) + 225 * 1024 + 1024);
   std::vector<float> v1339(800);
   std::copy(v1338.begin() + 0, v1338.begin() + 0 + 800, v1339.begin());
   std::vector<float> v1340(224);
@@ -4044,7 +4046,7 @@ std::vector<CiphertextT> mnist(CryptoContextT cc, std::vector<float> v0, std::ve
   }
   auto pt225 = cc->MakeCKKSPackedPlaintext(pt225_filled);
   const auto& ct464 = cc->EvalMult(ct2, pt225);
-  std::vector<float> v1344(std::begin(v28) + 226 * 512, std::begin(v28) + 226 * 512 + 1024);
+  std::vector<float> v1344(std::begin(v28) + 226 * 1024, std::begin(v28) + 226 * 1024 + 1024);
   std::vector<float> v1345(800);
   std::copy(v1344.begin() + 0, v1344.begin() + 0 + 800, v1345.begin());
   std::vector<float> v1346(224);
@@ -4061,7 +4063,7 @@ std::vector<CiphertextT> mnist(CryptoContextT cc, std::vector<float> v0, std::ve
   }
   auto pt226 = cc->MakeCKKSPackedPlaintext(pt226_filled);
   const auto& ct465 = cc->EvalMult(ct4, pt226);
-  std::vector<float> v1350(std::begin(v28) + 227 * 512, std::begin(v28) + 227 * 512 + 1024);
+  std::vector<float> v1350(std::begin(v28) + 227 * 1024, std::begin(v28) + 227 * 1024 + 1024);
   std::vector<float> v1351(800);
   std::copy(v1350.begin() + 0, v1350.begin() + 0 + 800, v1351.begin());
   std::vector<float> v1352(224);
@@ -4078,7 +4080,7 @@ std::vector<CiphertextT> mnist(CryptoContextT cc, std::vector<float> v0, std::ve
   }
   auto pt227 = cc->MakeCKKSPackedPlaintext(pt227_filled);
   const auto& ct466 = cc->EvalMult(ct6, pt227);
-  std::vector<float> v1356(std::begin(v28) + 228 * 512, std::begin(v28) + 228 * 512 + 1024);
+  std::vector<float> v1356(std::begin(v28) + 228 * 1024, std::begin(v28) + 228 * 1024 + 1024);
   std::vector<float> v1357(800);
   std::copy(v1356.begin() + 0, v1356.begin() + 0 + 800, v1357.begin());
   std::vector<float> v1358(224);
@@ -4095,7 +4097,7 @@ std::vector<CiphertextT> mnist(CryptoContextT cc, std::vector<float> v0, std::ve
   }
   auto pt228 = cc->MakeCKKSPackedPlaintext(pt228_filled);
   const auto& ct467 = cc->EvalMult(ct8, pt228);
-  std::vector<float> v1362(std::begin(v28) + 229 * 512, std::begin(v28) + 229 * 512 + 1024);
+  std::vector<float> v1362(std::begin(v28) + 229 * 1024, std::begin(v28) + 229 * 1024 + 1024);
   std::vector<float> v1363(800);
   std::copy(v1362.begin() + 0, v1362.begin() + 0 + 800, v1363.begin());
   std::vector<float> v1364(224);
@@ -4112,7 +4114,7 @@ std::vector<CiphertextT> mnist(CryptoContextT cc, std::vector<float> v0, std::ve
   }
   auto pt229 = cc->MakeCKKSPackedPlaintext(pt229_filled);
   const auto& ct468 = cc->EvalMult(ct10, pt229);
-  std::vector<float> v1368(std::begin(v28) + 230 * 512, std::begin(v28) + 230 * 512 + 1024);
+  std::vector<float> v1368(std::begin(v28) + 230 * 1024, std::begin(v28) + 230 * 1024 + 1024);
   std::vector<float> v1369(800);
   std::copy(v1368.begin() + 0, v1368.begin() + 0 + 800, v1369.begin());
   std::vector<float> v1370(224);
@@ -4129,7 +4131,7 @@ std::vector<CiphertextT> mnist(CryptoContextT cc, std::vector<float> v0, std::ve
   }
   auto pt230 = cc->MakeCKKSPackedPlaintext(pt230_filled);
   const auto& ct469 = cc->EvalMult(ct12, pt230);
-  std::vector<float> v1374(std::begin(v28) + 231 * 512, std::begin(v28) + 231 * 512 + 1024);
+  std::vector<float> v1374(std::begin(v28) + 231 * 1024, std::begin(v28) + 231 * 1024 + 1024);
   std::vector<float> v1375(800);
   std::copy(v1374.begin() + 0, v1374.begin() + 0 + 800, v1375.begin());
   std::vector<float> v1376(224);
@@ -4146,7 +4148,7 @@ std::vector<CiphertextT> mnist(CryptoContextT cc, std::vector<float> v0, std::ve
   }
   auto pt231 = cc->MakeCKKSPackedPlaintext(pt231_filled);
   const auto& ct470 = cc->EvalMult(ct14, pt231);
-  std::vector<float> v1380(std::begin(v28) + 232 * 512, std::begin(v28) + 232 * 512 + 1024);
+  std::vector<float> v1380(std::begin(v28) + 232 * 1024, std::begin(v28) + 232 * 1024 + 1024);
   std::vector<float> v1381(800);
   std::copy(v1380.begin() + 0, v1380.begin() + 0 + 800, v1381.begin());
   std::vector<float> v1382(224);
@@ -4163,7 +4165,7 @@ std::vector<CiphertextT> mnist(CryptoContextT cc, std::vector<float> v0, std::ve
   }
   auto pt232 = cc->MakeCKKSPackedPlaintext(pt232_filled);
   const auto& ct471 = cc->EvalMult(ct16, pt232);
-  std::vector<float> v1386(std::begin(v28) + 233 * 512, std::begin(v28) + 233 * 512 + 1024);
+  std::vector<float> v1386(std::begin(v28) + 233 * 1024, std::begin(v28) + 233 * 1024 + 1024);
   std::vector<float> v1387(800);
   std::copy(v1386.begin() + 0, v1386.begin() + 0 + 800, v1387.begin());
   std::vector<float> v1388(224);
@@ -4180,7 +4182,7 @@ std::vector<CiphertextT> mnist(CryptoContextT cc, std::vector<float> v0, std::ve
   }
   auto pt233 = cc->MakeCKKSPackedPlaintext(pt233_filled);
   const auto& ct472 = cc->EvalMult(ct18, pt233);
-  std::vector<float> v1392(std::begin(v28) + 234 * 512, std::begin(v28) + 234 * 512 + 1024);
+  std::vector<float> v1392(std::begin(v28) + 234 * 1024, std::begin(v28) + 234 * 1024 + 1024);
   std::vector<float> v1393(800);
   std::copy(v1392.begin() + 0, v1392.begin() + 0 + 800, v1393.begin());
   std::vector<float> v1394(224);
@@ -4197,7 +4199,7 @@ std::vector<CiphertextT> mnist(CryptoContextT cc, std::vector<float> v0, std::ve
   }
   auto pt234 = cc->MakeCKKSPackedPlaintext(pt234_filled);
   const auto& ct473 = cc->EvalMult(ct20, pt234);
-  std::vector<float> v1398(std::begin(v28) + 235 * 512, std::begin(v28) + 235 * 512 + 1024);
+  std::vector<float> v1398(std::begin(v28) + 235 * 1024, std::begin(v28) + 235 * 1024 + 1024);
   std::vector<float> v1399(800);
   std::copy(v1398.begin() + 0, v1398.begin() + 0 + 800, v1399.begin());
   std::vector<float> v1400(224);
@@ -4214,7 +4216,7 @@ std::vector<CiphertextT> mnist(CryptoContextT cc, std::vector<float> v0, std::ve
   }
   auto pt235 = cc->MakeCKKSPackedPlaintext(pt235_filled);
   const auto& ct474 = cc->EvalMult(ct22, pt235);
-  std::vector<float> v1404(std::begin(v28) + 236 * 512, std::begin(v28) + 236 * 512 + 1024);
+  std::vector<float> v1404(std::begin(v28) + 236 * 1024, std::begin(v28) + 236 * 1024 + 1024);
   std::vector<float> v1405(800);
   std::copy(v1404.begin() + 0, v1404.begin() + 0 + 800, v1405.begin());
   std::vector<float> v1406(224);
@@ -4231,7 +4233,7 @@ std::vector<CiphertextT> mnist(CryptoContextT cc, std::vector<float> v0, std::ve
   }
   auto pt236 = cc->MakeCKKSPackedPlaintext(pt236_filled);
   const auto& ct475 = cc->EvalMult(ct24, pt236);
-  std::vector<float> v1410(std::begin(v28) + 237 * 512, std::begin(v28) + 237 * 512 + 1024);
+  std::vector<float> v1410(std::begin(v28) + 237 * 1024, std::begin(v28) + 237 * 1024 + 1024);
   std::vector<float> v1411(800);
   std::copy(v1410.begin() + 0, v1410.begin() + 0 + 800, v1411.begin());
   std::vector<float> v1412(224);
@@ -4248,7 +4250,7 @@ std::vector<CiphertextT> mnist(CryptoContextT cc, std::vector<float> v0, std::ve
   }
   auto pt237 = cc->MakeCKKSPackedPlaintext(pt237_filled);
   const auto& ct476 = cc->EvalMult(ct26, pt237);
-  std::vector<float> v1416(std::begin(v28) + 238 * 512, std::begin(v28) + 238 * 512 + 1024);
+  std::vector<float> v1416(std::begin(v28) + 238 * 1024, std::begin(v28) + 238 * 1024 + 1024);
   std::vector<float> v1417(800);
   std::copy(v1416.begin() + 0, v1416.begin() + 0 + 800, v1417.begin());
   std::vector<float> v1418(224);
@@ -4265,7 +4267,7 @@ std::vector<CiphertextT> mnist(CryptoContextT cc, std::vector<float> v0, std::ve
   }
   auto pt238 = cc->MakeCKKSPackedPlaintext(pt238_filled);
   const auto& ct477 = cc->EvalMult(ct28, pt238);
-  std::vector<float> v1422(std::begin(v28) + 239 * 512, std::begin(v28) + 239 * 512 + 1024);
+  std::vector<float> v1422(std::begin(v28) + 239 * 1024, std::begin(v28) + 239 * 1024 + 1024);
   std::vector<float> v1423(800);
   std::copy(v1422.begin() + 0, v1422.begin() + 0 + 800, v1423.begin());
   std::vector<float> v1424(224);
@@ -4298,7 +4300,7 @@ std::vector<CiphertextT> mnist(CryptoContextT cc, std::vector<float> v0, std::ve
   const auto& ct492 = cc->EvalAdd(ct488, ct491);
   const auto& ct493 = cc->EvalAdd(ct485, ct492);
   const auto& ct494 = cc->EvalRotate(ct493, 224);
-  std::vector<float> v1428(std::begin(v28) + 240 * 512, std::begin(v28) + 240 * 512 + 1024);
+  std::vector<float> v1428(std::begin(v28) + 240 * 1024, std::begin(v28) + 240 * 1024 + 1024);
   std::vector<float> v1429(784);
   std::copy(v1428.begin() + 0, v1428.begin() + 0 + 784, v1429.begin());
   std::vector<float> v1430(240);
@@ -4315,7 +4317,7 @@ std::vector<CiphertextT> mnist(CryptoContextT cc, std::vector<float> v0, std::ve
   }
   auto pt240 = cc->MakeCKKSPackedPlaintext(pt240_filled);
   const auto& ct495 = cc->EvalMult(ct, pt240);
-  std::vector<float> v1434(std::begin(v28) + 241 * 512, std::begin(v28) + 241 * 512 + 1024);
+  std::vector<float> v1434(std::begin(v28) + 241 * 1024, std::begin(v28) + 241 * 1024 + 1024);
   std::vector<float> v1435(784);
   std::copy(v1434.begin() + 0, v1434.begin() + 0 + 784, v1435.begin());
   std::vector<float> v1436(240);
@@ -4332,7 +4334,7 @@ std::vector<CiphertextT> mnist(CryptoContextT cc, std::vector<float> v0, std::ve
   }
   auto pt241 = cc->MakeCKKSPackedPlaintext(pt241_filled);
   const auto& ct496 = cc->EvalMult(ct2, pt241);
-  std::vector<float> v1440(std::begin(v28) + 242 * 512, std::begin(v28) + 242 * 512 + 1024);
+  std::vector<float> v1440(std::begin(v28) + 242 * 1024, std::begin(v28) + 242 * 1024 + 1024);
   std::vector<float> v1441(784);
   std::copy(v1440.begin() + 0, v1440.begin() + 0 + 784, v1441.begin());
   std::vector<float> v1442(240);
@@ -4349,7 +4351,7 @@ std::vector<CiphertextT> mnist(CryptoContextT cc, std::vector<float> v0, std::ve
   }
   auto pt242 = cc->MakeCKKSPackedPlaintext(pt242_filled);
   const auto& ct497 = cc->EvalMult(ct4, pt242);
-  std::vector<float> v1446(std::begin(v28) + 243 * 512, std::begin(v28) + 243 * 512 + 1024);
+  std::vector<float> v1446(std::begin(v28) + 243 * 1024, std::begin(v28) + 243 * 1024 + 1024);
   std::vector<float> v1447(784);
   std::copy(v1446.begin() + 0, v1446.begin() + 0 + 784, v1447.begin());
   std::vector<float> v1448(240);
@@ -4366,7 +4368,7 @@ std::vector<CiphertextT> mnist(CryptoContextT cc, std::vector<float> v0, std::ve
   }
   auto pt243 = cc->MakeCKKSPackedPlaintext(pt243_filled);
   const auto& ct498 = cc->EvalMult(ct6, pt243);
-  std::vector<float> v1452(std::begin(v28) + 244 * 512, std::begin(v28) + 244 * 512 + 1024);
+  std::vector<float> v1452(std::begin(v28) + 244 * 1024, std::begin(v28) + 244 * 1024 + 1024);
   std::vector<float> v1453(784);
   std::copy(v1452.begin() + 0, v1452.begin() + 0 + 784, v1453.begin());
   std::vector<float> v1454(240);
@@ -4383,7 +4385,7 @@ std::vector<CiphertextT> mnist(CryptoContextT cc, std::vector<float> v0, std::ve
   }
   auto pt244 = cc->MakeCKKSPackedPlaintext(pt244_filled);
   const auto& ct499 = cc->EvalMult(ct8, pt244);
-  std::vector<float> v1458(std::begin(v28) + 245 * 512, std::begin(v28) + 245 * 512 + 1024);
+  std::vector<float> v1458(std::begin(v28) + 245 * 1024, std::begin(v28) + 245 * 1024 + 1024);
   std::vector<float> v1459(784);
   std::copy(v1458.begin() + 0, v1458.begin() + 0 + 784, v1459.begin());
   std::vector<float> v1460(240);
@@ -4400,7 +4402,7 @@ std::vector<CiphertextT> mnist(CryptoContextT cc, std::vector<float> v0, std::ve
   }
   auto pt245 = cc->MakeCKKSPackedPlaintext(pt245_filled);
   const auto& ct500 = cc->EvalMult(ct10, pt245);
-  std::vector<float> v1464(std::begin(v28) + 246 * 512, std::begin(v28) + 246 * 512 + 1024);
+  std::vector<float> v1464(std::begin(v28) + 246 * 1024, std::begin(v28) + 246 * 1024 + 1024);
   std::vector<float> v1465(784);
   std::copy(v1464.begin() + 0, v1464.begin() + 0 + 784, v1465.begin());
   std::vector<float> v1466(240);
@@ -4417,7 +4419,7 @@ std::vector<CiphertextT> mnist(CryptoContextT cc, std::vector<float> v0, std::ve
   }
   auto pt246 = cc->MakeCKKSPackedPlaintext(pt246_filled);
   const auto& ct501 = cc->EvalMult(ct12, pt246);
-  std::vector<float> v1470(std::begin(v28) + 247 * 512, std::begin(v28) + 247 * 512 + 1024);
+  std::vector<float> v1470(std::begin(v28) + 247 * 1024, std::begin(v28) + 247 * 1024 + 1024);
   std::vector<float> v1471(784);
   std::copy(v1470.begin() + 0, v1470.begin() + 0 + 784, v1471.begin());
   std::vector<float> v1472(240);
@@ -4434,7 +4436,7 @@ std::vector<CiphertextT> mnist(CryptoContextT cc, std::vector<float> v0, std::ve
   }
   auto pt247 = cc->MakeCKKSPackedPlaintext(pt247_filled);
   const auto& ct502 = cc->EvalMult(ct14, pt247);
-  std::vector<float> v1476(std::begin(v28) + 248 * 512, std::begin(v28) + 248 * 512 + 1024);
+  std::vector<float> v1476(std::begin(v28) + 248 * 1024, std::begin(v28) + 248 * 1024 + 1024);
   std::vector<float> v1477(784);
   std::copy(v1476.begin() + 0, v1476.begin() + 0 + 784, v1477.begin());
   std::vector<float> v1478(240);
@@ -4451,7 +4453,7 @@ std::vector<CiphertextT> mnist(CryptoContextT cc, std::vector<float> v0, std::ve
   }
   auto pt248 = cc->MakeCKKSPackedPlaintext(pt248_filled);
   const auto& ct503 = cc->EvalMult(ct16, pt248);
-  std::vector<float> v1482(std::begin(v28) + 249 * 512, std::begin(v28) + 249 * 512 + 1024);
+  std::vector<float> v1482(std::begin(v28) + 249 * 1024, std::begin(v28) + 249 * 1024 + 1024);
   std::vector<float> v1483(784);
   std::copy(v1482.begin() + 0, v1482.begin() + 0 + 784, v1483.begin());
   std::vector<float> v1484(240);
@@ -4468,7 +4470,7 @@ std::vector<CiphertextT> mnist(CryptoContextT cc, std::vector<float> v0, std::ve
   }
   auto pt249 = cc->MakeCKKSPackedPlaintext(pt249_filled);
   const auto& ct504 = cc->EvalMult(ct18, pt249);
-  std::vector<float> v1488(std::begin(v28) + 250 * 512, std::begin(v28) + 250 * 512 + 1024);
+  std::vector<float> v1488(std::begin(v28) + 250 * 1024, std::begin(v28) + 250 * 1024 + 1024);
   std::vector<float> v1489(784);
   std::copy(v1488.begin() + 0, v1488.begin() + 0 + 784, v1489.begin());
   std::vector<float> v1490(240);
@@ -4485,7 +4487,7 @@ std::vector<CiphertextT> mnist(CryptoContextT cc, std::vector<float> v0, std::ve
   }
   auto pt250 = cc->MakeCKKSPackedPlaintext(pt250_filled);
   const auto& ct505 = cc->EvalMult(ct20, pt250);
-  std::vector<float> v1494(std::begin(v28) + 251 * 512, std::begin(v28) + 251 * 512 + 1024);
+  std::vector<float> v1494(std::begin(v28) + 251 * 1024, std::begin(v28) + 251 * 1024 + 1024);
   std::vector<float> v1495(784);
   std::copy(v1494.begin() + 0, v1494.begin() + 0 + 784, v1495.begin());
   std::vector<float> v1496(240);
@@ -4502,7 +4504,7 @@ std::vector<CiphertextT> mnist(CryptoContextT cc, std::vector<float> v0, std::ve
   }
   auto pt251 = cc->MakeCKKSPackedPlaintext(pt251_filled);
   const auto& ct506 = cc->EvalMult(ct22, pt251);
-  std::vector<float> v1500(std::begin(v28) + 252 * 512, std::begin(v28) + 252 * 512 + 1024);
+  std::vector<float> v1500(std::begin(v28) + 252 * 1024, std::begin(v28) + 252 * 1024 + 1024);
   std::vector<float> v1501(784);
   std::copy(v1500.begin() + 0, v1500.begin() + 0 + 784, v1501.begin());
   std::vector<float> v1502(240);
@@ -4519,7 +4521,7 @@ std::vector<CiphertextT> mnist(CryptoContextT cc, std::vector<float> v0, std::ve
   }
   auto pt252 = cc->MakeCKKSPackedPlaintext(pt252_filled);
   const auto& ct507 = cc->EvalMult(ct24, pt252);
-  std::vector<float> v1506(std::begin(v28) + 253 * 512, std::begin(v28) + 253 * 512 + 1024);
+  std::vector<float> v1506(std::begin(v28) + 253 * 1024, std::begin(v28) + 253 * 1024 + 1024);
   std::vector<float> v1507(784);
   std::copy(v1506.begin() + 0, v1506.begin() + 0 + 784, v1507.begin());
   std::vector<float> v1508(240);
@@ -4536,7 +4538,7 @@ std::vector<CiphertextT> mnist(CryptoContextT cc, std::vector<float> v0, std::ve
   }
   auto pt253 = cc->MakeCKKSPackedPlaintext(pt253_filled);
   const auto& ct508 = cc->EvalMult(ct26, pt253);
-  std::vector<float> v1512(std::begin(v28) + 254 * 512, std::begin(v28) + 254 * 512 + 1024);
+  std::vector<float> v1512(std::begin(v28) + 254 * 1024, std::begin(v28) + 254 * 1024 + 1024);
   std::vector<float> v1513(784);
   std::copy(v1512.begin() + 0, v1512.begin() + 0 + 784, v1513.begin());
   std::vector<float> v1514(240);
@@ -4553,7 +4555,7 @@ std::vector<CiphertextT> mnist(CryptoContextT cc, std::vector<float> v0, std::ve
   }
   auto pt254 = cc->MakeCKKSPackedPlaintext(pt254_filled);
   const auto& ct509 = cc->EvalMult(ct28, pt254);
-  std::vector<float> v1518(std::begin(v28) + 255 * 512, std::begin(v28) + 255 * 512 + 1024);
+  std::vector<float> v1518(std::begin(v28) + 255 * 1024, std::begin(v28) + 255 * 1024 + 1024);
   std::vector<float> v1519(784);
   std::copy(v1518.begin() + 0, v1518.begin() + 0 + 784, v1519.begin());
   std::vector<float> v1520(240);
@@ -4586,7 +4588,7 @@ std::vector<CiphertextT> mnist(CryptoContextT cc, std::vector<float> v0, std::ve
   const auto& ct524 = cc->EvalAdd(ct520, ct523);
   const auto& ct525 = cc->EvalAdd(ct517, ct524);
   const auto& ct526 = cc->EvalRotate(ct525, 240);
-  std::vector<float> v1524(std::begin(v28) + 256 * 512, std::begin(v28) + 256 * 512 + 1024);
+  std::vector<float> v1524(std::begin(v28) + 256 * 1024, std::begin(v28) + 256 * 1024 + 1024);
   std::vector<float> v1525(768);
   std::copy(v1524.begin() + 0, v1524.begin() + 0 + 768, v1525.begin());
   std::vector<float> v1526(256);
@@ -4603,7 +4605,7 @@ std::vector<CiphertextT> mnist(CryptoContextT cc, std::vector<float> v0, std::ve
   }
   auto pt256 = cc->MakeCKKSPackedPlaintext(pt256_filled);
   const auto& ct527 = cc->EvalMult(ct, pt256);
-  std::vector<float> v1530(std::begin(v28) + 257 * 512, std::begin(v28) + 257 * 512 + 1024);
+  std::vector<float> v1530(std::begin(v28) + 257 * 1024, std::begin(v28) + 257 * 1024 + 1024);
   std::vector<float> v1531(768);
   std::copy(v1530.begin() + 0, v1530.begin() + 0 + 768, v1531.begin());
   std::vector<float> v1532(256);
@@ -4620,7 +4622,7 @@ std::vector<CiphertextT> mnist(CryptoContextT cc, std::vector<float> v0, std::ve
   }
   auto pt257 = cc->MakeCKKSPackedPlaintext(pt257_filled);
   const auto& ct528 = cc->EvalMult(ct2, pt257);
-  std::vector<float> v1536(std::begin(v28) + 258 * 512, std::begin(v28) + 258 * 512 + 1024);
+  std::vector<float> v1536(std::begin(v28) + 258 * 1024, std::begin(v28) + 258 * 1024 + 1024);
   std::vector<float> v1537(768);
   std::copy(v1536.begin() + 0, v1536.begin() + 0 + 768, v1537.begin());
   std::vector<float> v1538(256);
@@ -4637,7 +4639,7 @@ std::vector<CiphertextT> mnist(CryptoContextT cc, std::vector<float> v0, std::ve
   }
   auto pt258 = cc->MakeCKKSPackedPlaintext(pt258_filled);
   const auto& ct529 = cc->EvalMult(ct4, pt258);
-  std::vector<float> v1542(std::begin(v28) + 259 * 512, std::begin(v28) + 259 * 512 + 1024);
+  std::vector<float> v1542(std::begin(v28) + 259 * 1024, std::begin(v28) + 259 * 1024 + 1024);
   std::vector<float> v1543(768);
   std::copy(v1542.begin() + 0, v1542.begin() + 0 + 768, v1543.begin());
   std::vector<float> v1544(256);
@@ -4654,7 +4656,7 @@ std::vector<CiphertextT> mnist(CryptoContextT cc, std::vector<float> v0, std::ve
   }
   auto pt259 = cc->MakeCKKSPackedPlaintext(pt259_filled);
   const auto& ct530 = cc->EvalMult(ct6, pt259);
-  std::vector<float> v1548(std::begin(v28) + 260 * 512, std::begin(v28) + 260 * 512 + 1024);
+  std::vector<float> v1548(std::begin(v28) + 260 * 1024, std::begin(v28) + 260 * 1024 + 1024);
   std::vector<float> v1549(768);
   std::copy(v1548.begin() + 0, v1548.begin() + 0 + 768, v1549.begin());
   std::vector<float> v1550(256);
@@ -4671,7 +4673,7 @@ std::vector<CiphertextT> mnist(CryptoContextT cc, std::vector<float> v0, std::ve
   }
   auto pt260 = cc->MakeCKKSPackedPlaintext(pt260_filled);
   const auto& ct531 = cc->EvalMult(ct8, pt260);
-  std::vector<float> v1554(std::begin(v28) + 261 * 512, std::begin(v28) + 261 * 512 + 1024);
+  std::vector<float> v1554(std::begin(v28) + 261 * 1024, std::begin(v28) + 261 * 1024 + 1024);
   std::vector<float> v1555(768);
   std::copy(v1554.begin() + 0, v1554.begin() + 0 + 768, v1555.begin());
   std::vector<float> v1556(256);
@@ -4688,7 +4690,7 @@ std::vector<CiphertextT> mnist(CryptoContextT cc, std::vector<float> v0, std::ve
   }
   auto pt261 = cc->MakeCKKSPackedPlaintext(pt261_filled);
   const auto& ct532 = cc->EvalMult(ct10, pt261);
-  std::vector<float> v1560(std::begin(v28) + 262 * 512, std::begin(v28) + 262 * 512 + 1024);
+  std::vector<float> v1560(std::begin(v28) + 262 * 1024, std::begin(v28) + 262 * 1024 + 1024);
   std::vector<float> v1561(768);
   std::copy(v1560.begin() + 0, v1560.begin() + 0 + 768, v1561.begin());
   std::vector<float> v1562(256);
@@ -4705,7 +4707,7 @@ std::vector<CiphertextT> mnist(CryptoContextT cc, std::vector<float> v0, std::ve
   }
   auto pt262 = cc->MakeCKKSPackedPlaintext(pt262_filled);
   const auto& ct533 = cc->EvalMult(ct12, pt262);
-  std::vector<float> v1566(std::begin(v28) + 263 * 512, std::begin(v28) + 263 * 512 + 1024);
+  std::vector<float> v1566(std::begin(v28) + 263 * 1024, std::begin(v28) + 263 * 1024 + 1024);
   std::vector<float> v1567(768);
   std::copy(v1566.begin() + 0, v1566.begin() + 0 + 768, v1567.begin());
   std::vector<float> v1568(256);
@@ -4722,7 +4724,7 @@ std::vector<CiphertextT> mnist(CryptoContextT cc, std::vector<float> v0, std::ve
   }
   auto pt263 = cc->MakeCKKSPackedPlaintext(pt263_filled);
   const auto& ct534 = cc->EvalMult(ct14, pt263);
-  std::vector<float> v1572(std::begin(v28) + 264 * 512, std::begin(v28) + 264 * 512 + 1024);
+  std::vector<float> v1572(std::begin(v28) + 264 * 1024, std::begin(v28) + 264 * 1024 + 1024);
   std::vector<float> v1573(768);
   std::copy(v1572.begin() + 0, v1572.begin() + 0 + 768, v1573.begin());
   std::vector<float> v1574(256);
@@ -4739,7 +4741,7 @@ std::vector<CiphertextT> mnist(CryptoContextT cc, std::vector<float> v0, std::ve
   }
   auto pt264 = cc->MakeCKKSPackedPlaintext(pt264_filled);
   const auto& ct535 = cc->EvalMult(ct16, pt264);
-  std::vector<float> v1578(std::begin(v28) + 265 * 512, std::begin(v28) + 265 * 512 + 1024);
+  std::vector<float> v1578(std::begin(v28) + 265 * 1024, std::begin(v28) + 265 * 1024 + 1024);
   std::vector<float> v1579(768);
   std::copy(v1578.begin() + 0, v1578.begin() + 0 + 768, v1579.begin());
   std::vector<float> v1580(256);
@@ -4756,7 +4758,7 @@ std::vector<CiphertextT> mnist(CryptoContextT cc, std::vector<float> v0, std::ve
   }
   auto pt265 = cc->MakeCKKSPackedPlaintext(pt265_filled);
   const auto& ct536 = cc->EvalMult(ct18, pt265);
-  std::vector<float> v1584(std::begin(v28) + 266 * 512, std::begin(v28) + 266 * 512 + 1024);
+  std::vector<float> v1584(std::begin(v28) + 266 * 1024, std::begin(v28) + 266 * 1024 + 1024);
   std::vector<float> v1585(768);
   std::copy(v1584.begin() + 0, v1584.begin() + 0 + 768, v1585.begin());
   std::vector<float> v1586(256);
@@ -4773,7 +4775,7 @@ std::vector<CiphertextT> mnist(CryptoContextT cc, std::vector<float> v0, std::ve
   }
   auto pt266 = cc->MakeCKKSPackedPlaintext(pt266_filled);
   const auto& ct537 = cc->EvalMult(ct20, pt266);
-  std::vector<float> v1590(std::begin(v28) + 267 * 512, std::begin(v28) + 267 * 512 + 1024);
+  std::vector<float> v1590(std::begin(v28) + 267 * 1024, std::begin(v28) + 267 * 1024 + 1024);
   std::vector<float> v1591(768);
   std::copy(v1590.begin() + 0, v1590.begin() + 0 + 768, v1591.begin());
   std::vector<float> v1592(256);
@@ -4790,7 +4792,7 @@ std::vector<CiphertextT> mnist(CryptoContextT cc, std::vector<float> v0, std::ve
   }
   auto pt267 = cc->MakeCKKSPackedPlaintext(pt267_filled);
   const auto& ct538 = cc->EvalMult(ct22, pt267);
-  std::vector<float> v1596(std::begin(v28) + 268 * 512, std::begin(v28) + 268 * 512 + 1024);
+  std::vector<float> v1596(std::begin(v28) + 268 * 1024, std::begin(v28) + 268 * 1024 + 1024);
   std::vector<float> v1597(768);
   std::copy(v1596.begin() + 0, v1596.begin() + 0 + 768, v1597.begin());
   std::vector<float> v1598(256);
@@ -4807,7 +4809,7 @@ std::vector<CiphertextT> mnist(CryptoContextT cc, std::vector<float> v0, std::ve
   }
   auto pt268 = cc->MakeCKKSPackedPlaintext(pt268_filled);
   const auto& ct539 = cc->EvalMult(ct24, pt268);
-  std::vector<float> v1602(std::begin(v28) + 269 * 512, std::begin(v28) + 269 * 512 + 1024);
+  std::vector<float> v1602(std::begin(v28) + 269 * 1024, std::begin(v28) + 269 * 1024 + 1024);
   std::vector<float> v1603(768);
   std::copy(v1602.begin() + 0, v1602.begin() + 0 + 768, v1603.begin());
   std::vector<float> v1604(256);
@@ -4824,7 +4826,7 @@ std::vector<CiphertextT> mnist(CryptoContextT cc, std::vector<float> v0, std::ve
   }
   auto pt269 = cc->MakeCKKSPackedPlaintext(pt269_filled);
   const auto& ct540 = cc->EvalMult(ct26, pt269);
-  std::vector<float> v1608(std::begin(v28) + 270 * 512, std::begin(v28) + 270 * 512 + 1024);
+  std::vector<float> v1608(std::begin(v28) + 270 * 1024, std::begin(v28) + 270 * 1024 + 1024);
   std::vector<float> v1609(768);
   std::copy(v1608.begin() + 0, v1608.begin() + 0 + 768, v1609.begin());
   std::vector<float> v1610(256);
@@ -4841,7 +4843,7 @@ std::vector<CiphertextT> mnist(CryptoContextT cc, std::vector<float> v0, std::ve
   }
   auto pt270 = cc->MakeCKKSPackedPlaintext(pt270_filled);
   const auto& ct541 = cc->EvalMult(ct28, pt270);
-  std::vector<float> v1614(std::begin(v28) + 271 * 512, std::begin(v28) + 271 * 512 + 1024);
+  std::vector<float> v1614(std::begin(v28) + 271 * 1024, std::begin(v28) + 271 * 1024 + 1024);
   std::vector<float> v1615(768);
   std::copy(v1614.begin() + 0, v1614.begin() + 0 + 768, v1615.begin());
   std::vector<float> v1616(256);
@@ -4874,7 +4876,7 @@ std::vector<CiphertextT> mnist(CryptoContextT cc, std::vector<float> v0, std::ve
   const auto& ct556 = cc->EvalAdd(ct552, ct555);
   const auto& ct557 = cc->EvalAdd(ct549, ct556);
   const auto& ct558 = cc->EvalRotate(ct557, 256);
-  std::vector<float> v1620(std::begin(v28) + 272 * 512, std::begin(v28) + 272 * 512 + 1024);
+  std::vector<float> v1620(std::begin(v28) + 272 * 1024, std::begin(v28) + 272 * 1024 + 1024);
   std::vector<float> v1621(752);
   std::copy(v1620.begin() + 0, v1620.begin() + 0 + 752, v1621.begin());
   std::vector<float> v1622(272);
@@ -4891,7 +4893,7 @@ std::vector<CiphertextT> mnist(CryptoContextT cc, std::vector<float> v0, std::ve
   }
   auto pt272 = cc->MakeCKKSPackedPlaintext(pt272_filled);
   const auto& ct559 = cc->EvalMult(ct, pt272);
-  std::vector<float> v1626(std::begin(v28) + 273 * 512, std::begin(v28) + 273 * 512 + 1024);
+  std::vector<float> v1626(std::begin(v28) + 273 * 1024, std::begin(v28) + 273 * 1024 + 1024);
   std::vector<float> v1627(752);
   std::copy(v1626.begin() + 0, v1626.begin() + 0 + 752, v1627.begin());
   std::vector<float> v1628(272);
@@ -4908,7 +4910,7 @@ std::vector<CiphertextT> mnist(CryptoContextT cc, std::vector<float> v0, std::ve
   }
   auto pt273 = cc->MakeCKKSPackedPlaintext(pt273_filled);
   const auto& ct560 = cc->EvalMult(ct2, pt273);
-  std::vector<float> v1632(std::begin(v28) + 274 * 512, std::begin(v28) + 274 * 512 + 1024);
+  std::vector<float> v1632(std::begin(v28) + 274 * 1024, std::begin(v28) + 274 * 1024 + 1024);
   std::vector<float> v1633(752);
   std::copy(v1632.begin() + 0, v1632.begin() + 0 + 752, v1633.begin());
   std::vector<float> v1634(272);
@@ -4925,7 +4927,7 @@ std::vector<CiphertextT> mnist(CryptoContextT cc, std::vector<float> v0, std::ve
   }
   auto pt274 = cc->MakeCKKSPackedPlaintext(pt274_filled);
   const auto& ct561 = cc->EvalMult(ct4, pt274);
-  std::vector<float> v1638(std::begin(v28) + 275 * 512, std::begin(v28) + 275 * 512 + 1024);
+  std::vector<float> v1638(std::begin(v28) + 275 * 1024, std::begin(v28) + 275 * 1024 + 1024);
   std::vector<float> v1639(752);
   std::copy(v1638.begin() + 0, v1638.begin() + 0 + 752, v1639.begin());
   std::vector<float> v1640(272);
@@ -4942,7 +4944,7 @@ std::vector<CiphertextT> mnist(CryptoContextT cc, std::vector<float> v0, std::ve
   }
   auto pt275 = cc->MakeCKKSPackedPlaintext(pt275_filled);
   const auto& ct562 = cc->EvalMult(ct6, pt275);
-  std::vector<float> v1644(std::begin(v28) + 276 * 512, std::begin(v28) + 276 * 512 + 1024);
+  std::vector<float> v1644(std::begin(v28) + 276 * 1024, std::begin(v28) + 276 * 1024 + 1024);
   std::vector<float> v1645(752);
   std::copy(v1644.begin() + 0, v1644.begin() + 0 + 752, v1645.begin());
   std::vector<float> v1646(272);
@@ -4959,7 +4961,7 @@ std::vector<CiphertextT> mnist(CryptoContextT cc, std::vector<float> v0, std::ve
   }
   auto pt276 = cc->MakeCKKSPackedPlaintext(pt276_filled);
   const auto& ct563 = cc->EvalMult(ct8, pt276);
-  std::vector<float> v1650(std::begin(v28) + 277 * 512, std::begin(v28) + 277 * 512 + 1024);
+  std::vector<float> v1650(std::begin(v28) + 277 * 1024, std::begin(v28) + 277 * 1024 + 1024);
   std::vector<float> v1651(752);
   std::copy(v1650.begin() + 0, v1650.begin() + 0 + 752, v1651.begin());
   std::vector<float> v1652(272);
@@ -4976,7 +4978,7 @@ std::vector<CiphertextT> mnist(CryptoContextT cc, std::vector<float> v0, std::ve
   }
   auto pt277 = cc->MakeCKKSPackedPlaintext(pt277_filled);
   const auto& ct564 = cc->EvalMult(ct10, pt277);
-  std::vector<float> v1656(std::begin(v28) + 278 * 512, std::begin(v28) + 278 * 512 + 1024);
+  std::vector<float> v1656(std::begin(v28) + 278 * 1024, std::begin(v28) + 278 * 1024 + 1024);
   std::vector<float> v1657(752);
   std::copy(v1656.begin() + 0, v1656.begin() + 0 + 752, v1657.begin());
   std::vector<float> v1658(272);
@@ -4993,7 +4995,7 @@ std::vector<CiphertextT> mnist(CryptoContextT cc, std::vector<float> v0, std::ve
   }
   auto pt278 = cc->MakeCKKSPackedPlaintext(pt278_filled);
   const auto& ct565 = cc->EvalMult(ct12, pt278);
-  std::vector<float> v1662(std::begin(v28) + 279 * 512, std::begin(v28) + 279 * 512 + 1024);
+  std::vector<float> v1662(std::begin(v28) + 279 * 1024, std::begin(v28) + 279 * 1024 + 1024);
   std::vector<float> v1663(752);
   std::copy(v1662.begin() + 0, v1662.begin() + 0 + 752, v1663.begin());
   std::vector<float> v1664(272);
@@ -5010,7 +5012,7 @@ std::vector<CiphertextT> mnist(CryptoContextT cc, std::vector<float> v0, std::ve
   }
   auto pt279 = cc->MakeCKKSPackedPlaintext(pt279_filled);
   const auto& ct566 = cc->EvalMult(ct14, pt279);
-  std::vector<float> v1668(std::begin(v28) + 280 * 512, std::begin(v28) + 280 * 512 + 1024);
+  std::vector<float> v1668(std::begin(v28) + 280 * 1024, std::begin(v28) + 280 * 1024 + 1024);
   std::vector<float> v1669(752);
   std::copy(v1668.begin() + 0, v1668.begin() + 0 + 752, v1669.begin());
   std::vector<float> v1670(272);
@@ -5027,7 +5029,7 @@ std::vector<CiphertextT> mnist(CryptoContextT cc, std::vector<float> v0, std::ve
   }
   auto pt280 = cc->MakeCKKSPackedPlaintext(pt280_filled);
   const auto& ct567 = cc->EvalMult(ct16, pt280);
-  std::vector<float> v1674(std::begin(v28) + 281 * 512, std::begin(v28) + 281 * 512 + 1024);
+  std::vector<float> v1674(std::begin(v28) + 281 * 1024, std::begin(v28) + 281 * 1024 + 1024);
   std::vector<float> v1675(752);
   std::copy(v1674.begin() + 0, v1674.begin() + 0 + 752, v1675.begin());
   std::vector<float> v1676(272);
@@ -5044,7 +5046,7 @@ std::vector<CiphertextT> mnist(CryptoContextT cc, std::vector<float> v0, std::ve
   }
   auto pt281 = cc->MakeCKKSPackedPlaintext(pt281_filled);
   const auto& ct568 = cc->EvalMult(ct18, pt281);
-  std::vector<float> v1680(std::begin(v28) + 282 * 512, std::begin(v28) + 282 * 512 + 1024);
+  std::vector<float> v1680(std::begin(v28) + 282 * 1024, std::begin(v28) + 282 * 1024 + 1024);
   std::vector<float> v1681(752);
   std::copy(v1680.begin() + 0, v1680.begin() + 0 + 752, v1681.begin());
   std::vector<float> v1682(272);
@@ -5061,7 +5063,7 @@ std::vector<CiphertextT> mnist(CryptoContextT cc, std::vector<float> v0, std::ve
   }
   auto pt282 = cc->MakeCKKSPackedPlaintext(pt282_filled);
   const auto& ct569 = cc->EvalMult(ct20, pt282);
-  std::vector<float> v1686(std::begin(v28) + 283 * 512, std::begin(v28) + 283 * 512 + 1024);
+  std::vector<float> v1686(std::begin(v28) + 283 * 1024, std::begin(v28) + 283 * 1024 + 1024);
   std::vector<float> v1687(752);
   std::copy(v1686.begin() + 0, v1686.begin() + 0 + 752, v1687.begin());
   std::vector<float> v1688(272);
@@ -5078,7 +5080,7 @@ std::vector<CiphertextT> mnist(CryptoContextT cc, std::vector<float> v0, std::ve
   }
   auto pt283 = cc->MakeCKKSPackedPlaintext(pt283_filled);
   const auto& ct570 = cc->EvalMult(ct22, pt283);
-  std::vector<float> v1692(std::begin(v28) + 284 * 512, std::begin(v28) + 284 * 512 + 1024);
+  std::vector<float> v1692(std::begin(v28) + 284 * 1024, std::begin(v28) + 284 * 1024 + 1024);
   std::vector<float> v1693(752);
   std::copy(v1692.begin() + 0, v1692.begin() + 0 + 752, v1693.begin());
   std::vector<float> v1694(272);
@@ -5095,7 +5097,7 @@ std::vector<CiphertextT> mnist(CryptoContextT cc, std::vector<float> v0, std::ve
   }
   auto pt284 = cc->MakeCKKSPackedPlaintext(pt284_filled);
   const auto& ct571 = cc->EvalMult(ct24, pt284);
-  std::vector<float> v1698(std::begin(v28) + 285 * 512, std::begin(v28) + 285 * 512 + 1024);
+  std::vector<float> v1698(std::begin(v28) + 285 * 1024, std::begin(v28) + 285 * 1024 + 1024);
   std::vector<float> v1699(752);
   std::copy(v1698.begin() + 0, v1698.begin() + 0 + 752, v1699.begin());
   std::vector<float> v1700(272);
@@ -5112,7 +5114,7 @@ std::vector<CiphertextT> mnist(CryptoContextT cc, std::vector<float> v0, std::ve
   }
   auto pt285 = cc->MakeCKKSPackedPlaintext(pt285_filled);
   const auto& ct572 = cc->EvalMult(ct26, pt285);
-  std::vector<float> v1704(std::begin(v28) + 286 * 512, std::begin(v28) + 286 * 512 + 1024);
+  std::vector<float> v1704(std::begin(v28) + 286 * 1024, std::begin(v28) + 286 * 1024 + 1024);
   std::vector<float> v1705(752);
   std::copy(v1704.begin() + 0, v1704.begin() + 0 + 752, v1705.begin());
   std::vector<float> v1706(272);
@@ -5129,7 +5131,7 @@ std::vector<CiphertextT> mnist(CryptoContextT cc, std::vector<float> v0, std::ve
   }
   auto pt286 = cc->MakeCKKSPackedPlaintext(pt286_filled);
   const auto& ct573 = cc->EvalMult(ct28, pt286);
-  std::vector<float> v1710(std::begin(v28) + 287 * 512, std::begin(v28) + 287 * 512 + 1024);
+  std::vector<float> v1710(std::begin(v28) + 287 * 1024, std::begin(v28) + 287 * 1024 + 1024);
   std::vector<float> v1711(752);
   std::copy(v1710.begin() + 0, v1710.begin() + 0 + 752, v1711.begin());
   std::vector<float> v1712(272);
@@ -5162,7 +5164,7 @@ std::vector<CiphertextT> mnist(CryptoContextT cc, std::vector<float> v0, std::ve
   const auto& ct588 = cc->EvalAdd(ct584, ct587);
   const auto& ct589 = cc->EvalAdd(ct581, ct588);
   const auto& ct590 = cc->EvalRotate(ct589, 272);
-  std::vector<float> v1716(std::begin(v28) + 288 * 512, std::begin(v28) + 288 * 512 + 1024);
+  std::vector<float> v1716(std::begin(v28) + 288 * 1024, std::begin(v28) + 288 * 1024 + 1024);
   std::vector<float> v1717(736);
   std::copy(v1716.begin() + 0, v1716.begin() + 0 + 736, v1717.begin());
   std::vector<float> v1718(288);
@@ -5179,7 +5181,7 @@ std::vector<CiphertextT> mnist(CryptoContextT cc, std::vector<float> v0, std::ve
   }
   auto pt288 = cc->MakeCKKSPackedPlaintext(pt288_filled);
   const auto& ct591 = cc->EvalMult(ct, pt288);
-  std::vector<float> v1722(std::begin(v28) + 289 * 512, std::begin(v28) + 289 * 512 + 1024);
+  std::vector<float> v1722(std::begin(v28) + 289 * 1024, std::begin(v28) + 289 * 1024 + 1024);
   std::vector<float> v1723(736);
   std::copy(v1722.begin() + 0, v1722.begin() + 0 + 736, v1723.begin());
   std::vector<float> v1724(288);
@@ -5196,7 +5198,7 @@ std::vector<CiphertextT> mnist(CryptoContextT cc, std::vector<float> v0, std::ve
   }
   auto pt289 = cc->MakeCKKSPackedPlaintext(pt289_filled);
   const auto& ct592 = cc->EvalMult(ct2, pt289);
-  std::vector<float> v1728(std::begin(v28) + 290 * 512, std::begin(v28) + 290 * 512 + 1024);
+  std::vector<float> v1728(std::begin(v28) + 290 * 1024, std::begin(v28) + 290 * 1024 + 1024);
   std::vector<float> v1729(736);
   std::copy(v1728.begin() + 0, v1728.begin() + 0 + 736, v1729.begin());
   std::vector<float> v1730(288);
@@ -5213,7 +5215,7 @@ std::vector<CiphertextT> mnist(CryptoContextT cc, std::vector<float> v0, std::ve
   }
   auto pt290 = cc->MakeCKKSPackedPlaintext(pt290_filled);
   const auto& ct593 = cc->EvalMult(ct4, pt290);
-  std::vector<float> v1734(std::begin(v28) + 291 * 512, std::begin(v28) + 291 * 512 + 1024);
+  std::vector<float> v1734(std::begin(v28) + 291 * 1024, std::begin(v28) + 291 * 1024 + 1024);
   std::vector<float> v1735(736);
   std::copy(v1734.begin() + 0, v1734.begin() + 0 + 736, v1735.begin());
   std::vector<float> v1736(288);
@@ -5230,7 +5232,7 @@ std::vector<CiphertextT> mnist(CryptoContextT cc, std::vector<float> v0, std::ve
   }
   auto pt291 = cc->MakeCKKSPackedPlaintext(pt291_filled);
   const auto& ct594 = cc->EvalMult(ct6, pt291);
-  std::vector<float> v1740(std::begin(v28) + 292 * 512, std::begin(v28) + 292 * 512 + 1024);
+  std::vector<float> v1740(std::begin(v28) + 292 * 1024, std::begin(v28) + 292 * 1024 + 1024);
   std::vector<float> v1741(736);
   std::copy(v1740.begin() + 0, v1740.begin() + 0 + 736, v1741.begin());
   std::vector<float> v1742(288);
@@ -5247,7 +5249,7 @@ std::vector<CiphertextT> mnist(CryptoContextT cc, std::vector<float> v0, std::ve
   }
   auto pt292 = cc->MakeCKKSPackedPlaintext(pt292_filled);
   const auto& ct595 = cc->EvalMult(ct8, pt292);
-  std::vector<float> v1746(std::begin(v28) + 293 * 512, std::begin(v28) + 293 * 512 + 1024);
+  std::vector<float> v1746(std::begin(v28) + 293 * 1024, std::begin(v28) + 293 * 1024 + 1024);
   std::vector<float> v1747(736);
   std::copy(v1746.begin() + 0, v1746.begin() + 0 + 736, v1747.begin());
   std::vector<float> v1748(288);
@@ -5264,7 +5266,7 @@ std::vector<CiphertextT> mnist(CryptoContextT cc, std::vector<float> v0, std::ve
   }
   auto pt293 = cc->MakeCKKSPackedPlaintext(pt293_filled);
   const auto& ct596 = cc->EvalMult(ct10, pt293);
-  std::vector<float> v1752(std::begin(v28) + 294 * 512, std::begin(v28) + 294 * 512 + 1024);
+  std::vector<float> v1752(std::begin(v28) + 294 * 1024, std::begin(v28) + 294 * 1024 + 1024);
   std::vector<float> v1753(736);
   std::copy(v1752.begin() + 0, v1752.begin() + 0 + 736, v1753.begin());
   std::vector<float> v1754(288);
@@ -5281,7 +5283,7 @@ std::vector<CiphertextT> mnist(CryptoContextT cc, std::vector<float> v0, std::ve
   }
   auto pt294 = cc->MakeCKKSPackedPlaintext(pt294_filled);
   const auto& ct597 = cc->EvalMult(ct12, pt294);
-  std::vector<float> v1758(std::begin(v28) + 295 * 512, std::begin(v28) + 295 * 512 + 1024);
+  std::vector<float> v1758(std::begin(v28) + 295 * 1024, std::begin(v28) + 295 * 1024 + 1024);
   std::vector<float> v1759(736);
   std::copy(v1758.begin() + 0, v1758.begin() + 0 + 736, v1759.begin());
   std::vector<float> v1760(288);
@@ -5298,7 +5300,7 @@ std::vector<CiphertextT> mnist(CryptoContextT cc, std::vector<float> v0, std::ve
   }
   auto pt295 = cc->MakeCKKSPackedPlaintext(pt295_filled);
   const auto& ct598 = cc->EvalMult(ct14, pt295);
-  std::vector<float> v1764(std::begin(v28) + 296 * 512, std::begin(v28) + 296 * 512 + 1024);
+  std::vector<float> v1764(std::begin(v28) + 296 * 1024, std::begin(v28) + 296 * 1024 + 1024);
   std::vector<float> v1765(736);
   std::copy(v1764.begin() + 0, v1764.begin() + 0 + 736, v1765.begin());
   std::vector<float> v1766(288);
@@ -5315,7 +5317,7 @@ std::vector<CiphertextT> mnist(CryptoContextT cc, std::vector<float> v0, std::ve
   }
   auto pt296 = cc->MakeCKKSPackedPlaintext(pt296_filled);
   const auto& ct599 = cc->EvalMult(ct16, pt296);
-  std::vector<float> v1770(std::begin(v28) + 297 * 512, std::begin(v28) + 297 * 512 + 1024);
+  std::vector<float> v1770(std::begin(v28) + 297 * 1024, std::begin(v28) + 297 * 1024 + 1024);
   std::vector<float> v1771(736);
   std::copy(v1770.begin() + 0, v1770.begin() + 0 + 736, v1771.begin());
   std::vector<float> v1772(288);
@@ -5332,7 +5334,7 @@ std::vector<CiphertextT> mnist(CryptoContextT cc, std::vector<float> v0, std::ve
   }
   auto pt297 = cc->MakeCKKSPackedPlaintext(pt297_filled);
   const auto& ct600 = cc->EvalMult(ct18, pt297);
-  std::vector<float> v1776(std::begin(v28) + 298 * 512, std::begin(v28) + 298 * 512 + 1024);
+  std::vector<float> v1776(std::begin(v28) + 298 * 1024, std::begin(v28) + 298 * 1024 + 1024);
   std::vector<float> v1777(736);
   std::copy(v1776.begin() + 0, v1776.begin() + 0 + 736, v1777.begin());
   std::vector<float> v1778(288);
@@ -5349,7 +5351,7 @@ std::vector<CiphertextT> mnist(CryptoContextT cc, std::vector<float> v0, std::ve
   }
   auto pt298 = cc->MakeCKKSPackedPlaintext(pt298_filled);
   const auto& ct601 = cc->EvalMult(ct20, pt298);
-  std::vector<float> v1782(std::begin(v28) + 299 * 512, std::begin(v28) + 299 * 512 + 1024);
+  std::vector<float> v1782(std::begin(v28) + 299 * 1024, std::begin(v28) + 299 * 1024 + 1024);
   std::vector<float> v1783(736);
   std::copy(v1782.begin() + 0, v1782.begin() + 0 + 736, v1783.begin());
   std::vector<float> v1784(288);
@@ -5366,7 +5368,7 @@ std::vector<CiphertextT> mnist(CryptoContextT cc, std::vector<float> v0, std::ve
   }
   auto pt299 = cc->MakeCKKSPackedPlaintext(pt299_filled);
   const auto& ct602 = cc->EvalMult(ct22, pt299);
-  std::vector<float> v1788(std::begin(v28) + 300 * 512, std::begin(v28) + 300 * 512 + 1024);
+  std::vector<float> v1788(std::begin(v28) + 300 * 1024, std::begin(v28) + 300 * 1024 + 1024);
   std::vector<float> v1789(736);
   std::copy(v1788.begin() + 0, v1788.begin() + 0 + 736, v1789.begin());
   std::vector<float> v1790(288);
@@ -5383,7 +5385,7 @@ std::vector<CiphertextT> mnist(CryptoContextT cc, std::vector<float> v0, std::ve
   }
   auto pt300 = cc->MakeCKKSPackedPlaintext(pt300_filled);
   const auto& ct603 = cc->EvalMult(ct24, pt300);
-  std::vector<float> v1794(std::begin(v28) + 301 * 512, std::begin(v28) + 301 * 512 + 1024);
+  std::vector<float> v1794(std::begin(v28) + 301 * 1024, std::begin(v28) + 301 * 1024 + 1024);
   std::vector<float> v1795(736);
   std::copy(v1794.begin() + 0, v1794.begin() + 0 + 736, v1795.begin());
   std::vector<float> v1796(288);
@@ -5400,7 +5402,7 @@ std::vector<CiphertextT> mnist(CryptoContextT cc, std::vector<float> v0, std::ve
   }
   auto pt301 = cc->MakeCKKSPackedPlaintext(pt301_filled);
   const auto& ct604 = cc->EvalMult(ct26, pt301);
-  std::vector<float> v1800(std::begin(v28) + 302 * 512, std::begin(v28) + 302 * 512 + 1024);
+  std::vector<float> v1800(std::begin(v28) + 302 * 1024, std::begin(v28) + 302 * 1024 + 1024);
   std::vector<float> v1801(736);
   std::copy(v1800.begin() + 0, v1800.begin() + 0 + 736, v1801.begin());
   std::vector<float> v1802(288);
@@ -5417,7 +5419,7 @@ std::vector<CiphertextT> mnist(CryptoContextT cc, std::vector<float> v0, std::ve
   }
   auto pt302 = cc->MakeCKKSPackedPlaintext(pt302_filled);
   const auto& ct605 = cc->EvalMult(ct28, pt302);
-  std::vector<float> v1806(std::begin(v28) + 303 * 512, std::begin(v28) + 303 * 512 + 1024);
+  std::vector<float> v1806(std::begin(v28) + 303 * 1024, std::begin(v28) + 303 * 1024 + 1024);
   std::vector<float> v1807(736);
   std::copy(v1806.begin() + 0, v1806.begin() + 0 + 736, v1807.begin());
   std::vector<float> v1808(288);
@@ -5450,7 +5452,7 @@ std::vector<CiphertextT> mnist(CryptoContextT cc, std::vector<float> v0, std::ve
   const auto& ct620 = cc->EvalAdd(ct616, ct619);
   const auto& ct621 = cc->EvalAdd(ct613, ct620);
   const auto& ct622 = cc->EvalRotate(ct621, 288);
-  std::vector<float> v1812(std::begin(v28) + 304 * 512, std::begin(v28) + 304 * 512 + 1024);
+  std::vector<float> v1812(std::begin(v28) + 304 * 1024, std::begin(v28) + 304 * 1024 + 1024);
   std::vector<float> v1813(720);
   std::copy(v1812.begin() + 0, v1812.begin() + 0 + 720, v1813.begin());
   std::vector<float> v1814(304);
@@ -5467,7 +5469,7 @@ std::vector<CiphertextT> mnist(CryptoContextT cc, std::vector<float> v0, std::ve
   }
   auto pt304 = cc->MakeCKKSPackedPlaintext(pt304_filled);
   const auto& ct623 = cc->EvalMult(ct, pt304);
-  std::vector<float> v1818(std::begin(v28) + 305 * 512, std::begin(v28) + 305 * 512 + 1024);
+  std::vector<float> v1818(std::begin(v28) + 305 * 1024, std::begin(v28) + 305 * 1024 + 1024);
   std::vector<float> v1819(720);
   std::copy(v1818.begin() + 0, v1818.begin() + 0 + 720, v1819.begin());
   std::vector<float> v1820(304);
@@ -5484,7 +5486,7 @@ std::vector<CiphertextT> mnist(CryptoContextT cc, std::vector<float> v0, std::ve
   }
   auto pt305 = cc->MakeCKKSPackedPlaintext(pt305_filled);
   const auto& ct624 = cc->EvalMult(ct2, pt305);
-  std::vector<float> v1824(std::begin(v28) + 306 * 512, std::begin(v28) + 306 * 512 + 1024);
+  std::vector<float> v1824(std::begin(v28) + 306 * 1024, std::begin(v28) + 306 * 1024 + 1024);
   std::vector<float> v1825(720);
   std::copy(v1824.begin() + 0, v1824.begin() + 0 + 720, v1825.begin());
   std::vector<float> v1826(304);
@@ -5501,7 +5503,7 @@ std::vector<CiphertextT> mnist(CryptoContextT cc, std::vector<float> v0, std::ve
   }
   auto pt306 = cc->MakeCKKSPackedPlaintext(pt306_filled);
   const auto& ct625 = cc->EvalMult(ct4, pt306);
-  std::vector<float> v1830(std::begin(v28) + 307 * 512, std::begin(v28) + 307 * 512 + 1024);
+  std::vector<float> v1830(std::begin(v28) + 307 * 1024, std::begin(v28) + 307 * 1024 + 1024);
   std::vector<float> v1831(720);
   std::copy(v1830.begin() + 0, v1830.begin() + 0 + 720, v1831.begin());
   std::vector<float> v1832(304);
@@ -5518,7 +5520,7 @@ std::vector<CiphertextT> mnist(CryptoContextT cc, std::vector<float> v0, std::ve
   }
   auto pt307 = cc->MakeCKKSPackedPlaintext(pt307_filled);
   const auto& ct626 = cc->EvalMult(ct6, pt307);
-  std::vector<float> v1836(std::begin(v28) + 308 * 512, std::begin(v28) + 308 * 512 + 1024);
+  std::vector<float> v1836(std::begin(v28) + 308 * 1024, std::begin(v28) + 308 * 1024 + 1024);
   std::vector<float> v1837(720);
   std::copy(v1836.begin() + 0, v1836.begin() + 0 + 720, v1837.begin());
   std::vector<float> v1838(304);
@@ -5535,7 +5537,7 @@ std::vector<CiphertextT> mnist(CryptoContextT cc, std::vector<float> v0, std::ve
   }
   auto pt308 = cc->MakeCKKSPackedPlaintext(pt308_filled);
   const auto& ct627 = cc->EvalMult(ct8, pt308);
-  std::vector<float> v1842(std::begin(v28) + 309 * 512, std::begin(v28) + 309 * 512 + 1024);
+  std::vector<float> v1842(std::begin(v28) + 309 * 1024, std::begin(v28) + 309 * 1024 + 1024);
   std::vector<float> v1843(720);
   std::copy(v1842.begin() + 0, v1842.begin() + 0 + 720, v1843.begin());
   std::vector<float> v1844(304);
@@ -5552,7 +5554,7 @@ std::vector<CiphertextT> mnist(CryptoContextT cc, std::vector<float> v0, std::ve
   }
   auto pt309 = cc->MakeCKKSPackedPlaintext(pt309_filled);
   const auto& ct628 = cc->EvalMult(ct10, pt309);
-  std::vector<float> v1848(std::begin(v28) + 310 * 512, std::begin(v28) + 310 * 512 + 1024);
+  std::vector<float> v1848(std::begin(v28) + 310 * 1024, std::begin(v28) + 310 * 1024 + 1024);
   std::vector<float> v1849(720);
   std::copy(v1848.begin() + 0, v1848.begin() + 0 + 720, v1849.begin());
   std::vector<float> v1850(304);
@@ -5569,7 +5571,7 @@ std::vector<CiphertextT> mnist(CryptoContextT cc, std::vector<float> v0, std::ve
   }
   auto pt310 = cc->MakeCKKSPackedPlaintext(pt310_filled);
   const auto& ct629 = cc->EvalMult(ct12, pt310);
-  std::vector<float> v1854(std::begin(v28) + 311 * 512, std::begin(v28) + 311 * 512 + 1024);
+  std::vector<float> v1854(std::begin(v28) + 311 * 1024, std::begin(v28) + 311 * 1024 + 1024);
   std::vector<float> v1855(720);
   std::copy(v1854.begin() + 0, v1854.begin() + 0 + 720, v1855.begin());
   std::vector<float> v1856(304);
@@ -5586,7 +5588,7 @@ std::vector<CiphertextT> mnist(CryptoContextT cc, std::vector<float> v0, std::ve
   }
   auto pt311 = cc->MakeCKKSPackedPlaintext(pt311_filled);
   const auto& ct630 = cc->EvalMult(ct14, pt311);
-  std::vector<float> v1860(std::begin(v28) + 312 * 512, std::begin(v28) + 312 * 512 + 1024);
+  std::vector<float> v1860(std::begin(v28) + 312 * 1024, std::begin(v28) + 312 * 1024 + 1024);
   std::vector<float> v1861(720);
   std::copy(v1860.begin() + 0, v1860.begin() + 0 + 720, v1861.begin());
   std::vector<float> v1862(304);
@@ -5603,7 +5605,7 @@ std::vector<CiphertextT> mnist(CryptoContextT cc, std::vector<float> v0, std::ve
   }
   auto pt312 = cc->MakeCKKSPackedPlaintext(pt312_filled);
   const auto& ct631 = cc->EvalMult(ct16, pt312);
-  std::vector<float> v1866(std::begin(v28) + 313 * 512, std::begin(v28) + 313 * 512 + 1024);
+  std::vector<float> v1866(std::begin(v28) + 313 * 1024, std::begin(v28) + 313 * 1024 + 1024);
   std::vector<float> v1867(720);
   std::copy(v1866.begin() + 0, v1866.begin() + 0 + 720, v1867.begin());
   std::vector<float> v1868(304);
@@ -5620,7 +5622,7 @@ std::vector<CiphertextT> mnist(CryptoContextT cc, std::vector<float> v0, std::ve
   }
   auto pt313 = cc->MakeCKKSPackedPlaintext(pt313_filled);
   const auto& ct632 = cc->EvalMult(ct18, pt313);
-  std::vector<float> v1872(std::begin(v28) + 314 * 512, std::begin(v28) + 314 * 512 + 1024);
+  std::vector<float> v1872(std::begin(v28) + 314 * 1024, std::begin(v28) + 314 * 1024 + 1024);
   std::vector<float> v1873(720);
   std::copy(v1872.begin() + 0, v1872.begin() + 0 + 720, v1873.begin());
   std::vector<float> v1874(304);
@@ -5637,7 +5639,7 @@ std::vector<CiphertextT> mnist(CryptoContextT cc, std::vector<float> v0, std::ve
   }
   auto pt314 = cc->MakeCKKSPackedPlaintext(pt314_filled);
   const auto& ct633 = cc->EvalMult(ct20, pt314);
-  std::vector<float> v1878(std::begin(v28) + 315 * 512, std::begin(v28) + 315 * 512 + 1024);
+  std::vector<float> v1878(std::begin(v28) + 315 * 1024, std::begin(v28) + 315 * 1024 + 1024);
   std::vector<float> v1879(720);
   std::copy(v1878.begin() + 0, v1878.begin() + 0 + 720, v1879.begin());
   std::vector<float> v1880(304);
@@ -5654,7 +5656,7 @@ std::vector<CiphertextT> mnist(CryptoContextT cc, std::vector<float> v0, std::ve
   }
   auto pt315 = cc->MakeCKKSPackedPlaintext(pt315_filled);
   const auto& ct634 = cc->EvalMult(ct22, pt315);
-  std::vector<float> v1884(std::begin(v28) + 316 * 512, std::begin(v28) + 316 * 512 + 1024);
+  std::vector<float> v1884(std::begin(v28) + 316 * 1024, std::begin(v28) + 316 * 1024 + 1024);
   std::vector<float> v1885(720);
   std::copy(v1884.begin() + 0, v1884.begin() + 0 + 720, v1885.begin());
   std::vector<float> v1886(304);
@@ -5671,7 +5673,7 @@ std::vector<CiphertextT> mnist(CryptoContextT cc, std::vector<float> v0, std::ve
   }
   auto pt316 = cc->MakeCKKSPackedPlaintext(pt316_filled);
   const auto& ct635 = cc->EvalMult(ct24, pt316);
-  std::vector<float> v1890(std::begin(v28) + 317 * 512, std::begin(v28) + 317 * 512 + 1024);
+  std::vector<float> v1890(std::begin(v28) + 317 * 1024, std::begin(v28) + 317 * 1024 + 1024);
   std::vector<float> v1891(720);
   std::copy(v1890.begin() + 0, v1890.begin() + 0 + 720, v1891.begin());
   std::vector<float> v1892(304);
@@ -5688,7 +5690,7 @@ std::vector<CiphertextT> mnist(CryptoContextT cc, std::vector<float> v0, std::ve
   }
   auto pt317 = cc->MakeCKKSPackedPlaintext(pt317_filled);
   const auto& ct636 = cc->EvalMult(ct26, pt317);
-  std::vector<float> v1896(std::begin(v28) + 318 * 512, std::begin(v28) + 318 * 512 + 1024);
+  std::vector<float> v1896(std::begin(v28) + 318 * 1024, std::begin(v28) + 318 * 1024 + 1024);
   std::vector<float> v1897(720);
   std::copy(v1896.begin() + 0, v1896.begin() + 0 + 720, v1897.begin());
   std::vector<float> v1898(304);
@@ -5705,7 +5707,7 @@ std::vector<CiphertextT> mnist(CryptoContextT cc, std::vector<float> v0, std::ve
   }
   auto pt318 = cc->MakeCKKSPackedPlaintext(pt318_filled);
   const auto& ct637 = cc->EvalMult(ct28, pt318);
-  std::vector<float> v1902(std::begin(v28) + 319 * 512, std::begin(v28) + 319 * 512 + 1024);
+  std::vector<float> v1902(std::begin(v28) + 319 * 1024, std::begin(v28) + 319 * 1024 + 1024);
   std::vector<float> v1903(720);
   std::copy(v1902.begin() + 0, v1902.begin() + 0 + 720, v1903.begin());
   std::vector<float> v1904(304);
@@ -5738,7 +5740,7 @@ std::vector<CiphertextT> mnist(CryptoContextT cc, std::vector<float> v0, std::ve
   const auto& ct652 = cc->EvalAdd(ct648, ct651);
   const auto& ct653 = cc->EvalAdd(ct645, ct652);
   const auto& ct654 = cc->EvalRotate(ct653, 304);
-  std::vector<float> v1908(std::begin(v28) + 320 * 512, std::begin(v28) + 320 * 512 + 1024);
+  std::vector<float> v1908(std::begin(v28) + 320 * 1024, std::begin(v28) + 320 * 1024 + 1024);
   std::vector<float> v1909(704);
   std::copy(v1908.begin() + 0, v1908.begin() + 0 + 704, v1909.begin());
   std::vector<float> v1910(320);
@@ -5755,7 +5757,7 @@ std::vector<CiphertextT> mnist(CryptoContextT cc, std::vector<float> v0, std::ve
   }
   auto pt320 = cc->MakeCKKSPackedPlaintext(pt320_filled);
   const auto& ct655 = cc->EvalMult(ct, pt320);
-  std::vector<float> v1914(std::begin(v28) + 321 * 512, std::begin(v28) + 321 * 512 + 1024);
+  std::vector<float> v1914(std::begin(v28) + 321 * 1024, std::begin(v28) + 321 * 1024 + 1024);
   std::vector<float> v1915(704);
   std::copy(v1914.begin() + 0, v1914.begin() + 0 + 704, v1915.begin());
   std::vector<float> v1916(320);
@@ -5772,7 +5774,7 @@ std::vector<CiphertextT> mnist(CryptoContextT cc, std::vector<float> v0, std::ve
   }
   auto pt321 = cc->MakeCKKSPackedPlaintext(pt321_filled);
   const auto& ct656 = cc->EvalMult(ct2, pt321);
-  std::vector<float> v1920(std::begin(v28) + 322 * 512, std::begin(v28) + 322 * 512 + 1024);
+  std::vector<float> v1920(std::begin(v28) + 322 * 1024, std::begin(v28) + 322 * 1024 + 1024);
   std::vector<float> v1921(704);
   std::copy(v1920.begin() + 0, v1920.begin() + 0 + 704, v1921.begin());
   std::vector<float> v1922(320);
@@ -5789,7 +5791,7 @@ std::vector<CiphertextT> mnist(CryptoContextT cc, std::vector<float> v0, std::ve
   }
   auto pt322 = cc->MakeCKKSPackedPlaintext(pt322_filled);
   const auto& ct657 = cc->EvalMult(ct4, pt322);
-  std::vector<float> v1926(std::begin(v28) + 323 * 512, std::begin(v28) + 323 * 512 + 1024);
+  std::vector<float> v1926(std::begin(v28) + 323 * 1024, std::begin(v28) + 323 * 1024 + 1024);
   std::vector<float> v1927(704);
   std::copy(v1926.begin() + 0, v1926.begin() + 0 + 704, v1927.begin());
   std::vector<float> v1928(320);
@@ -5806,7 +5808,7 @@ std::vector<CiphertextT> mnist(CryptoContextT cc, std::vector<float> v0, std::ve
   }
   auto pt323 = cc->MakeCKKSPackedPlaintext(pt323_filled);
   const auto& ct658 = cc->EvalMult(ct6, pt323);
-  std::vector<float> v1932(std::begin(v28) + 324 * 512, std::begin(v28) + 324 * 512 + 1024);
+  std::vector<float> v1932(std::begin(v28) + 324 * 1024, std::begin(v28) + 324 * 1024 + 1024);
   std::vector<float> v1933(704);
   std::copy(v1932.begin() + 0, v1932.begin() + 0 + 704, v1933.begin());
   std::vector<float> v1934(320);
@@ -5823,7 +5825,7 @@ std::vector<CiphertextT> mnist(CryptoContextT cc, std::vector<float> v0, std::ve
   }
   auto pt324 = cc->MakeCKKSPackedPlaintext(pt324_filled);
   const auto& ct659 = cc->EvalMult(ct8, pt324);
-  std::vector<float> v1938(std::begin(v28) + 325 * 512, std::begin(v28) + 325 * 512 + 1024);
+  std::vector<float> v1938(std::begin(v28) + 325 * 1024, std::begin(v28) + 325 * 1024 + 1024);
   std::vector<float> v1939(704);
   std::copy(v1938.begin() + 0, v1938.begin() + 0 + 704, v1939.begin());
   std::vector<float> v1940(320);
@@ -5840,7 +5842,7 @@ std::vector<CiphertextT> mnist(CryptoContextT cc, std::vector<float> v0, std::ve
   }
   auto pt325 = cc->MakeCKKSPackedPlaintext(pt325_filled);
   const auto& ct660 = cc->EvalMult(ct10, pt325);
-  std::vector<float> v1944(std::begin(v28) + 326 * 512, std::begin(v28) + 326 * 512 + 1024);
+  std::vector<float> v1944(std::begin(v28) + 326 * 1024, std::begin(v28) + 326 * 1024 + 1024);
   std::vector<float> v1945(704);
   std::copy(v1944.begin() + 0, v1944.begin() + 0 + 704, v1945.begin());
   std::vector<float> v1946(320);
@@ -5857,7 +5859,7 @@ std::vector<CiphertextT> mnist(CryptoContextT cc, std::vector<float> v0, std::ve
   }
   auto pt326 = cc->MakeCKKSPackedPlaintext(pt326_filled);
   const auto& ct661 = cc->EvalMult(ct12, pt326);
-  std::vector<float> v1950(std::begin(v28) + 327 * 512, std::begin(v28) + 327 * 512 + 1024);
+  std::vector<float> v1950(std::begin(v28) + 327 * 1024, std::begin(v28) + 327 * 1024 + 1024);
   std::vector<float> v1951(704);
   std::copy(v1950.begin() + 0, v1950.begin() + 0 + 704, v1951.begin());
   std::vector<float> v1952(320);
@@ -5874,7 +5876,7 @@ std::vector<CiphertextT> mnist(CryptoContextT cc, std::vector<float> v0, std::ve
   }
   auto pt327 = cc->MakeCKKSPackedPlaintext(pt327_filled);
   const auto& ct662 = cc->EvalMult(ct14, pt327);
-  std::vector<float> v1956(std::begin(v28) + 328 * 512, std::begin(v28) + 328 * 512 + 1024);
+  std::vector<float> v1956(std::begin(v28) + 328 * 1024, std::begin(v28) + 328 * 1024 + 1024);
   std::vector<float> v1957(704);
   std::copy(v1956.begin() + 0, v1956.begin() + 0 + 704, v1957.begin());
   std::vector<float> v1958(320);
@@ -5891,7 +5893,7 @@ std::vector<CiphertextT> mnist(CryptoContextT cc, std::vector<float> v0, std::ve
   }
   auto pt328 = cc->MakeCKKSPackedPlaintext(pt328_filled);
   const auto& ct663 = cc->EvalMult(ct16, pt328);
-  std::vector<float> v1962(std::begin(v28) + 329 * 512, std::begin(v28) + 329 * 512 + 1024);
+  std::vector<float> v1962(std::begin(v28) + 329 * 1024, std::begin(v28) + 329 * 1024 + 1024);
   std::vector<float> v1963(704);
   std::copy(v1962.begin() + 0, v1962.begin() + 0 + 704, v1963.begin());
   std::vector<float> v1964(320);
@@ -5908,7 +5910,7 @@ std::vector<CiphertextT> mnist(CryptoContextT cc, std::vector<float> v0, std::ve
   }
   auto pt329 = cc->MakeCKKSPackedPlaintext(pt329_filled);
   const auto& ct664 = cc->EvalMult(ct18, pt329);
-  std::vector<float> v1968(std::begin(v28) + 330 * 512, std::begin(v28) + 330 * 512 + 1024);
+  std::vector<float> v1968(std::begin(v28) + 330 * 1024, std::begin(v28) + 330 * 1024 + 1024);
   std::vector<float> v1969(704);
   std::copy(v1968.begin() + 0, v1968.begin() + 0 + 704, v1969.begin());
   std::vector<float> v1970(320);
@@ -5925,7 +5927,7 @@ std::vector<CiphertextT> mnist(CryptoContextT cc, std::vector<float> v0, std::ve
   }
   auto pt330 = cc->MakeCKKSPackedPlaintext(pt330_filled);
   const auto& ct665 = cc->EvalMult(ct20, pt330);
-  std::vector<float> v1974(std::begin(v28) + 331 * 512, std::begin(v28) + 331 * 512 + 1024);
+  std::vector<float> v1974(std::begin(v28) + 331 * 1024, std::begin(v28) + 331 * 1024 + 1024);
   std::vector<float> v1975(704);
   std::copy(v1974.begin() + 0, v1974.begin() + 0 + 704, v1975.begin());
   std::vector<float> v1976(320);
@@ -5942,7 +5944,7 @@ std::vector<CiphertextT> mnist(CryptoContextT cc, std::vector<float> v0, std::ve
   }
   auto pt331 = cc->MakeCKKSPackedPlaintext(pt331_filled);
   const auto& ct666 = cc->EvalMult(ct22, pt331);
-  std::vector<float> v1980(std::begin(v28) + 332 * 512, std::begin(v28) + 332 * 512 + 1024);
+  std::vector<float> v1980(std::begin(v28) + 332 * 1024, std::begin(v28) + 332 * 1024 + 1024);
   std::vector<float> v1981(704);
   std::copy(v1980.begin() + 0, v1980.begin() + 0 + 704, v1981.begin());
   std::vector<float> v1982(320);
@@ -5959,7 +5961,7 @@ std::vector<CiphertextT> mnist(CryptoContextT cc, std::vector<float> v0, std::ve
   }
   auto pt332 = cc->MakeCKKSPackedPlaintext(pt332_filled);
   const auto& ct667 = cc->EvalMult(ct24, pt332);
-  std::vector<float> v1986(std::begin(v28) + 333 * 512, std::begin(v28) + 333 * 512 + 1024);
+  std::vector<float> v1986(std::begin(v28) + 333 * 1024, std::begin(v28) + 333 * 1024 + 1024);
   std::vector<float> v1987(704);
   std::copy(v1986.begin() + 0, v1986.begin() + 0 + 704, v1987.begin());
   std::vector<float> v1988(320);
@@ -5976,7 +5978,7 @@ std::vector<CiphertextT> mnist(CryptoContextT cc, std::vector<float> v0, std::ve
   }
   auto pt333 = cc->MakeCKKSPackedPlaintext(pt333_filled);
   const auto& ct668 = cc->EvalMult(ct26, pt333);
-  std::vector<float> v1992(std::begin(v28) + 334 * 512, std::begin(v28) + 334 * 512 + 1024);
+  std::vector<float> v1992(std::begin(v28) + 334 * 1024, std::begin(v28) + 334 * 1024 + 1024);
   std::vector<float> v1993(704);
   std::copy(v1992.begin() + 0, v1992.begin() + 0 + 704, v1993.begin());
   std::vector<float> v1994(320);
@@ -5993,7 +5995,7 @@ std::vector<CiphertextT> mnist(CryptoContextT cc, std::vector<float> v0, std::ve
   }
   auto pt334 = cc->MakeCKKSPackedPlaintext(pt334_filled);
   const auto& ct669 = cc->EvalMult(ct28, pt334);
-  std::vector<float> v1998(std::begin(v28) + 335 * 512, std::begin(v28) + 335 * 512 + 1024);
+  std::vector<float> v1998(std::begin(v28) + 335 * 1024, std::begin(v28) + 335 * 1024 + 1024);
   std::vector<float> v1999(704);
   std::copy(v1998.begin() + 0, v1998.begin() + 0 + 704, v1999.begin());
   std::vector<float> v2000(320);
@@ -6026,7 +6028,7 @@ std::vector<CiphertextT> mnist(CryptoContextT cc, std::vector<float> v0, std::ve
   const auto& ct684 = cc->EvalAdd(ct680, ct683);
   const auto& ct685 = cc->EvalAdd(ct677, ct684);
   const auto& ct686 = cc->EvalRotate(ct685, 320);
-  std::vector<float> v2004(std::begin(v28) + 336 * 512, std::begin(v28) + 336 * 512 + 1024);
+  std::vector<float> v2004(std::begin(v28) + 336 * 1024, std::begin(v28) + 336 * 1024 + 1024);
   std::vector<float> v2005(688);
   std::copy(v2004.begin() + 0, v2004.begin() + 0 + 688, v2005.begin());
   std::vector<float> v2006(336);
@@ -6043,7 +6045,7 @@ std::vector<CiphertextT> mnist(CryptoContextT cc, std::vector<float> v0, std::ve
   }
   auto pt336 = cc->MakeCKKSPackedPlaintext(pt336_filled);
   const auto& ct687 = cc->EvalMult(ct, pt336);
-  std::vector<float> v2010(std::begin(v28) + 337 * 512, std::begin(v28) + 337 * 512 + 1024);
+  std::vector<float> v2010(std::begin(v28) + 337 * 1024, std::begin(v28) + 337 * 1024 + 1024);
   std::vector<float> v2011(688);
   std::copy(v2010.begin() + 0, v2010.begin() + 0 + 688, v2011.begin());
   std::vector<float> v2012(336);
@@ -6060,7 +6062,7 @@ std::vector<CiphertextT> mnist(CryptoContextT cc, std::vector<float> v0, std::ve
   }
   auto pt337 = cc->MakeCKKSPackedPlaintext(pt337_filled);
   const auto& ct688 = cc->EvalMult(ct2, pt337);
-  std::vector<float> v2016(std::begin(v28) + 338 * 512, std::begin(v28) + 338 * 512 + 1024);
+  std::vector<float> v2016(std::begin(v28) + 338 * 1024, std::begin(v28) + 338 * 1024 + 1024);
   std::vector<float> v2017(688);
   std::copy(v2016.begin() + 0, v2016.begin() + 0 + 688, v2017.begin());
   std::vector<float> v2018(336);
@@ -6077,7 +6079,7 @@ std::vector<CiphertextT> mnist(CryptoContextT cc, std::vector<float> v0, std::ve
   }
   auto pt338 = cc->MakeCKKSPackedPlaintext(pt338_filled);
   const auto& ct689 = cc->EvalMult(ct4, pt338);
-  std::vector<float> v2022(std::begin(v28) + 339 * 512, std::begin(v28) + 339 * 512 + 1024);
+  std::vector<float> v2022(std::begin(v28) + 339 * 1024, std::begin(v28) + 339 * 1024 + 1024);
   std::vector<float> v2023(688);
   std::copy(v2022.begin() + 0, v2022.begin() + 0 + 688, v2023.begin());
   std::vector<float> v2024(336);
@@ -6094,7 +6096,7 @@ std::vector<CiphertextT> mnist(CryptoContextT cc, std::vector<float> v0, std::ve
   }
   auto pt339 = cc->MakeCKKSPackedPlaintext(pt339_filled);
   const auto& ct690 = cc->EvalMult(ct6, pt339);
-  std::vector<float> v2028(std::begin(v28) + 340 * 512, std::begin(v28) + 340 * 512 + 1024);
+  std::vector<float> v2028(std::begin(v28) + 340 * 1024, std::begin(v28) + 340 * 1024 + 1024);
   std::vector<float> v2029(688);
   std::copy(v2028.begin() + 0, v2028.begin() + 0 + 688, v2029.begin());
   std::vector<float> v2030(336);
@@ -6111,7 +6113,7 @@ std::vector<CiphertextT> mnist(CryptoContextT cc, std::vector<float> v0, std::ve
   }
   auto pt340 = cc->MakeCKKSPackedPlaintext(pt340_filled);
   const auto& ct691 = cc->EvalMult(ct8, pt340);
-  std::vector<float> v2034(std::begin(v28) + 341 * 512, std::begin(v28) + 341 * 512 + 1024);
+  std::vector<float> v2034(std::begin(v28) + 341 * 1024, std::begin(v28) + 341 * 1024 + 1024);
   std::vector<float> v2035(688);
   std::copy(v2034.begin() + 0, v2034.begin() + 0 + 688, v2035.begin());
   std::vector<float> v2036(336);
@@ -6128,7 +6130,7 @@ std::vector<CiphertextT> mnist(CryptoContextT cc, std::vector<float> v0, std::ve
   }
   auto pt341 = cc->MakeCKKSPackedPlaintext(pt341_filled);
   const auto& ct692 = cc->EvalMult(ct10, pt341);
-  std::vector<float> v2040(std::begin(v28) + 342 * 512, std::begin(v28) + 342 * 512 + 1024);
+  std::vector<float> v2040(std::begin(v28) + 342 * 1024, std::begin(v28) + 342 * 1024 + 1024);
   std::vector<float> v2041(688);
   std::copy(v2040.begin() + 0, v2040.begin() + 0 + 688, v2041.begin());
   std::vector<float> v2042(336);
@@ -6145,7 +6147,7 @@ std::vector<CiphertextT> mnist(CryptoContextT cc, std::vector<float> v0, std::ve
   }
   auto pt342 = cc->MakeCKKSPackedPlaintext(pt342_filled);
   const auto& ct693 = cc->EvalMult(ct12, pt342);
-  std::vector<float> v2046(std::begin(v28) + 343 * 512, std::begin(v28) + 343 * 512 + 1024);
+  std::vector<float> v2046(std::begin(v28) + 343 * 1024, std::begin(v28) + 343 * 1024 + 1024);
   std::vector<float> v2047(688);
   std::copy(v2046.begin() + 0, v2046.begin() + 0 + 688, v2047.begin());
   std::vector<float> v2048(336);
@@ -6162,7 +6164,7 @@ std::vector<CiphertextT> mnist(CryptoContextT cc, std::vector<float> v0, std::ve
   }
   auto pt343 = cc->MakeCKKSPackedPlaintext(pt343_filled);
   const auto& ct694 = cc->EvalMult(ct14, pt343);
-  std::vector<float> v2052(std::begin(v28) + 344 * 512, std::begin(v28) + 344 * 512 + 1024);
+  std::vector<float> v2052(std::begin(v28) + 344 * 1024, std::begin(v28) + 344 * 1024 + 1024);
   std::vector<float> v2053(688);
   std::copy(v2052.begin() + 0, v2052.begin() + 0 + 688, v2053.begin());
   std::vector<float> v2054(336);
@@ -6179,7 +6181,7 @@ std::vector<CiphertextT> mnist(CryptoContextT cc, std::vector<float> v0, std::ve
   }
   auto pt344 = cc->MakeCKKSPackedPlaintext(pt344_filled);
   const auto& ct695 = cc->EvalMult(ct16, pt344);
-  std::vector<float> v2058(std::begin(v28) + 345 * 512, std::begin(v28) + 345 * 512 + 1024);
+  std::vector<float> v2058(std::begin(v28) + 345 * 1024, std::begin(v28) + 345 * 1024 + 1024);
   std::vector<float> v2059(688);
   std::copy(v2058.begin() + 0, v2058.begin() + 0 + 688, v2059.begin());
   std::vector<float> v2060(336);
@@ -6196,7 +6198,7 @@ std::vector<CiphertextT> mnist(CryptoContextT cc, std::vector<float> v0, std::ve
   }
   auto pt345 = cc->MakeCKKSPackedPlaintext(pt345_filled);
   const auto& ct696 = cc->EvalMult(ct18, pt345);
-  std::vector<float> v2064(std::begin(v28) + 346 * 512, std::begin(v28) + 346 * 512 + 1024);
+  std::vector<float> v2064(std::begin(v28) + 346 * 1024, std::begin(v28) + 346 * 1024 + 1024);
   std::vector<float> v2065(688);
   std::copy(v2064.begin() + 0, v2064.begin() + 0 + 688, v2065.begin());
   std::vector<float> v2066(336);
@@ -6213,7 +6215,7 @@ std::vector<CiphertextT> mnist(CryptoContextT cc, std::vector<float> v0, std::ve
   }
   auto pt346 = cc->MakeCKKSPackedPlaintext(pt346_filled);
   const auto& ct697 = cc->EvalMult(ct20, pt346);
-  std::vector<float> v2070(std::begin(v28) + 347 * 512, std::begin(v28) + 347 * 512 + 1024);
+  std::vector<float> v2070(std::begin(v28) + 347 * 1024, std::begin(v28) + 347 * 1024 + 1024);
   std::vector<float> v2071(688);
   std::copy(v2070.begin() + 0, v2070.begin() + 0 + 688, v2071.begin());
   std::vector<float> v2072(336);
@@ -6230,7 +6232,7 @@ std::vector<CiphertextT> mnist(CryptoContextT cc, std::vector<float> v0, std::ve
   }
   auto pt347 = cc->MakeCKKSPackedPlaintext(pt347_filled);
   const auto& ct698 = cc->EvalMult(ct22, pt347);
-  std::vector<float> v2076(std::begin(v28) + 348 * 512, std::begin(v28) + 348 * 512 + 1024);
+  std::vector<float> v2076(std::begin(v28) + 348 * 1024, std::begin(v28) + 348 * 1024 + 1024);
   std::vector<float> v2077(688);
   std::copy(v2076.begin() + 0, v2076.begin() + 0 + 688, v2077.begin());
   std::vector<float> v2078(336);
@@ -6247,7 +6249,7 @@ std::vector<CiphertextT> mnist(CryptoContextT cc, std::vector<float> v0, std::ve
   }
   auto pt348 = cc->MakeCKKSPackedPlaintext(pt348_filled);
   const auto& ct699 = cc->EvalMult(ct24, pt348);
-  std::vector<float> v2082(std::begin(v28) + 349 * 512, std::begin(v28) + 349 * 512 + 1024);
+  std::vector<float> v2082(std::begin(v28) + 349 * 1024, std::begin(v28) + 349 * 1024 + 1024);
   std::vector<float> v2083(688);
   std::copy(v2082.begin() + 0, v2082.begin() + 0 + 688, v2083.begin());
   std::vector<float> v2084(336);
@@ -6264,7 +6266,7 @@ std::vector<CiphertextT> mnist(CryptoContextT cc, std::vector<float> v0, std::ve
   }
   auto pt349 = cc->MakeCKKSPackedPlaintext(pt349_filled);
   const auto& ct700 = cc->EvalMult(ct26, pt349);
-  std::vector<float> v2088(std::begin(v28) + 350 * 512, std::begin(v28) + 350 * 512 + 1024);
+  std::vector<float> v2088(std::begin(v28) + 350 * 1024, std::begin(v28) + 350 * 1024 + 1024);
   std::vector<float> v2089(688);
   std::copy(v2088.begin() + 0, v2088.begin() + 0 + 688, v2089.begin());
   std::vector<float> v2090(336);
@@ -6281,7 +6283,7 @@ std::vector<CiphertextT> mnist(CryptoContextT cc, std::vector<float> v0, std::ve
   }
   auto pt350 = cc->MakeCKKSPackedPlaintext(pt350_filled);
   const auto& ct701 = cc->EvalMult(ct28, pt350);
-  std::vector<float> v2094(std::begin(v28) + 351 * 512, std::begin(v28) + 351 * 512 + 1024);
+  std::vector<float> v2094(std::begin(v28) + 351 * 1024, std::begin(v28) + 351 * 1024 + 1024);
   std::vector<float> v2095(688);
   std::copy(v2094.begin() + 0, v2094.begin() + 0 + 688, v2095.begin());
   std::vector<float> v2096(336);
@@ -6314,7 +6316,7 @@ std::vector<CiphertextT> mnist(CryptoContextT cc, std::vector<float> v0, std::ve
   const auto& ct716 = cc->EvalAdd(ct712, ct715);
   const auto& ct717 = cc->EvalAdd(ct709, ct716);
   const auto& ct718 = cc->EvalRotate(ct717, 336);
-  std::vector<float> v2100(std::begin(v28) + 352 * 512, std::begin(v28) + 352 * 512 + 1024);
+  std::vector<float> v2100(std::begin(v28) + 352 * 1024, std::begin(v28) + 352 * 1024 + 1024);
   std::vector<float> v2101(672);
   std::copy(v2100.begin() + 0, v2100.begin() + 0 + 672, v2101.begin());
   std::vector<float> v2102(352);
@@ -6331,7 +6333,7 @@ std::vector<CiphertextT> mnist(CryptoContextT cc, std::vector<float> v0, std::ve
   }
   auto pt352 = cc->MakeCKKSPackedPlaintext(pt352_filled);
   const auto& ct719 = cc->EvalMult(ct, pt352);
-  std::vector<float> v2106(std::begin(v28) + 353 * 512, std::begin(v28) + 353 * 512 + 1024);
+  std::vector<float> v2106(std::begin(v28) + 353 * 1024, std::begin(v28) + 353 * 1024 + 1024);
   std::vector<float> v2107(672);
   std::copy(v2106.begin() + 0, v2106.begin() + 0 + 672, v2107.begin());
   std::vector<float> v2108(352);
@@ -6348,7 +6350,7 @@ std::vector<CiphertextT> mnist(CryptoContextT cc, std::vector<float> v0, std::ve
   }
   auto pt353 = cc->MakeCKKSPackedPlaintext(pt353_filled);
   const auto& ct720 = cc->EvalMult(ct2, pt353);
-  std::vector<float> v2112(std::begin(v28) + 354 * 512, std::begin(v28) + 354 * 512 + 1024);
+  std::vector<float> v2112(std::begin(v28) + 354 * 1024, std::begin(v28) + 354 * 1024 + 1024);
   std::vector<float> v2113(672);
   std::copy(v2112.begin() + 0, v2112.begin() + 0 + 672, v2113.begin());
   std::vector<float> v2114(352);
@@ -6365,7 +6367,7 @@ std::vector<CiphertextT> mnist(CryptoContextT cc, std::vector<float> v0, std::ve
   }
   auto pt354 = cc->MakeCKKSPackedPlaintext(pt354_filled);
   const auto& ct721 = cc->EvalMult(ct4, pt354);
-  std::vector<float> v2118(std::begin(v28) + 355 * 512, std::begin(v28) + 355 * 512 + 1024);
+  std::vector<float> v2118(std::begin(v28) + 355 * 1024, std::begin(v28) + 355 * 1024 + 1024);
   std::vector<float> v2119(672);
   std::copy(v2118.begin() + 0, v2118.begin() + 0 + 672, v2119.begin());
   std::vector<float> v2120(352);
@@ -6382,7 +6384,7 @@ std::vector<CiphertextT> mnist(CryptoContextT cc, std::vector<float> v0, std::ve
   }
   auto pt355 = cc->MakeCKKSPackedPlaintext(pt355_filled);
   const auto& ct722 = cc->EvalMult(ct6, pt355);
-  std::vector<float> v2124(std::begin(v28) + 356 * 512, std::begin(v28) + 356 * 512 + 1024);
+  std::vector<float> v2124(std::begin(v28) + 356 * 1024, std::begin(v28) + 356 * 1024 + 1024);
   std::vector<float> v2125(672);
   std::copy(v2124.begin() + 0, v2124.begin() + 0 + 672, v2125.begin());
   std::vector<float> v2126(352);
@@ -6399,7 +6401,7 @@ std::vector<CiphertextT> mnist(CryptoContextT cc, std::vector<float> v0, std::ve
   }
   auto pt356 = cc->MakeCKKSPackedPlaintext(pt356_filled);
   const auto& ct723 = cc->EvalMult(ct8, pt356);
-  std::vector<float> v2130(std::begin(v28) + 357 * 512, std::begin(v28) + 357 * 512 + 1024);
+  std::vector<float> v2130(std::begin(v28) + 357 * 1024, std::begin(v28) + 357 * 1024 + 1024);
   std::vector<float> v2131(672);
   std::copy(v2130.begin() + 0, v2130.begin() + 0 + 672, v2131.begin());
   std::vector<float> v2132(352);
@@ -6416,7 +6418,7 @@ std::vector<CiphertextT> mnist(CryptoContextT cc, std::vector<float> v0, std::ve
   }
   auto pt357 = cc->MakeCKKSPackedPlaintext(pt357_filled);
   const auto& ct724 = cc->EvalMult(ct10, pt357);
-  std::vector<float> v2136(std::begin(v28) + 358 * 512, std::begin(v28) + 358 * 512 + 1024);
+  std::vector<float> v2136(std::begin(v28) + 358 * 1024, std::begin(v28) + 358 * 1024 + 1024);
   std::vector<float> v2137(672);
   std::copy(v2136.begin() + 0, v2136.begin() + 0 + 672, v2137.begin());
   std::vector<float> v2138(352);
@@ -6433,7 +6435,7 @@ std::vector<CiphertextT> mnist(CryptoContextT cc, std::vector<float> v0, std::ve
   }
   auto pt358 = cc->MakeCKKSPackedPlaintext(pt358_filled);
   const auto& ct725 = cc->EvalMult(ct12, pt358);
-  std::vector<float> v2142(std::begin(v28) + 359 * 512, std::begin(v28) + 359 * 512 + 1024);
+  std::vector<float> v2142(std::begin(v28) + 359 * 1024, std::begin(v28) + 359 * 1024 + 1024);
   std::vector<float> v2143(672);
   std::copy(v2142.begin() + 0, v2142.begin() + 0 + 672, v2143.begin());
   std::vector<float> v2144(352);
@@ -6450,7 +6452,7 @@ std::vector<CiphertextT> mnist(CryptoContextT cc, std::vector<float> v0, std::ve
   }
   auto pt359 = cc->MakeCKKSPackedPlaintext(pt359_filled);
   const auto& ct726 = cc->EvalMult(ct14, pt359);
-  std::vector<float> v2148(std::begin(v28) + 360 * 512, std::begin(v28) + 360 * 512 + 1024);
+  std::vector<float> v2148(std::begin(v28) + 360 * 1024, std::begin(v28) + 360 * 1024 + 1024);
   std::vector<float> v2149(672);
   std::copy(v2148.begin() + 0, v2148.begin() + 0 + 672, v2149.begin());
   std::vector<float> v2150(352);
@@ -6467,7 +6469,7 @@ std::vector<CiphertextT> mnist(CryptoContextT cc, std::vector<float> v0, std::ve
   }
   auto pt360 = cc->MakeCKKSPackedPlaintext(pt360_filled);
   const auto& ct727 = cc->EvalMult(ct16, pt360);
-  std::vector<float> v2154(std::begin(v28) + 361 * 512, std::begin(v28) + 361 * 512 + 1024);
+  std::vector<float> v2154(std::begin(v28) + 361 * 1024, std::begin(v28) + 361 * 1024 + 1024);
   std::vector<float> v2155(672);
   std::copy(v2154.begin() + 0, v2154.begin() + 0 + 672, v2155.begin());
   std::vector<float> v2156(352);
@@ -6484,7 +6486,7 @@ std::vector<CiphertextT> mnist(CryptoContextT cc, std::vector<float> v0, std::ve
   }
   auto pt361 = cc->MakeCKKSPackedPlaintext(pt361_filled);
   const auto& ct728 = cc->EvalMult(ct18, pt361);
-  std::vector<float> v2160(std::begin(v28) + 362 * 512, std::begin(v28) + 362 * 512 + 1024);
+  std::vector<float> v2160(std::begin(v28) + 362 * 1024, std::begin(v28) + 362 * 1024 + 1024);
   std::vector<float> v2161(672);
   std::copy(v2160.begin() + 0, v2160.begin() + 0 + 672, v2161.begin());
   std::vector<float> v2162(352);
@@ -6501,7 +6503,7 @@ std::vector<CiphertextT> mnist(CryptoContextT cc, std::vector<float> v0, std::ve
   }
   auto pt362 = cc->MakeCKKSPackedPlaintext(pt362_filled);
   const auto& ct729 = cc->EvalMult(ct20, pt362);
-  std::vector<float> v2166(std::begin(v28) + 363 * 512, std::begin(v28) + 363 * 512 + 1024);
+  std::vector<float> v2166(std::begin(v28) + 363 * 1024, std::begin(v28) + 363 * 1024 + 1024);
   std::vector<float> v2167(672);
   std::copy(v2166.begin() + 0, v2166.begin() + 0 + 672, v2167.begin());
   std::vector<float> v2168(352);
@@ -6518,7 +6520,7 @@ std::vector<CiphertextT> mnist(CryptoContextT cc, std::vector<float> v0, std::ve
   }
   auto pt363 = cc->MakeCKKSPackedPlaintext(pt363_filled);
   const auto& ct730 = cc->EvalMult(ct22, pt363);
-  std::vector<float> v2172(std::begin(v28) + 364 * 512, std::begin(v28) + 364 * 512 + 1024);
+  std::vector<float> v2172(std::begin(v28) + 364 * 1024, std::begin(v28) + 364 * 1024 + 1024);
   std::vector<float> v2173(672);
   std::copy(v2172.begin() + 0, v2172.begin() + 0 + 672, v2173.begin());
   std::vector<float> v2174(352);
@@ -6535,7 +6537,7 @@ std::vector<CiphertextT> mnist(CryptoContextT cc, std::vector<float> v0, std::ve
   }
   auto pt364 = cc->MakeCKKSPackedPlaintext(pt364_filled);
   const auto& ct731 = cc->EvalMult(ct24, pt364);
-  std::vector<float> v2178(std::begin(v28) + 365 * 512, std::begin(v28) + 365 * 512 + 1024);
+  std::vector<float> v2178(std::begin(v28) + 365 * 1024, std::begin(v28) + 365 * 1024 + 1024);
   std::vector<float> v2179(672);
   std::copy(v2178.begin() + 0, v2178.begin() + 0 + 672, v2179.begin());
   std::vector<float> v2180(352);
@@ -6552,7 +6554,7 @@ std::vector<CiphertextT> mnist(CryptoContextT cc, std::vector<float> v0, std::ve
   }
   auto pt365 = cc->MakeCKKSPackedPlaintext(pt365_filled);
   const auto& ct732 = cc->EvalMult(ct26, pt365);
-  std::vector<float> v2184(std::begin(v28) + 366 * 512, std::begin(v28) + 366 * 512 + 1024);
+  std::vector<float> v2184(std::begin(v28) + 366 * 1024, std::begin(v28) + 366 * 1024 + 1024);
   std::vector<float> v2185(672);
   std::copy(v2184.begin() + 0, v2184.begin() + 0 + 672, v2185.begin());
   std::vector<float> v2186(352);
@@ -6569,7 +6571,7 @@ std::vector<CiphertextT> mnist(CryptoContextT cc, std::vector<float> v0, std::ve
   }
   auto pt366 = cc->MakeCKKSPackedPlaintext(pt366_filled);
   const auto& ct733 = cc->EvalMult(ct28, pt366);
-  std::vector<float> v2190(std::begin(v28) + 367 * 512, std::begin(v28) + 367 * 512 + 1024);
+  std::vector<float> v2190(std::begin(v28) + 367 * 1024, std::begin(v28) + 367 * 1024 + 1024);
   std::vector<float> v2191(672);
   std::copy(v2190.begin() + 0, v2190.begin() + 0 + 672, v2191.begin());
   std::vector<float> v2192(352);
@@ -6602,7 +6604,7 @@ std::vector<CiphertextT> mnist(CryptoContextT cc, std::vector<float> v0, std::ve
   const auto& ct748 = cc->EvalAdd(ct744, ct747);
   const auto& ct749 = cc->EvalAdd(ct741, ct748);
   const auto& ct750 = cc->EvalRotate(ct749, 352);
-  std::vector<float> v2196(std::begin(v28) + 368 * 512, std::begin(v28) + 368 * 512 + 1024);
+  std::vector<float> v2196(std::begin(v28) + 368 * 1024, std::begin(v28) + 368 * 1024 + 1024);
   std::vector<float> v2197(656);
   std::copy(v2196.begin() + 0, v2196.begin() + 0 + 656, v2197.begin());
   std::vector<float> v2198(368);
@@ -6619,7 +6621,7 @@ std::vector<CiphertextT> mnist(CryptoContextT cc, std::vector<float> v0, std::ve
   }
   auto pt368 = cc->MakeCKKSPackedPlaintext(pt368_filled);
   const auto& ct751 = cc->EvalMult(ct, pt368);
-  std::vector<float> v2202(std::begin(v28) + 369 * 512, std::begin(v28) + 369 * 512 + 1024);
+  std::vector<float> v2202(std::begin(v28) + 369 * 1024, std::begin(v28) + 369 * 1024 + 1024);
   std::vector<float> v2203(656);
   std::copy(v2202.begin() + 0, v2202.begin() + 0 + 656, v2203.begin());
   std::vector<float> v2204(368);
@@ -6636,7 +6638,7 @@ std::vector<CiphertextT> mnist(CryptoContextT cc, std::vector<float> v0, std::ve
   }
   auto pt369 = cc->MakeCKKSPackedPlaintext(pt369_filled);
   const auto& ct752 = cc->EvalMult(ct2, pt369);
-  std::vector<float> v2208(std::begin(v28) + 370 * 512, std::begin(v28) + 370 * 512 + 1024);
+  std::vector<float> v2208(std::begin(v28) + 370 * 1024, std::begin(v28) + 370 * 1024 + 1024);
   std::vector<float> v2209(656);
   std::copy(v2208.begin() + 0, v2208.begin() + 0 + 656, v2209.begin());
   std::vector<float> v2210(368);
@@ -6653,7 +6655,7 @@ std::vector<CiphertextT> mnist(CryptoContextT cc, std::vector<float> v0, std::ve
   }
   auto pt370 = cc->MakeCKKSPackedPlaintext(pt370_filled);
   const auto& ct753 = cc->EvalMult(ct4, pt370);
-  std::vector<float> v2214(std::begin(v28) + 371 * 512, std::begin(v28) + 371 * 512 + 1024);
+  std::vector<float> v2214(std::begin(v28) + 371 * 1024, std::begin(v28) + 371 * 1024 + 1024);
   std::vector<float> v2215(656);
   std::copy(v2214.begin() + 0, v2214.begin() + 0 + 656, v2215.begin());
   std::vector<float> v2216(368);
@@ -6670,7 +6672,7 @@ std::vector<CiphertextT> mnist(CryptoContextT cc, std::vector<float> v0, std::ve
   }
   auto pt371 = cc->MakeCKKSPackedPlaintext(pt371_filled);
   const auto& ct754 = cc->EvalMult(ct6, pt371);
-  std::vector<float> v2220(std::begin(v28) + 372 * 512, std::begin(v28) + 372 * 512 + 1024);
+  std::vector<float> v2220(std::begin(v28) + 372 * 1024, std::begin(v28) + 372 * 1024 + 1024);
   std::vector<float> v2221(656);
   std::copy(v2220.begin() + 0, v2220.begin() + 0 + 656, v2221.begin());
   std::vector<float> v2222(368);
@@ -6687,7 +6689,7 @@ std::vector<CiphertextT> mnist(CryptoContextT cc, std::vector<float> v0, std::ve
   }
   auto pt372 = cc->MakeCKKSPackedPlaintext(pt372_filled);
   const auto& ct755 = cc->EvalMult(ct8, pt372);
-  std::vector<float> v2226(std::begin(v28) + 373 * 512, std::begin(v28) + 373 * 512 + 1024);
+  std::vector<float> v2226(std::begin(v28) + 373 * 1024, std::begin(v28) + 373 * 1024 + 1024);
   std::vector<float> v2227(656);
   std::copy(v2226.begin() + 0, v2226.begin() + 0 + 656, v2227.begin());
   std::vector<float> v2228(368);
@@ -6704,7 +6706,7 @@ std::vector<CiphertextT> mnist(CryptoContextT cc, std::vector<float> v0, std::ve
   }
   auto pt373 = cc->MakeCKKSPackedPlaintext(pt373_filled);
   const auto& ct756 = cc->EvalMult(ct10, pt373);
-  std::vector<float> v2232(std::begin(v28) + 374 * 512, std::begin(v28) + 374 * 512 + 1024);
+  std::vector<float> v2232(std::begin(v28) + 374 * 1024, std::begin(v28) + 374 * 1024 + 1024);
   std::vector<float> v2233(656);
   std::copy(v2232.begin() + 0, v2232.begin() + 0 + 656, v2233.begin());
   std::vector<float> v2234(368);
@@ -6721,7 +6723,7 @@ std::vector<CiphertextT> mnist(CryptoContextT cc, std::vector<float> v0, std::ve
   }
   auto pt374 = cc->MakeCKKSPackedPlaintext(pt374_filled);
   const auto& ct757 = cc->EvalMult(ct12, pt374);
-  std::vector<float> v2238(std::begin(v28) + 375 * 512, std::begin(v28) + 375 * 512 + 1024);
+  std::vector<float> v2238(std::begin(v28) + 375 * 1024, std::begin(v28) + 375 * 1024 + 1024);
   std::vector<float> v2239(656);
   std::copy(v2238.begin() + 0, v2238.begin() + 0 + 656, v2239.begin());
   std::vector<float> v2240(368);
@@ -6738,7 +6740,7 @@ std::vector<CiphertextT> mnist(CryptoContextT cc, std::vector<float> v0, std::ve
   }
   auto pt375 = cc->MakeCKKSPackedPlaintext(pt375_filled);
   const auto& ct758 = cc->EvalMult(ct14, pt375);
-  std::vector<float> v2244(std::begin(v28) + 376 * 512, std::begin(v28) + 376 * 512 + 1024);
+  std::vector<float> v2244(std::begin(v28) + 376 * 1024, std::begin(v28) + 376 * 1024 + 1024);
   std::vector<float> v2245(656);
   std::copy(v2244.begin() + 0, v2244.begin() + 0 + 656, v2245.begin());
   std::vector<float> v2246(368);
@@ -6755,7 +6757,7 @@ std::vector<CiphertextT> mnist(CryptoContextT cc, std::vector<float> v0, std::ve
   }
   auto pt376 = cc->MakeCKKSPackedPlaintext(pt376_filled);
   const auto& ct759 = cc->EvalMult(ct16, pt376);
-  std::vector<float> v2250(std::begin(v28) + 377 * 512, std::begin(v28) + 377 * 512 + 1024);
+  std::vector<float> v2250(std::begin(v28) + 377 * 1024, std::begin(v28) + 377 * 1024 + 1024);
   std::vector<float> v2251(656);
   std::copy(v2250.begin() + 0, v2250.begin() + 0 + 656, v2251.begin());
   std::vector<float> v2252(368);
@@ -6772,7 +6774,7 @@ std::vector<CiphertextT> mnist(CryptoContextT cc, std::vector<float> v0, std::ve
   }
   auto pt377 = cc->MakeCKKSPackedPlaintext(pt377_filled);
   const auto& ct760 = cc->EvalMult(ct18, pt377);
-  std::vector<float> v2256(std::begin(v28) + 378 * 512, std::begin(v28) + 378 * 512 + 1024);
+  std::vector<float> v2256(std::begin(v28) + 378 * 1024, std::begin(v28) + 378 * 1024 + 1024);
   std::vector<float> v2257(656);
   std::copy(v2256.begin() + 0, v2256.begin() + 0 + 656, v2257.begin());
   std::vector<float> v2258(368);
@@ -6789,7 +6791,7 @@ std::vector<CiphertextT> mnist(CryptoContextT cc, std::vector<float> v0, std::ve
   }
   auto pt378 = cc->MakeCKKSPackedPlaintext(pt378_filled);
   const auto& ct761 = cc->EvalMult(ct20, pt378);
-  std::vector<float> v2262(std::begin(v28) + 379 * 512, std::begin(v28) + 379 * 512 + 1024);
+  std::vector<float> v2262(std::begin(v28) + 379 * 1024, std::begin(v28) + 379 * 1024 + 1024);
   std::vector<float> v2263(656);
   std::copy(v2262.begin() + 0, v2262.begin() + 0 + 656, v2263.begin());
   std::vector<float> v2264(368);
@@ -6806,7 +6808,7 @@ std::vector<CiphertextT> mnist(CryptoContextT cc, std::vector<float> v0, std::ve
   }
   auto pt379 = cc->MakeCKKSPackedPlaintext(pt379_filled);
   const auto& ct762 = cc->EvalMult(ct22, pt379);
-  std::vector<float> v2268(std::begin(v28) + 380 * 512, std::begin(v28) + 380 * 512 + 1024);
+  std::vector<float> v2268(std::begin(v28) + 380 * 1024, std::begin(v28) + 380 * 1024 + 1024);
   std::vector<float> v2269(656);
   std::copy(v2268.begin() + 0, v2268.begin() + 0 + 656, v2269.begin());
   std::vector<float> v2270(368);
@@ -6823,7 +6825,7 @@ std::vector<CiphertextT> mnist(CryptoContextT cc, std::vector<float> v0, std::ve
   }
   auto pt380 = cc->MakeCKKSPackedPlaintext(pt380_filled);
   const auto& ct763 = cc->EvalMult(ct24, pt380);
-  std::vector<float> v2274(std::begin(v28) + 381 * 512, std::begin(v28) + 381 * 512 + 1024);
+  std::vector<float> v2274(std::begin(v28) + 381 * 1024, std::begin(v28) + 381 * 1024 + 1024);
   std::vector<float> v2275(656);
   std::copy(v2274.begin() + 0, v2274.begin() + 0 + 656, v2275.begin());
   std::vector<float> v2276(368);
@@ -6840,7 +6842,7 @@ std::vector<CiphertextT> mnist(CryptoContextT cc, std::vector<float> v0, std::ve
   }
   auto pt381 = cc->MakeCKKSPackedPlaintext(pt381_filled);
   const auto& ct764 = cc->EvalMult(ct26, pt381);
-  std::vector<float> v2280(std::begin(v28) + 382 * 512, std::begin(v28) + 382 * 512 + 1024);
+  std::vector<float> v2280(std::begin(v28) + 382 * 1024, std::begin(v28) + 382 * 1024 + 1024);
   std::vector<float> v2281(656);
   std::copy(v2280.begin() + 0, v2280.begin() + 0 + 656, v2281.begin());
   std::vector<float> v2282(368);
@@ -6857,7 +6859,7 @@ std::vector<CiphertextT> mnist(CryptoContextT cc, std::vector<float> v0, std::ve
   }
   auto pt382 = cc->MakeCKKSPackedPlaintext(pt382_filled);
   const auto& ct765 = cc->EvalMult(ct28, pt382);
-  std::vector<float> v2286(std::begin(v28) + 383 * 512, std::begin(v28) + 383 * 512 + 1024);
+  std::vector<float> v2286(std::begin(v28) + 383 * 1024, std::begin(v28) + 383 * 1024 + 1024);
   std::vector<float> v2287(656);
   std::copy(v2286.begin() + 0, v2286.begin() + 0 + 656, v2287.begin());
   std::vector<float> v2288(368);
@@ -6890,7 +6892,7 @@ std::vector<CiphertextT> mnist(CryptoContextT cc, std::vector<float> v0, std::ve
   const auto& ct780 = cc->EvalAdd(ct776, ct779);
   const auto& ct781 = cc->EvalAdd(ct773, ct780);
   const auto& ct782 = cc->EvalRotate(ct781, 368);
-  std::vector<float> v2292(std::begin(v28) + 384 * 512, std::begin(v28) + 384 * 512 + 1024);
+  std::vector<float> v2292(std::begin(v28) + 384 * 1024, std::begin(v28) + 384 * 1024 + 1024);
   std::vector<float> v2293(640);
   std::copy(v2292.begin() + 0, v2292.begin() + 0 + 640, v2293.begin());
   std::vector<float> v2294(384);
@@ -6907,7 +6909,7 @@ std::vector<CiphertextT> mnist(CryptoContextT cc, std::vector<float> v0, std::ve
   }
   auto pt384 = cc->MakeCKKSPackedPlaintext(pt384_filled);
   const auto& ct783 = cc->EvalMult(ct, pt384);
-  std::vector<float> v2298(std::begin(v28) + 385 * 512, std::begin(v28) + 385 * 512 + 1024);
+  std::vector<float> v2298(std::begin(v28) + 385 * 1024, std::begin(v28) + 385 * 1024 + 1024);
   std::vector<float> v2299(640);
   std::copy(v2298.begin() + 0, v2298.begin() + 0 + 640, v2299.begin());
   std::vector<float> v2300(384);
@@ -6924,7 +6926,7 @@ std::vector<CiphertextT> mnist(CryptoContextT cc, std::vector<float> v0, std::ve
   }
   auto pt385 = cc->MakeCKKSPackedPlaintext(pt385_filled);
   const auto& ct784 = cc->EvalMult(ct2, pt385);
-  std::vector<float> v2304(std::begin(v28) + 386 * 512, std::begin(v28) + 386 * 512 + 1024);
+  std::vector<float> v2304(std::begin(v28) + 386 * 1024, std::begin(v28) + 386 * 1024 + 1024);
   std::vector<float> v2305(640);
   std::copy(v2304.begin() + 0, v2304.begin() + 0 + 640, v2305.begin());
   std::vector<float> v2306(384);
@@ -6941,7 +6943,7 @@ std::vector<CiphertextT> mnist(CryptoContextT cc, std::vector<float> v0, std::ve
   }
   auto pt386 = cc->MakeCKKSPackedPlaintext(pt386_filled);
   const auto& ct785 = cc->EvalMult(ct4, pt386);
-  std::vector<float> v2310(std::begin(v28) + 387 * 512, std::begin(v28) + 387 * 512 + 1024);
+  std::vector<float> v2310(std::begin(v28) + 387 * 1024, std::begin(v28) + 387 * 1024 + 1024);
   std::vector<float> v2311(640);
   std::copy(v2310.begin() + 0, v2310.begin() + 0 + 640, v2311.begin());
   std::vector<float> v2312(384);
@@ -6958,7 +6960,7 @@ std::vector<CiphertextT> mnist(CryptoContextT cc, std::vector<float> v0, std::ve
   }
   auto pt387 = cc->MakeCKKSPackedPlaintext(pt387_filled);
   const auto& ct786 = cc->EvalMult(ct6, pt387);
-  std::vector<float> v2316(std::begin(v28) + 388 * 512, std::begin(v28) + 388 * 512 + 1024);
+  std::vector<float> v2316(std::begin(v28) + 388 * 1024, std::begin(v28) + 388 * 1024 + 1024);
   std::vector<float> v2317(640);
   std::copy(v2316.begin() + 0, v2316.begin() + 0 + 640, v2317.begin());
   std::vector<float> v2318(384);
@@ -6975,7 +6977,7 @@ std::vector<CiphertextT> mnist(CryptoContextT cc, std::vector<float> v0, std::ve
   }
   auto pt388 = cc->MakeCKKSPackedPlaintext(pt388_filled);
   const auto& ct787 = cc->EvalMult(ct8, pt388);
-  std::vector<float> v2322(std::begin(v28) + 389 * 512, std::begin(v28) + 389 * 512 + 1024);
+  std::vector<float> v2322(std::begin(v28) + 389 * 1024, std::begin(v28) + 389 * 1024 + 1024);
   std::vector<float> v2323(640);
   std::copy(v2322.begin() + 0, v2322.begin() + 0 + 640, v2323.begin());
   std::vector<float> v2324(384);
@@ -6992,7 +6994,7 @@ std::vector<CiphertextT> mnist(CryptoContextT cc, std::vector<float> v0, std::ve
   }
   auto pt389 = cc->MakeCKKSPackedPlaintext(pt389_filled);
   const auto& ct788 = cc->EvalMult(ct10, pt389);
-  std::vector<float> v2328(std::begin(v28) + 390 * 512, std::begin(v28) + 390 * 512 + 1024);
+  std::vector<float> v2328(std::begin(v28) + 390 * 1024, std::begin(v28) + 390 * 1024 + 1024);
   std::vector<float> v2329(640);
   std::copy(v2328.begin() + 0, v2328.begin() + 0 + 640, v2329.begin());
   std::vector<float> v2330(384);
@@ -7009,7 +7011,7 @@ std::vector<CiphertextT> mnist(CryptoContextT cc, std::vector<float> v0, std::ve
   }
   auto pt390 = cc->MakeCKKSPackedPlaintext(pt390_filled);
   const auto& ct789 = cc->EvalMult(ct12, pt390);
-  std::vector<float> v2334(std::begin(v28) + 391 * 512, std::begin(v28) + 391 * 512 + 1024);
+  std::vector<float> v2334(std::begin(v28) + 391 * 1024, std::begin(v28) + 391 * 1024 + 1024);
   std::vector<float> v2335(640);
   std::copy(v2334.begin() + 0, v2334.begin() + 0 + 640, v2335.begin());
   std::vector<float> v2336(384);
@@ -7026,7 +7028,7 @@ std::vector<CiphertextT> mnist(CryptoContextT cc, std::vector<float> v0, std::ve
   }
   auto pt391 = cc->MakeCKKSPackedPlaintext(pt391_filled);
   const auto& ct790 = cc->EvalMult(ct14, pt391);
-  std::vector<float> v2340(std::begin(v28) + 392 * 512, std::begin(v28) + 392 * 512 + 1024);
+  std::vector<float> v2340(std::begin(v28) + 392 * 1024, std::begin(v28) + 392 * 1024 + 1024);
   std::vector<float> v2341(640);
   std::copy(v2340.begin() + 0, v2340.begin() + 0 + 640, v2341.begin());
   std::vector<float> v2342(384);
@@ -7043,7 +7045,7 @@ std::vector<CiphertextT> mnist(CryptoContextT cc, std::vector<float> v0, std::ve
   }
   auto pt392 = cc->MakeCKKSPackedPlaintext(pt392_filled);
   const auto& ct791 = cc->EvalMult(ct16, pt392);
-  std::vector<float> v2346(std::begin(v28) + 393 * 512, std::begin(v28) + 393 * 512 + 1024);
+  std::vector<float> v2346(std::begin(v28) + 393 * 1024, std::begin(v28) + 393 * 1024 + 1024);
   std::vector<float> v2347(640);
   std::copy(v2346.begin() + 0, v2346.begin() + 0 + 640, v2347.begin());
   std::vector<float> v2348(384);
@@ -7060,7 +7062,7 @@ std::vector<CiphertextT> mnist(CryptoContextT cc, std::vector<float> v0, std::ve
   }
   auto pt393 = cc->MakeCKKSPackedPlaintext(pt393_filled);
   const auto& ct792 = cc->EvalMult(ct18, pt393);
-  std::vector<float> v2352(std::begin(v28) + 394 * 512, std::begin(v28) + 394 * 512 + 1024);
+  std::vector<float> v2352(std::begin(v28) + 394 * 1024, std::begin(v28) + 394 * 1024 + 1024);
   std::vector<float> v2353(640);
   std::copy(v2352.begin() + 0, v2352.begin() + 0 + 640, v2353.begin());
   std::vector<float> v2354(384);
@@ -7077,7 +7079,7 @@ std::vector<CiphertextT> mnist(CryptoContextT cc, std::vector<float> v0, std::ve
   }
   auto pt394 = cc->MakeCKKSPackedPlaintext(pt394_filled);
   const auto& ct793 = cc->EvalMult(ct20, pt394);
-  std::vector<float> v2358(std::begin(v28) + 395 * 512, std::begin(v28) + 395 * 512 + 1024);
+  std::vector<float> v2358(std::begin(v28) + 395 * 1024, std::begin(v28) + 395 * 1024 + 1024);
   std::vector<float> v2359(640);
   std::copy(v2358.begin() + 0, v2358.begin() + 0 + 640, v2359.begin());
   std::vector<float> v2360(384);
@@ -7094,7 +7096,7 @@ std::vector<CiphertextT> mnist(CryptoContextT cc, std::vector<float> v0, std::ve
   }
   auto pt395 = cc->MakeCKKSPackedPlaintext(pt395_filled);
   const auto& ct794 = cc->EvalMult(ct22, pt395);
-  std::vector<float> v2364(std::begin(v28) + 396 * 512, std::begin(v28) + 396 * 512 + 1024);
+  std::vector<float> v2364(std::begin(v28) + 396 * 1024, std::begin(v28) + 396 * 1024 + 1024);
   std::vector<float> v2365(640);
   std::copy(v2364.begin() + 0, v2364.begin() + 0 + 640, v2365.begin());
   std::vector<float> v2366(384);
@@ -7111,7 +7113,7 @@ std::vector<CiphertextT> mnist(CryptoContextT cc, std::vector<float> v0, std::ve
   }
   auto pt396 = cc->MakeCKKSPackedPlaintext(pt396_filled);
   const auto& ct795 = cc->EvalMult(ct24, pt396);
-  std::vector<float> v2370(std::begin(v28) + 397 * 512, std::begin(v28) + 397 * 512 + 1024);
+  std::vector<float> v2370(std::begin(v28) + 397 * 1024, std::begin(v28) + 397 * 1024 + 1024);
   std::vector<float> v2371(640);
   std::copy(v2370.begin() + 0, v2370.begin() + 0 + 640, v2371.begin());
   std::vector<float> v2372(384);
@@ -7128,7 +7130,7 @@ std::vector<CiphertextT> mnist(CryptoContextT cc, std::vector<float> v0, std::ve
   }
   auto pt397 = cc->MakeCKKSPackedPlaintext(pt397_filled);
   const auto& ct796 = cc->EvalMult(ct26, pt397);
-  std::vector<float> v2376(std::begin(v28) + 398 * 512, std::begin(v28) + 398 * 512 + 1024);
+  std::vector<float> v2376(std::begin(v28) + 398 * 1024, std::begin(v28) + 398 * 1024 + 1024);
   std::vector<float> v2377(640);
   std::copy(v2376.begin() + 0, v2376.begin() + 0 + 640, v2377.begin());
   std::vector<float> v2378(384);
@@ -7145,7 +7147,7 @@ std::vector<CiphertextT> mnist(CryptoContextT cc, std::vector<float> v0, std::ve
   }
   auto pt398 = cc->MakeCKKSPackedPlaintext(pt398_filled);
   const auto& ct797 = cc->EvalMult(ct28, pt398);
-  std::vector<float> v2382(std::begin(v28) + 399 * 512, std::begin(v28) + 399 * 512 + 1024);
+  std::vector<float> v2382(std::begin(v28) + 399 * 1024, std::begin(v28) + 399 * 1024 + 1024);
   std::vector<float> v2383(640);
   std::copy(v2382.begin() + 0, v2382.begin() + 0 + 640, v2383.begin());
   std::vector<float> v2384(384);
@@ -7178,7 +7180,7 @@ std::vector<CiphertextT> mnist(CryptoContextT cc, std::vector<float> v0, std::ve
   const auto& ct812 = cc->EvalAdd(ct808, ct811);
   const auto& ct813 = cc->EvalAdd(ct805, ct812);
   const auto& ct814 = cc->EvalRotate(ct813, 384);
-  std::vector<float> v2388(std::begin(v28) + 400 * 512, std::begin(v28) + 400 * 512 + 1024);
+  std::vector<float> v2388(std::begin(v28) + 400 * 1024, std::begin(v28) + 400 * 1024 + 1024);
   std::vector<float> v2389(624);
   std::copy(v2388.begin() + 0, v2388.begin() + 0 + 624, v2389.begin());
   std::vector<float> v2390(400);
@@ -7195,7 +7197,7 @@ std::vector<CiphertextT> mnist(CryptoContextT cc, std::vector<float> v0, std::ve
   }
   auto pt400 = cc->MakeCKKSPackedPlaintext(pt400_filled);
   const auto& ct815 = cc->EvalMult(ct, pt400);
-  std::vector<float> v2394(std::begin(v28) + 401 * 512, std::begin(v28) + 401 * 512 + 1024);
+  std::vector<float> v2394(std::begin(v28) + 401 * 1024, std::begin(v28) + 401 * 1024 + 1024);
   std::vector<float> v2395(624);
   std::copy(v2394.begin() + 0, v2394.begin() + 0 + 624, v2395.begin());
   std::vector<float> v2396(400);
@@ -7212,7 +7214,7 @@ std::vector<CiphertextT> mnist(CryptoContextT cc, std::vector<float> v0, std::ve
   }
   auto pt401 = cc->MakeCKKSPackedPlaintext(pt401_filled);
   const auto& ct816 = cc->EvalMult(ct2, pt401);
-  std::vector<float> v2400(std::begin(v28) + 402 * 512, std::begin(v28) + 402 * 512 + 1024);
+  std::vector<float> v2400(std::begin(v28) + 402 * 1024, std::begin(v28) + 402 * 1024 + 1024);
   std::vector<float> v2401(624);
   std::copy(v2400.begin() + 0, v2400.begin() + 0 + 624, v2401.begin());
   std::vector<float> v2402(400);
@@ -7229,7 +7231,7 @@ std::vector<CiphertextT> mnist(CryptoContextT cc, std::vector<float> v0, std::ve
   }
   auto pt402 = cc->MakeCKKSPackedPlaintext(pt402_filled);
   const auto& ct817 = cc->EvalMult(ct4, pt402);
-  std::vector<float> v2406(std::begin(v28) + 403 * 512, std::begin(v28) + 403 * 512 + 1024);
+  std::vector<float> v2406(std::begin(v28) + 403 * 1024, std::begin(v28) + 403 * 1024 + 1024);
   std::vector<float> v2407(624);
   std::copy(v2406.begin() + 0, v2406.begin() + 0 + 624, v2407.begin());
   std::vector<float> v2408(400);
@@ -7246,7 +7248,7 @@ std::vector<CiphertextT> mnist(CryptoContextT cc, std::vector<float> v0, std::ve
   }
   auto pt403 = cc->MakeCKKSPackedPlaintext(pt403_filled);
   const auto& ct818 = cc->EvalMult(ct6, pt403);
-  std::vector<float> v2412(std::begin(v28) + 404 * 512, std::begin(v28) + 404 * 512 + 1024);
+  std::vector<float> v2412(std::begin(v28) + 404 * 1024, std::begin(v28) + 404 * 1024 + 1024);
   std::vector<float> v2413(624);
   std::copy(v2412.begin() + 0, v2412.begin() + 0 + 624, v2413.begin());
   std::vector<float> v2414(400);
@@ -7263,7 +7265,7 @@ std::vector<CiphertextT> mnist(CryptoContextT cc, std::vector<float> v0, std::ve
   }
   auto pt404 = cc->MakeCKKSPackedPlaintext(pt404_filled);
   const auto& ct819 = cc->EvalMult(ct8, pt404);
-  std::vector<float> v2418(std::begin(v28) + 405 * 512, std::begin(v28) + 405 * 512 + 1024);
+  std::vector<float> v2418(std::begin(v28) + 405 * 1024, std::begin(v28) + 405 * 1024 + 1024);
   std::vector<float> v2419(624);
   std::copy(v2418.begin() + 0, v2418.begin() + 0 + 624, v2419.begin());
   std::vector<float> v2420(400);
@@ -7280,7 +7282,7 @@ std::vector<CiphertextT> mnist(CryptoContextT cc, std::vector<float> v0, std::ve
   }
   auto pt405 = cc->MakeCKKSPackedPlaintext(pt405_filled);
   const auto& ct820 = cc->EvalMult(ct10, pt405);
-  std::vector<float> v2424(std::begin(v28) + 406 * 512, std::begin(v28) + 406 * 512 + 1024);
+  std::vector<float> v2424(std::begin(v28) + 406 * 1024, std::begin(v28) + 406 * 1024 + 1024);
   std::vector<float> v2425(624);
   std::copy(v2424.begin() + 0, v2424.begin() + 0 + 624, v2425.begin());
   std::vector<float> v2426(400);
@@ -7297,7 +7299,7 @@ std::vector<CiphertextT> mnist(CryptoContextT cc, std::vector<float> v0, std::ve
   }
   auto pt406 = cc->MakeCKKSPackedPlaintext(pt406_filled);
   const auto& ct821 = cc->EvalMult(ct12, pt406);
-  std::vector<float> v2430(std::begin(v28) + 407 * 512, std::begin(v28) + 407 * 512 + 1024);
+  std::vector<float> v2430(std::begin(v28) + 407 * 1024, std::begin(v28) + 407 * 1024 + 1024);
   std::vector<float> v2431(624);
   std::copy(v2430.begin() + 0, v2430.begin() + 0 + 624, v2431.begin());
   std::vector<float> v2432(400);
@@ -7314,7 +7316,7 @@ std::vector<CiphertextT> mnist(CryptoContextT cc, std::vector<float> v0, std::ve
   }
   auto pt407 = cc->MakeCKKSPackedPlaintext(pt407_filled);
   const auto& ct822 = cc->EvalMult(ct14, pt407);
-  std::vector<float> v2436(std::begin(v28) + 408 * 512, std::begin(v28) + 408 * 512 + 1024);
+  std::vector<float> v2436(std::begin(v28) + 408 * 1024, std::begin(v28) + 408 * 1024 + 1024);
   std::vector<float> v2437(624);
   std::copy(v2436.begin() + 0, v2436.begin() + 0 + 624, v2437.begin());
   std::vector<float> v2438(400);
@@ -7331,7 +7333,7 @@ std::vector<CiphertextT> mnist(CryptoContextT cc, std::vector<float> v0, std::ve
   }
   auto pt408 = cc->MakeCKKSPackedPlaintext(pt408_filled);
   const auto& ct823 = cc->EvalMult(ct16, pt408);
-  std::vector<float> v2442(std::begin(v28) + 409 * 512, std::begin(v28) + 409 * 512 + 1024);
+  std::vector<float> v2442(std::begin(v28) + 409 * 1024, std::begin(v28) + 409 * 1024 + 1024);
   std::vector<float> v2443(624);
   std::copy(v2442.begin() + 0, v2442.begin() + 0 + 624, v2443.begin());
   std::vector<float> v2444(400);
@@ -7348,7 +7350,7 @@ std::vector<CiphertextT> mnist(CryptoContextT cc, std::vector<float> v0, std::ve
   }
   auto pt409 = cc->MakeCKKSPackedPlaintext(pt409_filled);
   const auto& ct824 = cc->EvalMult(ct18, pt409);
-  std::vector<float> v2448(std::begin(v28) + 410 * 512, std::begin(v28) + 410 * 512 + 1024);
+  std::vector<float> v2448(std::begin(v28) + 410 * 1024, std::begin(v28) + 410 * 1024 + 1024);
   std::vector<float> v2449(624);
   std::copy(v2448.begin() + 0, v2448.begin() + 0 + 624, v2449.begin());
   std::vector<float> v2450(400);
@@ -7365,7 +7367,7 @@ std::vector<CiphertextT> mnist(CryptoContextT cc, std::vector<float> v0, std::ve
   }
   auto pt410 = cc->MakeCKKSPackedPlaintext(pt410_filled);
   const auto& ct825 = cc->EvalMult(ct20, pt410);
-  std::vector<float> v2454(std::begin(v28) + 411 * 512, std::begin(v28) + 411 * 512 + 1024);
+  std::vector<float> v2454(std::begin(v28) + 411 * 1024, std::begin(v28) + 411 * 1024 + 1024);
   std::vector<float> v2455(624);
   std::copy(v2454.begin() + 0, v2454.begin() + 0 + 624, v2455.begin());
   std::vector<float> v2456(400);
@@ -7382,7 +7384,7 @@ std::vector<CiphertextT> mnist(CryptoContextT cc, std::vector<float> v0, std::ve
   }
   auto pt411 = cc->MakeCKKSPackedPlaintext(pt411_filled);
   const auto& ct826 = cc->EvalMult(ct22, pt411);
-  std::vector<float> v2460(std::begin(v28) + 412 * 512, std::begin(v28) + 412 * 512 + 1024);
+  std::vector<float> v2460(std::begin(v28) + 412 * 1024, std::begin(v28) + 412 * 1024 + 1024);
   std::vector<float> v2461(624);
   std::copy(v2460.begin() + 0, v2460.begin() + 0 + 624, v2461.begin());
   std::vector<float> v2462(400);
@@ -7399,7 +7401,7 @@ std::vector<CiphertextT> mnist(CryptoContextT cc, std::vector<float> v0, std::ve
   }
   auto pt412 = cc->MakeCKKSPackedPlaintext(pt412_filled);
   const auto& ct827 = cc->EvalMult(ct24, pt412);
-  std::vector<float> v2466(std::begin(v28) + 413 * 512, std::begin(v28) + 413 * 512 + 1024);
+  std::vector<float> v2466(std::begin(v28) + 413 * 1024, std::begin(v28) + 413 * 1024 + 1024);
   std::vector<float> v2467(624);
   std::copy(v2466.begin() + 0, v2466.begin() + 0 + 624, v2467.begin());
   std::vector<float> v2468(400);
@@ -7416,7 +7418,7 @@ std::vector<CiphertextT> mnist(CryptoContextT cc, std::vector<float> v0, std::ve
   }
   auto pt413 = cc->MakeCKKSPackedPlaintext(pt413_filled);
   const auto& ct828 = cc->EvalMult(ct26, pt413);
-  std::vector<float> v2472(std::begin(v28) + 414 * 512, std::begin(v28) + 414 * 512 + 1024);
+  std::vector<float> v2472(std::begin(v28) + 414 * 1024, std::begin(v28) + 414 * 1024 + 1024);
   std::vector<float> v2473(624);
   std::copy(v2472.begin() + 0, v2472.begin() + 0 + 624, v2473.begin());
   std::vector<float> v2474(400);
@@ -7433,7 +7435,7 @@ std::vector<CiphertextT> mnist(CryptoContextT cc, std::vector<float> v0, std::ve
   }
   auto pt414 = cc->MakeCKKSPackedPlaintext(pt414_filled);
   const auto& ct829 = cc->EvalMult(ct28, pt414);
-  std::vector<float> v2478(std::begin(v28) + 415 * 512, std::begin(v28) + 415 * 512 + 1024);
+  std::vector<float> v2478(std::begin(v28) + 415 * 1024, std::begin(v28) + 415 * 1024 + 1024);
   std::vector<float> v2479(624);
   std::copy(v2478.begin() + 0, v2478.begin() + 0 + 624, v2479.begin());
   std::vector<float> v2480(400);
@@ -7466,7 +7468,7 @@ std::vector<CiphertextT> mnist(CryptoContextT cc, std::vector<float> v0, std::ve
   const auto& ct844 = cc->EvalAdd(ct840, ct843);
   const auto& ct845 = cc->EvalAdd(ct837, ct844);
   const auto& ct846 = cc->EvalRotate(ct845, 400);
-  std::vector<float> v2484(std::begin(v28) + 416 * 512, std::begin(v28) + 416 * 512 + 1024);
+  std::vector<float> v2484(std::begin(v28) + 416 * 1024, std::begin(v28) + 416 * 1024 + 1024);
   std::vector<float> v2485(608);
   std::copy(v2484.begin() + 0, v2484.begin() + 0 + 608, v2485.begin());
   std::vector<float> v2486(416);
@@ -7483,7 +7485,7 @@ std::vector<CiphertextT> mnist(CryptoContextT cc, std::vector<float> v0, std::ve
   }
   auto pt416 = cc->MakeCKKSPackedPlaintext(pt416_filled);
   const auto& ct847 = cc->EvalMult(ct, pt416);
-  std::vector<float> v2490(std::begin(v28) + 417 * 512, std::begin(v28) + 417 * 512 + 1024);
+  std::vector<float> v2490(std::begin(v28) + 417 * 1024, std::begin(v28) + 417 * 1024 + 1024);
   std::vector<float> v2491(608);
   std::copy(v2490.begin() + 0, v2490.begin() + 0 + 608, v2491.begin());
   std::vector<float> v2492(416);
@@ -7500,7 +7502,7 @@ std::vector<CiphertextT> mnist(CryptoContextT cc, std::vector<float> v0, std::ve
   }
   auto pt417 = cc->MakeCKKSPackedPlaintext(pt417_filled);
   const auto& ct848 = cc->EvalMult(ct2, pt417);
-  std::vector<float> v2496(std::begin(v28) + 418 * 512, std::begin(v28) + 418 * 512 + 1024);
+  std::vector<float> v2496(std::begin(v28) + 418 * 1024, std::begin(v28) + 418 * 1024 + 1024);
   std::vector<float> v2497(608);
   std::copy(v2496.begin() + 0, v2496.begin() + 0 + 608, v2497.begin());
   std::vector<float> v2498(416);
@@ -7517,7 +7519,7 @@ std::vector<CiphertextT> mnist(CryptoContextT cc, std::vector<float> v0, std::ve
   }
   auto pt418 = cc->MakeCKKSPackedPlaintext(pt418_filled);
   const auto& ct849 = cc->EvalMult(ct4, pt418);
-  std::vector<float> v2502(std::begin(v28) + 419 * 512, std::begin(v28) + 419 * 512 + 1024);
+  std::vector<float> v2502(std::begin(v28) + 419 * 1024, std::begin(v28) + 419 * 1024 + 1024);
   std::vector<float> v2503(608);
   std::copy(v2502.begin() + 0, v2502.begin() + 0 + 608, v2503.begin());
   std::vector<float> v2504(416);
@@ -7534,7 +7536,7 @@ std::vector<CiphertextT> mnist(CryptoContextT cc, std::vector<float> v0, std::ve
   }
   auto pt419 = cc->MakeCKKSPackedPlaintext(pt419_filled);
   const auto& ct850 = cc->EvalMult(ct6, pt419);
-  std::vector<float> v2508(std::begin(v28) + 420 * 512, std::begin(v28) + 420 * 512 + 1024);
+  std::vector<float> v2508(std::begin(v28) + 420 * 1024, std::begin(v28) + 420 * 1024 + 1024);
   std::vector<float> v2509(608);
   std::copy(v2508.begin() + 0, v2508.begin() + 0 + 608, v2509.begin());
   std::vector<float> v2510(416);
@@ -7551,7 +7553,7 @@ std::vector<CiphertextT> mnist(CryptoContextT cc, std::vector<float> v0, std::ve
   }
   auto pt420 = cc->MakeCKKSPackedPlaintext(pt420_filled);
   const auto& ct851 = cc->EvalMult(ct8, pt420);
-  std::vector<float> v2514(std::begin(v28) + 421 * 512, std::begin(v28) + 421 * 512 + 1024);
+  std::vector<float> v2514(std::begin(v28) + 421 * 1024, std::begin(v28) + 421 * 1024 + 1024);
   std::vector<float> v2515(608);
   std::copy(v2514.begin() + 0, v2514.begin() + 0 + 608, v2515.begin());
   std::vector<float> v2516(416);
@@ -7568,7 +7570,7 @@ std::vector<CiphertextT> mnist(CryptoContextT cc, std::vector<float> v0, std::ve
   }
   auto pt421 = cc->MakeCKKSPackedPlaintext(pt421_filled);
   const auto& ct852 = cc->EvalMult(ct10, pt421);
-  std::vector<float> v2520(std::begin(v28) + 422 * 512, std::begin(v28) + 422 * 512 + 1024);
+  std::vector<float> v2520(std::begin(v28) + 422 * 1024, std::begin(v28) + 422 * 1024 + 1024);
   std::vector<float> v2521(608);
   std::copy(v2520.begin() + 0, v2520.begin() + 0 + 608, v2521.begin());
   std::vector<float> v2522(416);
@@ -7585,7 +7587,7 @@ std::vector<CiphertextT> mnist(CryptoContextT cc, std::vector<float> v0, std::ve
   }
   auto pt422 = cc->MakeCKKSPackedPlaintext(pt422_filled);
   const auto& ct853 = cc->EvalMult(ct12, pt422);
-  std::vector<float> v2526(std::begin(v28) + 423 * 512, std::begin(v28) + 423 * 512 + 1024);
+  std::vector<float> v2526(std::begin(v28) + 423 * 1024, std::begin(v28) + 423 * 1024 + 1024);
   std::vector<float> v2527(608);
   std::copy(v2526.begin() + 0, v2526.begin() + 0 + 608, v2527.begin());
   std::vector<float> v2528(416);
@@ -7602,7 +7604,7 @@ std::vector<CiphertextT> mnist(CryptoContextT cc, std::vector<float> v0, std::ve
   }
   auto pt423 = cc->MakeCKKSPackedPlaintext(pt423_filled);
   const auto& ct854 = cc->EvalMult(ct14, pt423);
-  std::vector<float> v2532(std::begin(v28) + 424 * 512, std::begin(v28) + 424 * 512 + 1024);
+  std::vector<float> v2532(std::begin(v28) + 424 * 1024, std::begin(v28) + 424 * 1024 + 1024);
   std::vector<float> v2533(608);
   std::copy(v2532.begin() + 0, v2532.begin() + 0 + 608, v2533.begin());
   std::vector<float> v2534(416);
@@ -7619,7 +7621,7 @@ std::vector<CiphertextT> mnist(CryptoContextT cc, std::vector<float> v0, std::ve
   }
   auto pt424 = cc->MakeCKKSPackedPlaintext(pt424_filled);
   const auto& ct855 = cc->EvalMult(ct16, pt424);
-  std::vector<float> v2538(std::begin(v28) + 425 * 512, std::begin(v28) + 425 * 512 + 1024);
+  std::vector<float> v2538(std::begin(v28) + 425 * 1024, std::begin(v28) + 425 * 1024 + 1024);
   std::vector<float> v2539(608);
   std::copy(v2538.begin() + 0, v2538.begin() + 0 + 608, v2539.begin());
   std::vector<float> v2540(416);
@@ -7636,7 +7638,7 @@ std::vector<CiphertextT> mnist(CryptoContextT cc, std::vector<float> v0, std::ve
   }
   auto pt425 = cc->MakeCKKSPackedPlaintext(pt425_filled);
   const auto& ct856 = cc->EvalMult(ct18, pt425);
-  std::vector<float> v2544(std::begin(v28) + 426 * 512, std::begin(v28) + 426 * 512 + 1024);
+  std::vector<float> v2544(std::begin(v28) + 426 * 1024, std::begin(v28) + 426 * 1024 + 1024);
   std::vector<float> v2545(608);
   std::copy(v2544.begin() + 0, v2544.begin() + 0 + 608, v2545.begin());
   std::vector<float> v2546(416);
@@ -7653,7 +7655,7 @@ std::vector<CiphertextT> mnist(CryptoContextT cc, std::vector<float> v0, std::ve
   }
   auto pt426 = cc->MakeCKKSPackedPlaintext(pt426_filled);
   const auto& ct857 = cc->EvalMult(ct20, pt426);
-  std::vector<float> v2550(std::begin(v28) + 427 * 512, std::begin(v28) + 427 * 512 + 1024);
+  std::vector<float> v2550(std::begin(v28) + 427 * 1024, std::begin(v28) + 427 * 1024 + 1024);
   std::vector<float> v2551(608);
   std::copy(v2550.begin() + 0, v2550.begin() + 0 + 608, v2551.begin());
   std::vector<float> v2552(416);
@@ -7670,7 +7672,7 @@ std::vector<CiphertextT> mnist(CryptoContextT cc, std::vector<float> v0, std::ve
   }
   auto pt427 = cc->MakeCKKSPackedPlaintext(pt427_filled);
   const auto& ct858 = cc->EvalMult(ct22, pt427);
-  std::vector<float> v2556(std::begin(v28) + 428 * 512, std::begin(v28) + 428 * 512 + 1024);
+  std::vector<float> v2556(std::begin(v28) + 428 * 1024, std::begin(v28) + 428 * 1024 + 1024);
   std::vector<float> v2557(608);
   std::copy(v2556.begin() + 0, v2556.begin() + 0 + 608, v2557.begin());
   std::vector<float> v2558(416);
@@ -7687,7 +7689,7 @@ std::vector<CiphertextT> mnist(CryptoContextT cc, std::vector<float> v0, std::ve
   }
   auto pt428 = cc->MakeCKKSPackedPlaintext(pt428_filled);
   const auto& ct859 = cc->EvalMult(ct24, pt428);
-  std::vector<float> v2562(std::begin(v28) + 429 * 512, std::begin(v28) + 429 * 512 + 1024);
+  std::vector<float> v2562(std::begin(v28) + 429 * 1024, std::begin(v28) + 429 * 1024 + 1024);
   std::vector<float> v2563(608);
   std::copy(v2562.begin() + 0, v2562.begin() + 0 + 608, v2563.begin());
   std::vector<float> v2564(416);
@@ -7704,7 +7706,7 @@ std::vector<CiphertextT> mnist(CryptoContextT cc, std::vector<float> v0, std::ve
   }
   auto pt429 = cc->MakeCKKSPackedPlaintext(pt429_filled);
   const auto& ct860 = cc->EvalMult(ct26, pt429);
-  std::vector<float> v2568(std::begin(v28) + 430 * 512, std::begin(v28) + 430 * 512 + 1024);
+  std::vector<float> v2568(std::begin(v28) + 430 * 1024, std::begin(v28) + 430 * 1024 + 1024);
   std::vector<float> v2569(608);
   std::copy(v2568.begin() + 0, v2568.begin() + 0 + 608, v2569.begin());
   std::vector<float> v2570(416);
@@ -7721,7 +7723,7 @@ std::vector<CiphertextT> mnist(CryptoContextT cc, std::vector<float> v0, std::ve
   }
   auto pt430 = cc->MakeCKKSPackedPlaintext(pt430_filled);
   const auto& ct861 = cc->EvalMult(ct28, pt430);
-  std::vector<float> v2574(std::begin(v28) + 431 * 512, std::begin(v28) + 431 * 512 + 1024);
+  std::vector<float> v2574(std::begin(v28) + 431 * 1024, std::begin(v28) + 431 * 1024 + 1024);
   std::vector<float> v2575(608);
   std::copy(v2574.begin() + 0, v2574.begin() + 0 + 608, v2575.begin());
   std::vector<float> v2576(416);
@@ -7754,7 +7756,7 @@ std::vector<CiphertextT> mnist(CryptoContextT cc, std::vector<float> v0, std::ve
   const auto& ct876 = cc->EvalAdd(ct872, ct875);
   const auto& ct877 = cc->EvalAdd(ct869, ct876);
   const auto& ct878 = cc->EvalRotate(ct877, 416);
-  std::vector<float> v2580(std::begin(v28) + 432 * 512, std::begin(v28) + 432 * 512 + 1024);
+  std::vector<float> v2580(std::begin(v28) + 432 * 1024, std::begin(v28) + 432 * 1024 + 1024);
   std::vector<float> v2581(592);
   std::copy(v2580.begin() + 0, v2580.begin() + 0 + 592, v2581.begin());
   std::vector<float> v2582(432);
@@ -7771,7 +7773,7 @@ std::vector<CiphertextT> mnist(CryptoContextT cc, std::vector<float> v0, std::ve
   }
   auto pt432 = cc->MakeCKKSPackedPlaintext(pt432_filled);
   const auto& ct879 = cc->EvalMult(ct, pt432);
-  std::vector<float> v2586(std::begin(v28) + 433 * 512, std::begin(v28) + 433 * 512 + 1024);
+  std::vector<float> v2586(std::begin(v28) + 433 * 1024, std::begin(v28) + 433 * 1024 + 1024);
   std::vector<float> v2587(592);
   std::copy(v2586.begin() + 0, v2586.begin() + 0 + 592, v2587.begin());
   std::vector<float> v2588(432);
@@ -7788,7 +7790,7 @@ std::vector<CiphertextT> mnist(CryptoContextT cc, std::vector<float> v0, std::ve
   }
   auto pt433 = cc->MakeCKKSPackedPlaintext(pt433_filled);
   const auto& ct880 = cc->EvalMult(ct2, pt433);
-  std::vector<float> v2592(std::begin(v28) + 434 * 512, std::begin(v28) + 434 * 512 + 1024);
+  std::vector<float> v2592(std::begin(v28) + 434 * 1024, std::begin(v28) + 434 * 1024 + 1024);
   std::vector<float> v2593(592);
   std::copy(v2592.begin() + 0, v2592.begin() + 0 + 592, v2593.begin());
   std::vector<float> v2594(432);
@@ -7805,7 +7807,7 @@ std::vector<CiphertextT> mnist(CryptoContextT cc, std::vector<float> v0, std::ve
   }
   auto pt434 = cc->MakeCKKSPackedPlaintext(pt434_filled);
   const auto& ct881 = cc->EvalMult(ct4, pt434);
-  std::vector<float> v2598(std::begin(v28) + 435 * 512, std::begin(v28) + 435 * 512 + 1024);
+  std::vector<float> v2598(std::begin(v28) + 435 * 1024, std::begin(v28) + 435 * 1024 + 1024);
   std::vector<float> v2599(592);
   std::copy(v2598.begin() + 0, v2598.begin() + 0 + 592, v2599.begin());
   std::vector<float> v2600(432);
@@ -7822,7 +7824,7 @@ std::vector<CiphertextT> mnist(CryptoContextT cc, std::vector<float> v0, std::ve
   }
   auto pt435 = cc->MakeCKKSPackedPlaintext(pt435_filled);
   const auto& ct882 = cc->EvalMult(ct6, pt435);
-  std::vector<float> v2604(std::begin(v28) + 436 * 512, std::begin(v28) + 436 * 512 + 1024);
+  std::vector<float> v2604(std::begin(v28) + 436 * 1024, std::begin(v28) + 436 * 1024 + 1024);
   std::vector<float> v2605(592);
   std::copy(v2604.begin() + 0, v2604.begin() + 0 + 592, v2605.begin());
   std::vector<float> v2606(432);
@@ -7839,7 +7841,7 @@ std::vector<CiphertextT> mnist(CryptoContextT cc, std::vector<float> v0, std::ve
   }
   auto pt436 = cc->MakeCKKSPackedPlaintext(pt436_filled);
   const auto& ct883 = cc->EvalMult(ct8, pt436);
-  std::vector<float> v2610(std::begin(v28) + 437 * 512, std::begin(v28) + 437 * 512 + 1024);
+  std::vector<float> v2610(std::begin(v28) + 437 * 1024, std::begin(v28) + 437 * 1024 + 1024);
   std::vector<float> v2611(592);
   std::copy(v2610.begin() + 0, v2610.begin() + 0 + 592, v2611.begin());
   std::vector<float> v2612(432);
@@ -7856,7 +7858,7 @@ std::vector<CiphertextT> mnist(CryptoContextT cc, std::vector<float> v0, std::ve
   }
   auto pt437 = cc->MakeCKKSPackedPlaintext(pt437_filled);
   const auto& ct884 = cc->EvalMult(ct10, pt437);
-  std::vector<float> v2616(std::begin(v28) + 438 * 512, std::begin(v28) + 438 * 512 + 1024);
+  std::vector<float> v2616(std::begin(v28) + 438 * 1024, std::begin(v28) + 438 * 1024 + 1024);
   std::vector<float> v2617(592);
   std::copy(v2616.begin() + 0, v2616.begin() + 0 + 592, v2617.begin());
   std::vector<float> v2618(432);
@@ -7873,7 +7875,7 @@ std::vector<CiphertextT> mnist(CryptoContextT cc, std::vector<float> v0, std::ve
   }
   auto pt438 = cc->MakeCKKSPackedPlaintext(pt438_filled);
   const auto& ct885 = cc->EvalMult(ct12, pt438);
-  std::vector<float> v2622(std::begin(v28) + 439 * 512, std::begin(v28) + 439 * 512 + 1024);
+  std::vector<float> v2622(std::begin(v28) + 439 * 1024, std::begin(v28) + 439 * 1024 + 1024);
   std::vector<float> v2623(592);
   std::copy(v2622.begin() + 0, v2622.begin() + 0 + 592, v2623.begin());
   std::vector<float> v2624(432);
@@ -7890,7 +7892,7 @@ std::vector<CiphertextT> mnist(CryptoContextT cc, std::vector<float> v0, std::ve
   }
   auto pt439 = cc->MakeCKKSPackedPlaintext(pt439_filled);
   const auto& ct886 = cc->EvalMult(ct14, pt439);
-  std::vector<float> v2628(std::begin(v28) + 440 * 512, std::begin(v28) + 440 * 512 + 1024);
+  std::vector<float> v2628(std::begin(v28) + 440 * 1024, std::begin(v28) + 440 * 1024 + 1024);
   std::vector<float> v2629(592);
   std::copy(v2628.begin() + 0, v2628.begin() + 0 + 592, v2629.begin());
   std::vector<float> v2630(432);
@@ -7907,7 +7909,7 @@ std::vector<CiphertextT> mnist(CryptoContextT cc, std::vector<float> v0, std::ve
   }
   auto pt440 = cc->MakeCKKSPackedPlaintext(pt440_filled);
   const auto& ct887 = cc->EvalMult(ct16, pt440);
-  std::vector<float> v2634(std::begin(v28) + 441 * 512, std::begin(v28) + 441 * 512 + 1024);
+  std::vector<float> v2634(std::begin(v28) + 441 * 1024, std::begin(v28) + 441 * 1024 + 1024);
   std::vector<float> v2635(592);
   std::copy(v2634.begin() + 0, v2634.begin() + 0 + 592, v2635.begin());
   std::vector<float> v2636(432);
@@ -7924,7 +7926,7 @@ std::vector<CiphertextT> mnist(CryptoContextT cc, std::vector<float> v0, std::ve
   }
   auto pt441 = cc->MakeCKKSPackedPlaintext(pt441_filled);
   const auto& ct888 = cc->EvalMult(ct18, pt441);
-  std::vector<float> v2640(std::begin(v28) + 442 * 512, std::begin(v28) + 442 * 512 + 1024);
+  std::vector<float> v2640(std::begin(v28) + 442 * 1024, std::begin(v28) + 442 * 1024 + 1024);
   std::vector<float> v2641(592);
   std::copy(v2640.begin() + 0, v2640.begin() + 0 + 592, v2641.begin());
   std::vector<float> v2642(432);
@@ -7941,7 +7943,7 @@ std::vector<CiphertextT> mnist(CryptoContextT cc, std::vector<float> v0, std::ve
   }
   auto pt442 = cc->MakeCKKSPackedPlaintext(pt442_filled);
   const auto& ct889 = cc->EvalMult(ct20, pt442);
-  std::vector<float> v2646(std::begin(v28) + 443 * 512, std::begin(v28) + 443 * 512 + 1024);
+  std::vector<float> v2646(std::begin(v28) + 443 * 1024, std::begin(v28) + 443 * 1024 + 1024);
   std::vector<float> v2647(592);
   std::copy(v2646.begin() + 0, v2646.begin() + 0 + 592, v2647.begin());
   std::vector<float> v2648(432);
@@ -7958,7 +7960,7 @@ std::vector<CiphertextT> mnist(CryptoContextT cc, std::vector<float> v0, std::ve
   }
   auto pt443 = cc->MakeCKKSPackedPlaintext(pt443_filled);
   const auto& ct890 = cc->EvalMult(ct22, pt443);
-  std::vector<float> v2652(std::begin(v28) + 444 * 512, std::begin(v28) + 444 * 512 + 1024);
+  std::vector<float> v2652(std::begin(v28) + 444 * 1024, std::begin(v28) + 444 * 1024 + 1024);
   std::vector<float> v2653(592);
   std::copy(v2652.begin() + 0, v2652.begin() + 0 + 592, v2653.begin());
   std::vector<float> v2654(432);
@@ -7975,7 +7977,7 @@ std::vector<CiphertextT> mnist(CryptoContextT cc, std::vector<float> v0, std::ve
   }
   auto pt444 = cc->MakeCKKSPackedPlaintext(pt444_filled);
   const auto& ct891 = cc->EvalMult(ct24, pt444);
-  std::vector<float> v2658(std::begin(v28) + 445 * 512, std::begin(v28) + 445 * 512 + 1024);
+  std::vector<float> v2658(std::begin(v28) + 445 * 1024, std::begin(v28) + 445 * 1024 + 1024);
   std::vector<float> v2659(592);
   std::copy(v2658.begin() + 0, v2658.begin() + 0 + 592, v2659.begin());
   std::vector<float> v2660(432);
@@ -7992,7 +7994,7 @@ std::vector<CiphertextT> mnist(CryptoContextT cc, std::vector<float> v0, std::ve
   }
   auto pt445 = cc->MakeCKKSPackedPlaintext(pt445_filled);
   const auto& ct892 = cc->EvalMult(ct26, pt445);
-  std::vector<float> v2664(std::begin(v28) + 446 * 512, std::begin(v28) + 446 * 512 + 1024);
+  std::vector<float> v2664(std::begin(v28) + 446 * 1024, std::begin(v28) + 446 * 1024 + 1024);
   std::vector<float> v2665(592);
   std::copy(v2664.begin() + 0, v2664.begin() + 0 + 592, v2665.begin());
   std::vector<float> v2666(432);
@@ -8009,7 +8011,7 @@ std::vector<CiphertextT> mnist(CryptoContextT cc, std::vector<float> v0, std::ve
   }
   auto pt446 = cc->MakeCKKSPackedPlaintext(pt446_filled);
   const auto& ct893 = cc->EvalMult(ct28, pt446);
-  std::vector<float> v2670(std::begin(v28) + 447 * 512, std::begin(v28) + 447 * 512 + 1024);
+  std::vector<float> v2670(std::begin(v28) + 447 * 1024, std::begin(v28) + 447 * 1024 + 1024);
   std::vector<float> v2671(592);
   std::copy(v2670.begin() + 0, v2670.begin() + 0 + 592, v2671.begin());
   std::vector<float> v2672(432);
@@ -8042,7 +8044,7 @@ std::vector<CiphertextT> mnist(CryptoContextT cc, std::vector<float> v0, std::ve
   const auto& ct908 = cc->EvalAdd(ct904, ct907);
   const auto& ct909 = cc->EvalAdd(ct901, ct908);
   const auto& ct910 = cc->EvalRotate(ct909, 432);
-  std::vector<float> v2676(std::begin(v28) + 448 * 512, std::begin(v28) + 448 * 512 + 1024);
+  std::vector<float> v2676(std::begin(v28) + 448 * 1024, std::begin(v28) + 448 * 1024 + 1024);
   std::vector<float> v2677(576);
   std::copy(v2676.begin() + 0, v2676.begin() + 0 + 576, v2677.begin());
   std::vector<float> v2678(448);
@@ -8059,7 +8061,7 @@ std::vector<CiphertextT> mnist(CryptoContextT cc, std::vector<float> v0, std::ve
   }
   auto pt448 = cc->MakeCKKSPackedPlaintext(pt448_filled);
   const auto& ct911 = cc->EvalMult(ct, pt448);
-  std::vector<float> v2682(std::begin(v28) + 449 * 512, std::begin(v28) + 449 * 512 + 1024);
+  std::vector<float> v2682(std::begin(v28) + 449 * 1024, std::begin(v28) + 449 * 1024 + 1024);
   std::vector<float> v2683(576);
   std::copy(v2682.begin() + 0, v2682.begin() + 0 + 576, v2683.begin());
   std::vector<float> v2684(448);
@@ -8076,7 +8078,7 @@ std::vector<CiphertextT> mnist(CryptoContextT cc, std::vector<float> v0, std::ve
   }
   auto pt449 = cc->MakeCKKSPackedPlaintext(pt449_filled);
   const auto& ct912 = cc->EvalMult(ct2, pt449);
-  std::vector<float> v2688(std::begin(v28) + 450 * 512, std::begin(v28) + 450 * 512 + 1024);
+  std::vector<float> v2688(std::begin(v28) + 450 * 1024, std::begin(v28) + 450 * 1024 + 1024);
   std::vector<float> v2689(576);
   std::copy(v2688.begin() + 0, v2688.begin() + 0 + 576, v2689.begin());
   std::vector<float> v2690(448);
@@ -8093,7 +8095,7 @@ std::vector<CiphertextT> mnist(CryptoContextT cc, std::vector<float> v0, std::ve
   }
   auto pt450 = cc->MakeCKKSPackedPlaintext(pt450_filled);
   const auto& ct913 = cc->EvalMult(ct4, pt450);
-  std::vector<float> v2694(std::begin(v28) + 451 * 512, std::begin(v28) + 451 * 512 + 1024);
+  std::vector<float> v2694(std::begin(v28) + 451 * 1024, std::begin(v28) + 451 * 1024 + 1024);
   std::vector<float> v2695(576);
   std::copy(v2694.begin() + 0, v2694.begin() + 0 + 576, v2695.begin());
   std::vector<float> v2696(448);
@@ -8110,7 +8112,7 @@ std::vector<CiphertextT> mnist(CryptoContextT cc, std::vector<float> v0, std::ve
   }
   auto pt451 = cc->MakeCKKSPackedPlaintext(pt451_filled);
   const auto& ct914 = cc->EvalMult(ct6, pt451);
-  std::vector<float> v2700(std::begin(v28) + 452 * 512, std::begin(v28) + 452 * 512 + 1024);
+  std::vector<float> v2700(std::begin(v28) + 452 * 1024, std::begin(v28) + 452 * 1024 + 1024);
   std::vector<float> v2701(576);
   std::copy(v2700.begin() + 0, v2700.begin() + 0 + 576, v2701.begin());
   std::vector<float> v2702(448);
@@ -8127,7 +8129,7 @@ std::vector<CiphertextT> mnist(CryptoContextT cc, std::vector<float> v0, std::ve
   }
   auto pt452 = cc->MakeCKKSPackedPlaintext(pt452_filled);
   const auto& ct915 = cc->EvalMult(ct8, pt452);
-  std::vector<float> v2706(std::begin(v28) + 453 * 512, std::begin(v28) + 453 * 512 + 1024);
+  std::vector<float> v2706(std::begin(v28) + 453 * 1024, std::begin(v28) + 453 * 1024 + 1024);
   std::vector<float> v2707(576);
   std::copy(v2706.begin() + 0, v2706.begin() + 0 + 576, v2707.begin());
   std::vector<float> v2708(448);
@@ -8144,7 +8146,7 @@ std::vector<CiphertextT> mnist(CryptoContextT cc, std::vector<float> v0, std::ve
   }
   auto pt453 = cc->MakeCKKSPackedPlaintext(pt453_filled);
   const auto& ct916 = cc->EvalMult(ct10, pt453);
-  std::vector<float> v2712(std::begin(v28) + 454 * 512, std::begin(v28) + 454 * 512 + 1024);
+  std::vector<float> v2712(std::begin(v28) + 454 * 1024, std::begin(v28) + 454 * 1024 + 1024);
   std::vector<float> v2713(576);
   std::copy(v2712.begin() + 0, v2712.begin() + 0 + 576, v2713.begin());
   std::vector<float> v2714(448);
@@ -8161,7 +8163,7 @@ std::vector<CiphertextT> mnist(CryptoContextT cc, std::vector<float> v0, std::ve
   }
   auto pt454 = cc->MakeCKKSPackedPlaintext(pt454_filled);
   const auto& ct917 = cc->EvalMult(ct12, pt454);
-  std::vector<float> v2718(std::begin(v28) + 455 * 512, std::begin(v28) + 455 * 512 + 1024);
+  std::vector<float> v2718(std::begin(v28) + 455 * 1024, std::begin(v28) + 455 * 1024 + 1024);
   std::vector<float> v2719(576);
   std::copy(v2718.begin() + 0, v2718.begin() + 0 + 576, v2719.begin());
   std::vector<float> v2720(448);
@@ -8178,7 +8180,7 @@ std::vector<CiphertextT> mnist(CryptoContextT cc, std::vector<float> v0, std::ve
   }
   auto pt455 = cc->MakeCKKSPackedPlaintext(pt455_filled);
   const auto& ct918 = cc->EvalMult(ct14, pt455);
-  std::vector<float> v2724(std::begin(v28) + 456 * 512, std::begin(v28) + 456 * 512 + 1024);
+  std::vector<float> v2724(std::begin(v28) + 456 * 1024, std::begin(v28) + 456 * 1024 + 1024);
   std::vector<float> v2725(576);
   std::copy(v2724.begin() + 0, v2724.begin() + 0 + 576, v2725.begin());
   std::vector<float> v2726(448);
@@ -8195,7 +8197,7 @@ std::vector<CiphertextT> mnist(CryptoContextT cc, std::vector<float> v0, std::ve
   }
   auto pt456 = cc->MakeCKKSPackedPlaintext(pt456_filled);
   const auto& ct919 = cc->EvalMult(ct16, pt456);
-  std::vector<float> v2730(std::begin(v28) + 457 * 512, std::begin(v28) + 457 * 512 + 1024);
+  std::vector<float> v2730(std::begin(v28) + 457 * 1024, std::begin(v28) + 457 * 1024 + 1024);
   std::vector<float> v2731(576);
   std::copy(v2730.begin() + 0, v2730.begin() + 0 + 576, v2731.begin());
   std::vector<float> v2732(448);
@@ -8212,7 +8214,7 @@ std::vector<CiphertextT> mnist(CryptoContextT cc, std::vector<float> v0, std::ve
   }
   auto pt457 = cc->MakeCKKSPackedPlaintext(pt457_filled);
   const auto& ct920 = cc->EvalMult(ct18, pt457);
-  std::vector<float> v2736(std::begin(v28) + 458 * 512, std::begin(v28) + 458 * 512 + 1024);
+  std::vector<float> v2736(std::begin(v28) + 458 * 1024, std::begin(v28) + 458 * 1024 + 1024);
   std::vector<float> v2737(576);
   std::copy(v2736.begin() + 0, v2736.begin() + 0 + 576, v2737.begin());
   std::vector<float> v2738(448);
@@ -8229,7 +8231,7 @@ std::vector<CiphertextT> mnist(CryptoContextT cc, std::vector<float> v0, std::ve
   }
   auto pt458 = cc->MakeCKKSPackedPlaintext(pt458_filled);
   const auto& ct921 = cc->EvalMult(ct20, pt458);
-  std::vector<float> v2742(std::begin(v28) + 459 * 512, std::begin(v28) + 459 * 512 + 1024);
+  std::vector<float> v2742(std::begin(v28) + 459 * 1024, std::begin(v28) + 459 * 1024 + 1024);
   std::vector<float> v2743(576);
   std::copy(v2742.begin() + 0, v2742.begin() + 0 + 576, v2743.begin());
   std::vector<float> v2744(448);
@@ -8246,7 +8248,7 @@ std::vector<CiphertextT> mnist(CryptoContextT cc, std::vector<float> v0, std::ve
   }
   auto pt459 = cc->MakeCKKSPackedPlaintext(pt459_filled);
   const auto& ct922 = cc->EvalMult(ct22, pt459);
-  std::vector<float> v2748(std::begin(v28) + 460 * 512, std::begin(v28) + 460 * 512 + 1024);
+  std::vector<float> v2748(std::begin(v28) + 460 * 1024, std::begin(v28) + 460 * 1024 + 1024);
   std::vector<float> v2749(576);
   std::copy(v2748.begin() + 0, v2748.begin() + 0 + 576, v2749.begin());
   std::vector<float> v2750(448);
@@ -8263,7 +8265,7 @@ std::vector<CiphertextT> mnist(CryptoContextT cc, std::vector<float> v0, std::ve
   }
   auto pt460 = cc->MakeCKKSPackedPlaintext(pt460_filled);
   const auto& ct923 = cc->EvalMult(ct24, pt460);
-  std::vector<float> v2754(std::begin(v28) + 461 * 512, std::begin(v28) + 461 * 512 + 1024);
+  std::vector<float> v2754(std::begin(v28) + 461 * 1024, std::begin(v28) + 461 * 1024 + 1024);
   std::vector<float> v2755(576);
   std::copy(v2754.begin() + 0, v2754.begin() + 0 + 576, v2755.begin());
   std::vector<float> v2756(448);
@@ -8280,7 +8282,7 @@ std::vector<CiphertextT> mnist(CryptoContextT cc, std::vector<float> v0, std::ve
   }
   auto pt461 = cc->MakeCKKSPackedPlaintext(pt461_filled);
   const auto& ct924 = cc->EvalMult(ct26, pt461);
-  std::vector<float> v2760(std::begin(v28) + 462 * 512, std::begin(v28) + 462 * 512 + 1024);
+  std::vector<float> v2760(std::begin(v28) + 462 * 1024, std::begin(v28) + 462 * 1024 + 1024);
   std::vector<float> v2761(576);
   std::copy(v2760.begin() + 0, v2760.begin() + 0 + 576, v2761.begin());
   std::vector<float> v2762(448);
@@ -8297,7 +8299,7 @@ std::vector<CiphertextT> mnist(CryptoContextT cc, std::vector<float> v0, std::ve
   }
   auto pt462 = cc->MakeCKKSPackedPlaintext(pt462_filled);
   const auto& ct925 = cc->EvalMult(ct28, pt462);
-  std::vector<float> v2766(std::begin(v28) + 463 * 512, std::begin(v28) + 463 * 512 + 1024);
+  std::vector<float> v2766(std::begin(v28) + 463 * 1024, std::begin(v28) + 463 * 1024 + 1024);
   std::vector<float> v2767(576);
   std::copy(v2766.begin() + 0, v2766.begin() + 0 + 576, v2767.begin());
   std::vector<float> v2768(448);
@@ -8330,7 +8332,7 @@ std::vector<CiphertextT> mnist(CryptoContextT cc, std::vector<float> v0, std::ve
   const auto& ct940 = cc->EvalAdd(ct936, ct939);
   const auto& ct941 = cc->EvalAdd(ct933, ct940);
   const auto& ct942 = cc->EvalRotate(ct941, 448);
-  std::vector<float> v2772(std::begin(v28) + 464 * 512, std::begin(v28) + 464 * 512 + 1024);
+  std::vector<float> v2772(std::begin(v28) + 464 * 1024, std::begin(v28) + 464 * 1024 + 1024);
   std::vector<float> v2773(560);
   std::copy(v2772.begin() + 0, v2772.begin() + 0 + 560, v2773.begin());
   std::vector<float> v2774(464);
@@ -8347,7 +8349,7 @@ std::vector<CiphertextT> mnist(CryptoContextT cc, std::vector<float> v0, std::ve
   }
   auto pt464 = cc->MakeCKKSPackedPlaintext(pt464_filled);
   const auto& ct943 = cc->EvalMult(ct, pt464);
-  std::vector<float> v2778(std::begin(v28) + 465 * 512, std::begin(v28) + 465 * 512 + 1024);
+  std::vector<float> v2778(std::begin(v28) + 465 * 1024, std::begin(v28) + 465 * 1024 + 1024);
   std::vector<float> v2779(560);
   std::copy(v2778.begin() + 0, v2778.begin() + 0 + 560, v2779.begin());
   std::vector<float> v2780(464);
@@ -8364,7 +8366,7 @@ std::vector<CiphertextT> mnist(CryptoContextT cc, std::vector<float> v0, std::ve
   }
   auto pt465 = cc->MakeCKKSPackedPlaintext(pt465_filled);
   const auto& ct944 = cc->EvalMult(ct2, pt465);
-  std::vector<float> v2784(std::begin(v28) + 466 * 512, std::begin(v28) + 466 * 512 + 1024);
+  std::vector<float> v2784(std::begin(v28) + 466 * 1024, std::begin(v28) + 466 * 1024 + 1024);
   std::vector<float> v2785(560);
   std::copy(v2784.begin() + 0, v2784.begin() + 0 + 560, v2785.begin());
   std::vector<float> v2786(464);
@@ -8381,7 +8383,7 @@ std::vector<CiphertextT> mnist(CryptoContextT cc, std::vector<float> v0, std::ve
   }
   auto pt466 = cc->MakeCKKSPackedPlaintext(pt466_filled);
   const auto& ct945 = cc->EvalMult(ct4, pt466);
-  std::vector<float> v2790(std::begin(v28) + 467 * 512, std::begin(v28) + 467 * 512 + 1024);
+  std::vector<float> v2790(std::begin(v28) + 467 * 1024, std::begin(v28) + 467 * 1024 + 1024);
   std::vector<float> v2791(560);
   std::copy(v2790.begin() + 0, v2790.begin() + 0 + 560, v2791.begin());
   std::vector<float> v2792(464);
@@ -8398,7 +8400,7 @@ std::vector<CiphertextT> mnist(CryptoContextT cc, std::vector<float> v0, std::ve
   }
   auto pt467 = cc->MakeCKKSPackedPlaintext(pt467_filled);
   const auto& ct946 = cc->EvalMult(ct6, pt467);
-  std::vector<float> v2796(std::begin(v28) + 468 * 512, std::begin(v28) + 468 * 512 + 1024);
+  std::vector<float> v2796(std::begin(v28) + 468 * 1024, std::begin(v28) + 468 * 1024 + 1024);
   std::vector<float> v2797(560);
   std::copy(v2796.begin() + 0, v2796.begin() + 0 + 560, v2797.begin());
   std::vector<float> v2798(464);
@@ -8415,7 +8417,7 @@ std::vector<CiphertextT> mnist(CryptoContextT cc, std::vector<float> v0, std::ve
   }
   auto pt468 = cc->MakeCKKSPackedPlaintext(pt468_filled);
   const auto& ct947 = cc->EvalMult(ct8, pt468);
-  std::vector<float> v2802(std::begin(v28) + 469 * 512, std::begin(v28) + 469 * 512 + 1024);
+  std::vector<float> v2802(std::begin(v28) + 469 * 1024, std::begin(v28) + 469 * 1024 + 1024);
   std::vector<float> v2803(560);
   std::copy(v2802.begin() + 0, v2802.begin() + 0 + 560, v2803.begin());
   std::vector<float> v2804(464);
@@ -8432,7 +8434,7 @@ std::vector<CiphertextT> mnist(CryptoContextT cc, std::vector<float> v0, std::ve
   }
   auto pt469 = cc->MakeCKKSPackedPlaintext(pt469_filled);
   const auto& ct948 = cc->EvalMult(ct10, pt469);
-  std::vector<float> v2808(std::begin(v28) + 470 * 512, std::begin(v28) + 470 * 512 + 1024);
+  std::vector<float> v2808(std::begin(v28) + 470 * 1024, std::begin(v28) + 470 * 1024 + 1024);
   std::vector<float> v2809(560);
   std::copy(v2808.begin() + 0, v2808.begin() + 0 + 560, v2809.begin());
   std::vector<float> v2810(464);
@@ -8449,7 +8451,7 @@ std::vector<CiphertextT> mnist(CryptoContextT cc, std::vector<float> v0, std::ve
   }
   auto pt470 = cc->MakeCKKSPackedPlaintext(pt470_filled);
   const auto& ct949 = cc->EvalMult(ct12, pt470);
-  std::vector<float> v2814(std::begin(v28) + 471 * 512, std::begin(v28) + 471 * 512 + 1024);
+  std::vector<float> v2814(std::begin(v28) + 471 * 1024, std::begin(v28) + 471 * 1024 + 1024);
   std::vector<float> v2815(560);
   std::copy(v2814.begin() + 0, v2814.begin() + 0 + 560, v2815.begin());
   std::vector<float> v2816(464);
@@ -8466,7 +8468,7 @@ std::vector<CiphertextT> mnist(CryptoContextT cc, std::vector<float> v0, std::ve
   }
   auto pt471 = cc->MakeCKKSPackedPlaintext(pt471_filled);
   const auto& ct950 = cc->EvalMult(ct14, pt471);
-  std::vector<float> v2820(std::begin(v28) + 472 * 512, std::begin(v28) + 472 * 512 + 1024);
+  std::vector<float> v2820(std::begin(v28) + 472 * 1024, std::begin(v28) + 472 * 1024 + 1024);
   std::vector<float> v2821(560);
   std::copy(v2820.begin() + 0, v2820.begin() + 0 + 560, v2821.begin());
   std::vector<float> v2822(464);
@@ -8483,7 +8485,7 @@ std::vector<CiphertextT> mnist(CryptoContextT cc, std::vector<float> v0, std::ve
   }
   auto pt472 = cc->MakeCKKSPackedPlaintext(pt472_filled);
   const auto& ct951 = cc->EvalMult(ct16, pt472);
-  std::vector<float> v2826(std::begin(v28) + 473 * 512, std::begin(v28) + 473 * 512 + 1024);
+  std::vector<float> v2826(std::begin(v28) + 473 * 1024, std::begin(v28) + 473 * 1024 + 1024);
   std::vector<float> v2827(560);
   std::copy(v2826.begin() + 0, v2826.begin() + 0 + 560, v2827.begin());
   std::vector<float> v2828(464);
@@ -8500,7 +8502,7 @@ std::vector<CiphertextT> mnist(CryptoContextT cc, std::vector<float> v0, std::ve
   }
   auto pt473 = cc->MakeCKKSPackedPlaintext(pt473_filled);
   const auto& ct952 = cc->EvalMult(ct18, pt473);
-  std::vector<float> v2832(std::begin(v28) + 474 * 512, std::begin(v28) + 474 * 512 + 1024);
+  std::vector<float> v2832(std::begin(v28) + 474 * 1024, std::begin(v28) + 474 * 1024 + 1024);
   std::vector<float> v2833(560);
   std::copy(v2832.begin() + 0, v2832.begin() + 0 + 560, v2833.begin());
   std::vector<float> v2834(464);
@@ -8517,7 +8519,7 @@ std::vector<CiphertextT> mnist(CryptoContextT cc, std::vector<float> v0, std::ve
   }
   auto pt474 = cc->MakeCKKSPackedPlaintext(pt474_filled);
   const auto& ct953 = cc->EvalMult(ct20, pt474);
-  std::vector<float> v2838(std::begin(v28) + 475 * 512, std::begin(v28) + 475 * 512 + 1024);
+  std::vector<float> v2838(std::begin(v28) + 475 * 1024, std::begin(v28) + 475 * 1024 + 1024);
   std::vector<float> v2839(560);
   std::copy(v2838.begin() + 0, v2838.begin() + 0 + 560, v2839.begin());
   std::vector<float> v2840(464);
@@ -8534,7 +8536,7 @@ std::vector<CiphertextT> mnist(CryptoContextT cc, std::vector<float> v0, std::ve
   }
   auto pt475 = cc->MakeCKKSPackedPlaintext(pt475_filled);
   const auto& ct954 = cc->EvalMult(ct22, pt475);
-  std::vector<float> v2844(std::begin(v28) + 476 * 512, std::begin(v28) + 476 * 512 + 1024);
+  std::vector<float> v2844(std::begin(v28) + 476 * 1024, std::begin(v28) + 476 * 1024 + 1024);
   std::vector<float> v2845(560);
   std::copy(v2844.begin() + 0, v2844.begin() + 0 + 560, v2845.begin());
   std::vector<float> v2846(464);
@@ -8551,7 +8553,7 @@ std::vector<CiphertextT> mnist(CryptoContextT cc, std::vector<float> v0, std::ve
   }
   auto pt476 = cc->MakeCKKSPackedPlaintext(pt476_filled);
   const auto& ct955 = cc->EvalMult(ct24, pt476);
-  std::vector<float> v2850(std::begin(v28) + 477 * 512, std::begin(v28) + 477 * 512 + 1024);
+  std::vector<float> v2850(std::begin(v28) + 477 * 1024, std::begin(v28) + 477 * 1024 + 1024);
   std::vector<float> v2851(560);
   std::copy(v2850.begin() + 0, v2850.begin() + 0 + 560, v2851.begin());
   std::vector<float> v2852(464);
@@ -8568,7 +8570,7 @@ std::vector<CiphertextT> mnist(CryptoContextT cc, std::vector<float> v0, std::ve
   }
   auto pt477 = cc->MakeCKKSPackedPlaintext(pt477_filled);
   const auto& ct956 = cc->EvalMult(ct26, pt477);
-  std::vector<float> v2856(std::begin(v28) + 478 * 512, std::begin(v28) + 478 * 512 + 1024);
+  std::vector<float> v2856(std::begin(v28) + 478 * 1024, std::begin(v28) + 478 * 1024 + 1024);
   std::vector<float> v2857(560);
   std::copy(v2856.begin() + 0, v2856.begin() + 0 + 560, v2857.begin());
   std::vector<float> v2858(464);
@@ -8585,7 +8587,7 @@ std::vector<CiphertextT> mnist(CryptoContextT cc, std::vector<float> v0, std::ve
   }
   auto pt478 = cc->MakeCKKSPackedPlaintext(pt478_filled);
   const auto& ct957 = cc->EvalMult(ct28, pt478);
-  std::vector<float> v2862(std::begin(v28) + 479 * 512, std::begin(v28) + 479 * 512 + 1024);
+  std::vector<float> v2862(std::begin(v28) + 479 * 1024, std::begin(v28) + 479 * 1024 + 1024);
   std::vector<float> v2863(560);
   std::copy(v2862.begin() + 0, v2862.begin() + 0 + 560, v2863.begin());
   std::vector<float> v2864(464);
@@ -8618,7 +8620,7 @@ std::vector<CiphertextT> mnist(CryptoContextT cc, std::vector<float> v0, std::ve
   const auto& ct972 = cc->EvalAdd(ct968, ct971);
   const auto& ct973 = cc->EvalAdd(ct965, ct972);
   const auto& ct974 = cc->EvalRotate(ct973, 464);
-  std::vector<float> v2868(std::begin(v28) + 480 * 512, std::begin(v28) + 480 * 512 + 1024);
+  std::vector<float> v2868(std::begin(v28) + 480 * 1024, std::begin(v28) + 480 * 1024 + 1024);
   std::vector<float> v2869(544);
   std::copy(v2868.begin() + 0, v2868.begin() + 0 + 544, v2869.begin());
   std::vector<float> v2870(480);
@@ -8635,7 +8637,7 @@ std::vector<CiphertextT> mnist(CryptoContextT cc, std::vector<float> v0, std::ve
   }
   auto pt480 = cc->MakeCKKSPackedPlaintext(pt480_filled);
   const auto& ct975 = cc->EvalMult(ct, pt480);
-  std::vector<float> v2874(std::begin(v28) + 481 * 512, std::begin(v28) + 481 * 512 + 1024);
+  std::vector<float> v2874(std::begin(v28) + 481 * 1024, std::begin(v28) + 481 * 1024 + 1024);
   std::vector<float> v2875(544);
   std::copy(v2874.begin() + 0, v2874.begin() + 0 + 544, v2875.begin());
   std::vector<float> v2876(480);
@@ -8652,7 +8654,7 @@ std::vector<CiphertextT> mnist(CryptoContextT cc, std::vector<float> v0, std::ve
   }
   auto pt481 = cc->MakeCKKSPackedPlaintext(pt481_filled);
   const auto& ct976 = cc->EvalMult(ct2, pt481);
-  std::vector<float> v2880(std::begin(v28) + 482 * 512, std::begin(v28) + 482 * 512 + 1024);
+  std::vector<float> v2880(std::begin(v28) + 482 * 1024, std::begin(v28) + 482 * 1024 + 1024);
   std::vector<float> v2881(544);
   std::copy(v2880.begin() + 0, v2880.begin() + 0 + 544, v2881.begin());
   std::vector<float> v2882(480);
@@ -8669,7 +8671,7 @@ std::vector<CiphertextT> mnist(CryptoContextT cc, std::vector<float> v0, std::ve
   }
   auto pt482 = cc->MakeCKKSPackedPlaintext(pt482_filled);
   const auto& ct977 = cc->EvalMult(ct4, pt482);
-  std::vector<float> v2886(std::begin(v28) + 483 * 512, std::begin(v28) + 483 * 512 + 1024);
+  std::vector<float> v2886(std::begin(v28) + 483 * 1024, std::begin(v28) + 483 * 1024 + 1024);
   std::vector<float> v2887(544);
   std::copy(v2886.begin() + 0, v2886.begin() + 0 + 544, v2887.begin());
   std::vector<float> v2888(480);
@@ -8686,7 +8688,7 @@ std::vector<CiphertextT> mnist(CryptoContextT cc, std::vector<float> v0, std::ve
   }
   auto pt483 = cc->MakeCKKSPackedPlaintext(pt483_filled);
   const auto& ct978 = cc->EvalMult(ct6, pt483);
-  std::vector<float> v2892(std::begin(v28) + 484 * 512, std::begin(v28) + 484 * 512 + 1024);
+  std::vector<float> v2892(std::begin(v28) + 484 * 1024, std::begin(v28) + 484 * 1024 + 1024);
   std::vector<float> v2893(544);
   std::copy(v2892.begin() + 0, v2892.begin() + 0 + 544, v2893.begin());
   std::vector<float> v2894(480);
@@ -8703,7 +8705,7 @@ std::vector<CiphertextT> mnist(CryptoContextT cc, std::vector<float> v0, std::ve
   }
   auto pt484 = cc->MakeCKKSPackedPlaintext(pt484_filled);
   const auto& ct979 = cc->EvalMult(ct8, pt484);
-  std::vector<float> v2898(std::begin(v28) + 485 * 512, std::begin(v28) + 485 * 512 + 1024);
+  std::vector<float> v2898(std::begin(v28) + 485 * 1024, std::begin(v28) + 485 * 1024 + 1024);
   std::vector<float> v2899(544);
   std::copy(v2898.begin() + 0, v2898.begin() + 0 + 544, v2899.begin());
   std::vector<float> v2900(480);
@@ -8720,7 +8722,7 @@ std::vector<CiphertextT> mnist(CryptoContextT cc, std::vector<float> v0, std::ve
   }
   auto pt485 = cc->MakeCKKSPackedPlaintext(pt485_filled);
   const auto& ct980 = cc->EvalMult(ct10, pt485);
-  std::vector<float> v2904(std::begin(v28) + 486 * 512, std::begin(v28) + 486 * 512 + 1024);
+  std::vector<float> v2904(std::begin(v28) + 486 * 1024, std::begin(v28) + 486 * 1024 + 1024);
   std::vector<float> v2905(544);
   std::copy(v2904.begin() + 0, v2904.begin() + 0 + 544, v2905.begin());
   std::vector<float> v2906(480);
@@ -8737,7 +8739,7 @@ std::vector<CiphertextT> mnist(CryptoContextT cc, std::vector<float> v0, std::ve
   }
   auto pt486 = cc->MakeCKKSPackedPlaintext(pt486_filled);
   const auto& ct981 = cc->EvalMult(ct12, pt486);
-  std::vector<float> v2910(std::begin(v28) + 487 * 512, std::begin(v28) + 487 * 512 + 1024);
+  std::vector<float> v2910(std::begin(v28) + 487 * 1024, std::begin(v28) + 487 * 1024 + 1024);
   std::vector<float> v2911(544);
   std::copy(v2910.begin() + 0, v2910.begin() + 0 + 544, v2911.begin());
   std::vector<float> v2912(480);
@@ -8754,7 +8756,7 @@ std::vector<CiphertextT> mnist(CryptoContextT cc, std::vector<float> v0, std::ve
   }
   auto pt487 = cc->MakeCKKSPackedPlaintext(pt487_filled);
   const auto& ct982 = cc->EvalMult(ct14, pt487);
-  std::vector<float> v2916(std::begin(v28) + 488 * 512, std::begin(v28) + 488 * 512 + 1024);
+  std::vector<float> v2916(std::begin(v28) + 488 * 1024, std::begin(v28) + 488 * 1024 + 1024);
   std::vector<float> v2917(544);
   std::copy(v2916.begin() + 0, v2916.begin() + 0 + 544, v2917.begin());
   std::vector<float> v2918(480);
@@ -8771,7 +8773,7 @@ std::vector<CiphertextT> mnist(CryptoContextT cc, std::vector<float> v0, std::ve
   }
   auto pt488 = cc->MakeCKKSPackedPlaintext(pt488_filled);
   const auto& ct983 = cc->EvalMult(ct16, pt488);
-  std::vector<float> v2922(std::begin(v28) + 489 * 512, std::begin(v28) + 489 * 512 + 1024);
+  std::vector<float> v2922(std::begin(v28) + 489 * 1024, std::begin(v28) + 489 * 1024 + 1024);
   std::vector<float> v2923(544);
   std::copy(v2922.begin() + 0, v2922.begin() + 0 + 544, v2923.begin());
   std::vector<float> v2924(480);
@@ -8788,7 +8790,7 @@ std::vector<CiphertextT> mnist(CryptoContextT cc, std::vector<float> v0, std::ve
   }
   auto pt489 = cc->MakeCKKSPackedPlaintext(pt489_filled);
   const auto& ct984 = cc->EvalMult(ct18, pt489);
-  std::vector<float> v2928(std::begin(v28) + 490 * 512, std::begin(v28) + 490 * 512 + 1024);
+  std::vector<float> v2928(std::begin(v28) + 490 * 1024, std::begin(v28) + 490 * 1024 + 1024);
   std::vector<float> v2929(544);
   std::copy(v2928.begin() + 0, v2928.begin() + 0 + 544, v2929.begin());
   std::vector<float> v2930(480);
@@ -8805,7 +8807,7 @@ std::vector<CiphertextT> mnist(CryptoContextT cc, std::vector<float> v0, std::ve
   }
   auto pt490 = cc->MakeCKKSPackedPlaintext(pt490_filled);
   const auto& ct985 = cc->EvalMult(ct20, pt490);
-  std::vector<float> v2934(std::begin(v28) + 491 * 512, std::begin(v28) + 491 * 512 + 1024);
+  std::vector<float> v2934(std::begin(v28) + 491 * 1024, std::begin(v28) + 491 * 1024 + 1024);
   std::vector<float> v2935(544);
   std::copy(v2934.begin() + 0, v2934.begin() + 0 + 544, v2935.begin());
   std::vector<float> v2936(480);
@@ -8822,7 +8824,7 @@ std::vector<CiphertextT> mnist(CryptoContextT cc, std::vector<float> v0, std::ve
   }
   auto pt491 = cc->MakeCKKSPackedPlaintext(pt491_filled);
   const auto& ct986 = cc->EvalMult(ct22, pt491);
-  std::vector<float> v2940(std::begin(v28) + 492 * 512, std::begin(v28) + 492 * 512 + 1024);
+  std::vector<float> v2940(std::begin(v28) + 492 * 1024, std::begin(v28) + 492 * 1024 + 1024);
   std::vector<float> v2941(544);
   std::copy(v2940.begin() + 0, v2940.begin() + 0 + 544, v2941.begin());
   std::vector<float> v2942(480);
@@ -8839,7 +8841,7 @@ std::vector<CiphertextT> mnist(CryptoContextT cc, std::vector<float> v0, std::ve
   }
   auto pt492 = cc->MakeCKKSPackedPlaintext(pt492_filled);
   const auto& ct987 = cc->EvalMult(ct24, pt492);
-  std::vector<float> v2946(std::begin(v28) + 493 * 512, std::begin(v28) + 493 * 512 + 1024);
+  std::vector<float> v2946(std::begin(v28) + 493 * 1024, std::begin(v28) + 493 * 1024 + 1024);
   std::vector<float> v2947(544);
   std::copy(v2946.begin() + 0, v2946.begin() + 0 + 544, v2947.begin());
   std::vector<float> v2948(480);
@@ -8856,7 +8858,7 @@ std::vector<CiphertextT> mnist(CryptoContextT cc, std::vector<float> v0, std::ve
   }
   auto pt493 = cc->MakeCKKSPackedPlaintext(pt493_filled);
   const auto& ct988 = cc->EvalMult(ct26, pt493);
-  std::vector<float> v2952(std::begin(v28) + 494 * 512, std::begin(v28) + 494 * 512 + 1024);
+  std::vector<float> v2952(std::begin(v28) + 494 * 1024, std::begin(v28) + 494 * 1024 + 1024);
   std::vector<float> v2953(544);
   std::copy(v2952.begin() + 0, v2952.begin() + 0 + 544, v2953.begin());
   std::vector<float> v2954(480);
@@ -8873,7 +8875,7 @@ std::vector<CiphertextT> mnist(CryptoContextT cc, std::vector<float> v0, std::ve
   }
   auto pt494 = cc->MakeCKKSPackedPlaintext(pt494_filled);
   const auto& ct989 = cc->EvalMult(ct28, pt494);
-  std::vector<float> v2958(std::begin(v28) + 495 * 512, std::begin(v28) + 495 * 512 + 1024);
+  std::vector<float> v2958(std::begin(v28) + 495 * 1024, std::begin(v28) + 495 * 1024 + 1024);
   std::vector<float> v2959(544);
   std::copy(v2958.begin() + 0, v2958.begin() + 0 + 544, v2959.begin());
   std::vector<float> v2960(480);
@@ -8906,7 +8908,7 @@ std::vector<CiphertextT> mnist(CryptoContextT cc, std::vector<float> v0, std::ve
   const auto& ct1004 = cc->EvalAdd(ct1000, ct1003);
   const auto& ct1005 = cc->EvalAdd(ct997, ct1004);
   const auto& ct1006 = cc->EvalRotate(ct1005, 480);
-  std::vector<float> v2964(std::begin(v28) + 496 * 512, std::begin(v28) + 496 * 512 + 1024);
+  std::vector<float> v2964(std::begin(v28) + 496 * 1024, std::begin(v28) + 496 * 1024 + 1024);
   std::vector<float> v2965(528);
   std::copy(v2964.begin() + 0, v2964.begin() + 0 + 528, v2965.begin());
   std::vector<float> v2966(496);
@@ -8923,7 +8925,7 @@ std::vector<CiphertextT> mnist(CryptoContextT cc, std::vector<float> v0, std::ve
   }
   auto pt496 = cc->MakeCKKSPackedPlaintext(pt496_filled);
   const auto& ct1007 = cc->EvalMult(ct, pt496);
-  std::vector<float> v2970(std::begin(v28) + 497 * 512, std::begin(v28) + 497 * 512 + 1024);
+  std::vector<float> v2970(std::begin(v28) + 497 * 1024, std::begin(v28) + 497 * 1024 + 1024);
   std::vector<float> v2971(528);
   std::copy(v2970.begin() + 0, v2970.begin() + 0 + 528, v2971.begin());
   std::vector<float> v2972(496);
@@ -8940,7 +8942,7 @@ std::vector<CiphertextT> mnist(CryptoContextT cc, std::vector<float> v0, std::ve
   }
   auto pt497 = cc->MakeCKKSPackedPlaintext(pt497_filled);
   const auto& ct1008 = cc->EvalMult(ct2, pt497);
-  std::vector<float> v2976(std::begin(v28) + 498 * 512, std::begin(v28) + 498 * 512 + 1024);
+  std::vector<float> v2976(std::begin(v28) + 498 * 1024, std::begin(v28) + 498 * 1024 + 1024);
   std::vector<float> v2977(528);
   std::copy(v2976.begin() + 0, v2976.begin() + 0 + 528, v2977.begin());
   std::vector<float> v2978(496);
@@ -8957,7 +8959,7 @@ std::vector<CiphertextT> mnist(CryptoContextT cc, std::vector<float> v0, std::ve
   }
   auto pt498 = cc->MakeCKKSPackedPlaintext(pt498_filled);
   const auto& ct1009 = cc->EvalMult(ct4, pt498);
-  std::vector<float> v2982(std::begin(v28) + 499 * 512, std::begin(v28) + 499 * 512 + 1024);
+  std::vector<float> v2982(std::begin(v28) + 499 * 1024, std::begin(v28) + 499 * 1024 + 1024);
   std::vector<float> v2983(528);
   std::copy(v2982.begin() + 0, v2982.begin() + 0 + 528, v2983.begin());
   std::vector<float> v2984(496);
@@ -8974,7 +8976,7 @@ std::vector<CiphertextT> mnist(CryptoContextT cc, std::vector<float> v0, std::ve
   }
   auto pt499 = cc->MakeCKKSPackedPlaintext(pt499_filled);
   const auto& ct1010 = cc->EvalMult(ct6, pt499);
-  std::vector<float> v2988(std::begin(v28) + 500 * 512, std::begin(v28) + 500 * 512 + 1024);
+  std::vector<float> v2988(std::begin(v28) + 500 * 1024, std::begin(v28) + 500 * 1024 + 1024);
   std::vector<float> v2989(528);
   std::copy(v2988.begin() + 0, v2988.begin() + 0 + 528, v2989.begin());
   std::vector<float> v2990(496);
@@ -8991,7 +8993,7 @@ std::vector<CiphertextT> mnist(CryptoContextT cc, std::vector<float> v0, std::ve
   }
   auto pt500 = cc->MakeCKKSPackedPlaintext(pt500_filled);
   const auto& ct1011 = cc->EvalMult(ct8, pt500);
-  std::vector<float> v2994(std::begin(v28) + 501 * 512, std::begin(v28) + 501 * 512 + 1024);
+  std::vector<float> v2994(std::begin(v28) + 501 * 1024, std::begin(v28) + 501 * 1024 + 1024);
   std::vector<float> v2995(528);
   std::copy(v2994.begin() + 0, v2994.begin() + 0 + 528, v2995.begin());
   std::vector<float> v2996(496);
@@ -9008,7 +9010,7 @@ std::vector<CiphertextT> mnist(CryptoContextT cc, std::vector<float> v0, std::ve
   }
   auto pt501 = cc->MakeCKKSPackedPlaintext(pt501_filled);
   const auto& ct1012 = cc->EvalMult(ct10, pt501);
-  std::vector<float> v3000(std::begin(v28) + 502 * 512, std::begin(v28) + 502 * 512 + 1024);
+  std::vector<float> v3000(std::begin(v28) + 502 * 1024, std::begin(v28) + 502 * 1024 + 1024);
   std::vector<float> v3001(528);
   std::copy(v3000.begin() + 0, v3000.begin() + 0 + 528, v3001.begin());
   std::vector<float> v3002(496);
@@ -9025,7 +9027,7 @@ std::vector<CiphertextT> mnist(CryptoContextT cc, std::vector<float> v0, std::ve
   }
   auto pt502 = cc->MakeCKKSPackedPlaintext(pt502_filled);
   const auto& ct1013 = cc->EvalMult(ct12, pt502);
-  std::vector<float> v3006(std::begin(v28) + 503 * 512, std::begin(v28) + 503 * 512 + 1024);
+  std::vector<float> v3006(std::begin(v28) + 503 * 1024, std::begin(v28) + 503 * 1024 + 1024);
   std::vector<float> v3007(528);
   std::copy(v3006.begin() + 0, v3006.begin() + 0 + 528, v3007.begin());
   std::vector<float> v3008(496);
@@ -9042,7 +9044,7 @@ std::vector<CiphertextT> mnist(CryptoContextT cc, std::vector<float> v0, std::ve
   }
   auto pt503 = cc->MakeCKKSPackedPlaintext(pt503_filled);
   const auto& ct1014 = cc->EvalMult(ct14, pt503);
-  std::vector<float> v3012(std::begin(v28) + 504 * 512, std::begin(v28) + 504 * 512 + 1024);
+  std::vector<float> v3012(std::begin(v28) + 504 * 1024, std::begin(v28) + 504 * 1024 + 1024);
   std::vector<float> v3013(528);
   std::copy(v3012.begin() + 0, v3012.begin() + 0 + 528, v3013.begin());
   std::vector<float> v3014(496);
@@ -9059,7 +9061,7 @@ std::vector<CiphertextT> mnist(CryptoContextT cc, std::vector<float> v0, std::ve
   }
   auto pt504 = cc->MakeCKKSPackedPlaintext(pt504_filled);
   const auto& ct1015 = cc->EvalMult(ct16, pt504);
-  std::vector<float> v3018(std::begin(v28) + 505 * 512, std::begin(v28) + 505 * 512 + 1024);
+  std::vector<float> v3018(std::begin(v28) + 505 * 1024, std::begin(v28) + 505 * 1024 + 1024);
   std::vector<float> v3019(528);
   std::copy(v3018.begin() + 0, v3018.begin() + 0 + 528, v3019.begin());
   std::vector<float> v3020(496);
@@ -9076,7 +9078,7 @@ std::vector<CiphertextT> mnist(CryptoContextT cc, std::vector<float> v0, std::ve
   }
   auto pt505 = cc->MakeCKKSPackedPlaintext(pt505_filled);
   const auto& ct1016 = cc->EvalMult(ct18, pt505);
-  std::vector<float> v3024(std::begin(v28) + 506 * 512, std::begin(v28) + 506 * 512 + 1024);
+  std::vector<float> v3024(std::begin(v28) + 506 * 1024, std::begin(v28) + 506 * 1024 + 1024);
   std::vector<float> v3025(528);
   std::copy(v3024.begin() + 0, v3024.begin() + 0 + 528, v3025.begin());
   std::vector<float> v3026(496);
@@ -9093,7 +9095,7 @@ std::vector<CiphertextT> mnist(CryptoContextT cc, std::vector<float> v0, std::ve
   }
   auto pt506 = cc->MakeCKKSPackedPlaintext(pt506_filled);
   const auto& ct1017 = cc->EvalMult(ct20, pt506);
-  std::vector<float> v3030(std::begin(v28) + 507 * 512, std::begin(v28) + 507 * 512 + 1024);
+  std::vector<float> v3030(std::begin(v28) + 507 * 1024, std::begin(v28) + 507 * 1024 + 1024);
   std::vector<float> v3031(528);
   std::copy(v3030.begin() + 0, v3030.begin() + 0 + 528, v3031.begin());
   std::vector<float> v3032(496);
@@ -9110,7 +9112,7 @@ std::vector<CiphertextT> mnist(CryptoContextT cc, std::vector<float> v0, std::ve
   }
   auto pt507 = cc->MakeCKKSPackedPlaintext(pt507_filled);
   const auto& ct1018 = cc->EvalMult(ct22, pt507);
-  std::vector<float> v3036(std::begin(v28) + 508 * 512, std::begin(v28) + 508 * 512 + 1024);
+  std::vector<float> v3036(std::begin(v28) + 508 * 1024, std::begin(v28) + 508 * 1024 + 1024);
   std::vector<float> v3037(528);
   std::copy(v3036.begin() + 0, v3036.begin() + 0 + 528, v3037.begin());
   std::vector<float> v3038(496);
@@ -9127,7 +9129,7 @@ std::vector<CiphertextT> mnist(CryptoContextT cc, std::vector<float> v0, std::ve
   }
   auto pt508 = cc->MakeCKKSPackedPlaintext(pt508_filled);
   const auto& ct1019 = cc->EvalMult(ct24, pt508);
-  std::vector<float> v3042(std::begin(v28) + 509 * 512, std::begin(v28) + 509 * 512 + 1024);
+  std::vector<float> v3042(std::begin(v28) + 509 * 1024, std::begin(v28) + 509 * 1024 + 1024);
   std::vector<float> v3043(528);
   std::copy(v3042.begin() + 0, v3042.begin() + 0 + 528, v3043.begin());
   std::vector<float> v3044(496);
@@ -9144,7 +9146,7 @@ std::vector<CiphertextT> mnist(CryptoContextT cc, std::vector<float> v0, std::ve
   }
   auto pt509 = cc->MakeCKKSPackedPlaintext(pt509_filled);
   const auto& ct1020 = cc->EvalMult(ct26, pt509);
-  std::vector<float> v3048(std::begin(v28) + 510 * 512, std::begin(v28) + 510 * 512 + 1024);
+  std::vector<float> v3048(std::begin(v28) + 510 * 1024, std::begin(v28) + 510 * 1024 + 1024);
   std::vector<float> v3049(528);
   std::copy(v3048.begin() + 0, v3048.begin() + 0 + 528, v3049.begin());
   std::vector<float> v3050(496);
@@ -9161,7 +9163,7 @@ std::vector<CiphertextT> mnist(CryptoContextT cc, std::vector<float> v0, std::ve
   }
   auto pt510 = cc->MakeCKKSPackedPlaintext(pt510_filled);
   const auto& ct1021 = cc->EvalMult(ct28, pt510);
-  std::vector<float> v3054(std::begin(v28) + 511 * 512, std::begin(v28) + 511 * 512 + 1024);
+  std::vector<float> v3054(std::begin(v28) + 511 * 1024, std::begin(v28) + 511 * 1024 + 1024);
   std::vector<float> v3055(528);
   std::copy(v3054.begin() + 0, v3054.begin() + 0 + 528, v3055.begin());
   std::vector<float> v3056(496);
@@ -9221,28 +9223,28 @@ std::vector<CiphertextT> mnist(CryptoContextT cc, std::vector<float> v0, std::ve
   const auto& ct1063 = cc->EvalAdd(ct1061, ct1062);
   const auto& ct1064 = cc->EvalAdd(ct942, ct974);
   const auto& ct1065 = cc->EvalAdd(ct1006, ct1038);
-  std::vector<double> v3061(std::begin(v47), std::end(v47));
+  const auto& ct1066 = cc->EvalAdd(ct1064, ct1065);
+  const auto& ct1067 = cc->EvalAdd(ct1063, ct1066);
+  const auto& ct1068 = cc->EvalAdd(ct1060, ct1067);
+  const auto& ct1069 = cc->EvalAdd(ct1053, ct1068);
+  const auto& ct1070 = cc->EvalRotate(ct1069, 512);
+  std::vector<float> v3061 = v20;
+  for (auto v3062 = 0; v3062 < 1024; ++v3062) {
+    size_t v3064 = v3062 % v24;
+    float v3065 = v1[v3064];
+    v3061[v3062 + 1024 * (0)] = v3065;
+  }
+  std::vector<double> v3068(std::begin(v3061), std::end(v3061));
   auto pt512_filled_n = cc->GetCryptoParameters()->GetElementParams()->GetRingDimension() / 2;
-  auto pt512_filled = v3061;
+  auto pt512_filled = v3068;
   pt512_filled.clear();
   pt512_filled.reserve(pt512_filled_n);
   for (auto i = 0; i < pt512_filled_n; ++i) {
-    pt512_filled.push_back(v3061[i % v3061.size()]);
+    pt512_filled.push_back(v3068[i % v3068.size()]);
   }
   auto pt512 = cc->MakeCKKSPackedPlaintext(pt512_filled);
-  const auto& ct1066 = cc->EvalAdd(ct1065, pt512);
-  const auto& ct1067 = cc->EvalAdd(ct1064, ct1066);
-  const auto& ct1068 = cc->EvalAdd(ct1063, ct1067);
-  const auto& ct1069 = cc->EvalAdd(ct1060, ct1068);
-  const auto& ct1070 = cc->EvalAdd(ct1053, ct1069);
-  const auto& ct1071 = cc->EvalRotate(ct1070, 512);
-  std::vector<float> v3062 = v20;
-  for (auto v3063 = 0; v3063 < 1024; ++v3063) {
-    size_t v3065 = v3063 % v24;
-    float v3066 = v1[v3065];
-    v3062[v3063 + 1024 * (0)] = v3066;
-  }
-  std::vector<double> v3069(std::begin(v3062), std::end(v3062));
+  const auto& ct1071 = cc->EvalAdd(ct1069, pt512);
+  std::vector<double> v3069(std::begin(v47), std::end(v47));
   auto pt513_filled_n = cc->GetCryptoParameters()->GetElementParams()->GetRingDimension() / 2;
   auto pt513_filled = v3069;
   pt513_filled.clear();
@@ -9252,10 +9254,10 @@ std::vector<CiphertextT> mnist(CryptoContextT cc, std::vector<float> v0, std::ve
   }
   auto pt513 = cc->MakeCKKSPackedPlaintext(pt513_filled);
   const auto& ct1072 = cc->EvalAdd(ct1070, pt513);
-  const auto& ct1073 = cc->EvalAdd(ct1072, ct1071);
+  const auto& ct1073 = cc->EvalAdd(ct1071, ct1072);
   std::vector<float> v3070 = v20;
   for (auto v3071 = 0; v3071 < 1024; ++v3071) {
-    v3070[v3071 + 1024 * (0)] = v18;
+    v3070[v3071 + 1024 * (0)] = v15;
   }
   const auto& ct1074 = cc->ModReduce(ct1073);
   std::vector<double> v3075(std::begin(v3070), std::end(v3070));
@@ -9270,7 +9272,7 @@ std::vector<CiphertextT> mnist(CryptoContextT cc, std::vector<float> v0, std::ve
   const auto& ct1075 = cc->EvalMult(ct1074, pt514);
   std::vector<float> v3076 = v20;
   for (auto v3077 = 0; v3077 < 1024; ++v3077) {
-    v3076[v3077 + 1024 * (0)] = v17;
+    v3076[v3077 + 1024 * (0)] = v14;
   }
   std::vector<double> v3081(std::begin(v3076), std::end(v3076));
   auto pt515_filled_n = cc->GetCryptoParameters()->GetElementParams()->GetRingDimension() / 2;
@@ -9288,7 +9290,7 @@ std::vector<CiphertextT> mnist(CryptoContextT cc, std::vector<float> v0, std::ve
   const auto& ct1080 = cc->EvalMultNoRelin(ct1077, ct1079);
   std::vector<float> v3082 = v20;
   for (auto v3083 = 0; v3083 < 1024; ++v3083) {
-    v3082[v3083 + 1024 * (0)] = v16;
+    v3082[v3083 + 1024 * (0)] = v13;
   }
   std::vector<double> v3087(std::begin(v3082), std::end(v3082));
   auto pt516_filled_n = cc->GetCryptoParameters()->GetElementParams()->GetRingDimension() / 2;
@@ -9307,7 +9309,7 @@ std::vector<CiphertextT> mnist(CryptoContextT cc, std::vector<float> v0, std::ve
   const auto& ct1086 = cc->EvalMultNoRelin(ct1083, ct1085);
   std::vector<float> v3088 = v20;
   for (auto v3089 = 0; v3089 < 1024; ++v3089) {
-    v3088[v3089 + 1024 * (0)] = v15;
+    v3088[v3089 + 1024 * (0)] = v12;
   }
   std::vector<double> v3093(std::begin(v3088), std::end(v3088));
   auto pt517_filled_n = cc->GetCryptoParameters()->GetElementParams()->GetRingDimension() / 2;
@@ -9326,7 +9328,7 @@ std::vector<CiphertextT> mnist(CryptoContextT cc, std::vector<float> v0, std::ve
   const auto& ct1092 = cc->EvalMultNoRelin(ct1089, ct1091);
   std::vector<float> v3094 = v20;
   for (auto v3095 = 0; v3095 < 1024; ++v3095) {
-    v3094[v3095 + 1024 * (0)] = v14;
+    v3094[v3095 + 1024 * (0)] = v11;
   }
   std::vector<double> v3099(std::begin(v3094), std::end(v3094));
   auto pt518_filled_n = cc->GetCryptoParameters()->GetElementParams()->GetRingDimension() / 2;
@@ -9345,7 +9347,7 @@ std::vector<CiphertextT> mnist(CryptoContextT cc, std::vector<float> v0, std::ve
   const auto& ct1098 = cc->EvalMultNoRelin(ct1095, ct1097);
   std::vector<float> v3100 = v20;
   for (auto v3101 = 0; v3101 < 1024; ++v3101) {
-    v3100[v3101 + 1024 * (0)] = v13;
+    v3100[v3101 + 1024 * (0)] = v10;
   }
   std::vector<double> v3105(std::begin(v3100), std::end(v3100));
   auto pt519_filled_n = cc->GetCryptoParameters()->GetElementParams()->GetRingDimension() / 2;
@@ -9358,15 +9360,16 @@ std::vector<CiphertextT> mnist(CryptoContextT cc, std::vector<float> v0, std::ve
   auto pt519 = cc->MakeCKKSPackedPlaintext(pt519_filled);
   const auto& ct1099 = cc->EvalAdd(ct1098, pt519);
   const auto& ct1100 = cc->Relinearize(ct1099);
-  std::vector<float> v3106 = v12;
+  const auto& digit_decomp1 = cc->EvalFastRotationPrecompute(ct1100);
+  std::vector<float> v3106 = v9;
   for (auto v3107 = 0; v3107 < 16; ++v3107) {
     for (auto v3110 = 0; v3110 < 1018; ++v3110) {
-      size_t v3112 = v3110 % v11;
-      bool v3113 = v3112 <= v9;
+      size_t v3112 = v3110 % v16;
+      bool v3113 = v3112 <= v17;
       if (v3113) {
-        size_t v3115 = v3110 + v8;
-        size_t v3116 = v3115 % v11;
-        size_t v3117 = v3116 - v8;
+        size_t v3115 = v3110 + v18;
+        size_t v3116 = v3115 % v16;
+        size_t v3117 = v3116 - v18;
         size_t v3118 = v26 - v3107;
         size_t v3119 = v3118 - v3110;
         size_t v3120 = v3119 + v7;
@@ -9374,19 +9377,21 @@ std::vector<CiphertextT> mnist(CryptoContextT cc, std::vector<float> v0, std::ve
         size_t v3122 = v5 - v3121;
         float v3123 = v2[v3122 + 512 * (v3117)];
         v3106[v3110 + 1024 * (v3107)] = v3123;
+      } else {
       }
     }
   }
   std::vector<float> v3125 = v20;
   for (auto v3126 = 0; v3126 < 1024; ++v3126) {
-    size_t v3128 = v3126 + v8;
-    size_t v3129 = v3128 % v11;
-    bool v3130 = v3129 >= v8;
+    size_t v3128 = v3126 + v18;
+    size_t v3129 = v3128 % v16;
+    bool v3130 = v3129 >= v18;
     if (v3130) {
       v3125[v3126 + 1024 * (0)] = v19;
+    } else {
     }
   }
-  std::vector<float> v3133(std::begin(v3106) + 0 * 16, std::begin(v3106) + 0 * 16 + 1024);
+  std::vector<float> v3133(std::begin(v3106) + 0 * 1024, std::begin(v3106) + 0 * 1024 + 1024);
   const auto& ct1101 = cc->ModReduce(ct1100);
   std::vector<double> v3134(std::begin(v3133), std::end(v3133));
   auto pt520_filled_n = cc->GetCryptoParameters()->GetElementParams()->GetRingDimension() / 2;
@@ -9398,8 +9403,8 @@ std::vector<CiphertextT> mnist(CryptoContextT cc, std::vector<float> v0, std::ve
   }
   auto pt520 = cc->MakeCKKSPackedPlaintext(pt520_filled);
   const auto& ct1102 = cc->EvalMult(ct1101, pt520);
-  std::vector<float> v3135(std::begin(v3106) + 1 * 16, std::begin(v3106) + 1 * 16 + 1024);
-  const auto& ct1103 = cc->EvalRotate(ct1100, 1);
+  std::vector<float> v3135(std::begin(v3106) + 1 * 1024, std::begin(v3106) + 1 * 1024 + 1024);
+  const auto& ct1103 = cc->EvalFastRotation(ct1100, 1, 2 * cc->GetRingDimension(), digit_decomp1);
   const auto& ct1104 = cc->ModReduce(ct1103);
   std::vector<double> v3136(std::begin(v3135), std::end(v3135));
   auto pt521_filled_n = cc->GetCryptoParameters()->GetElementParams()->GetRingDimension() / 2;
@@ -9411,8 +9416,8 @@ std::vector<CiphertextT> mnist(CryptoContextT cc, std::vector<float> v0, std::ve
   }
   auto pt521 = cc->MakeCKKSPackedPlaintext(pt521_filled);
   const auto& ct1105 = cc->EvalMult(ct1104, pt521);
-  std::vector<float> v3137(std::begin(v3106) + 2 * 16, std::begin(v3106) + 2 * 16 + 1024);
-  const auto& ct1106 = cc->EvalRotate(ct1100, 2);
+  std::vector<float> v3137(std::begin(v3106) + 2 * 1024, std::begin(v3106) + 2 * 1024 + 1024);
+  const auto& ct1106 = cc->EvalFastRotation(ct1100, 2, 2 * cc->GetRingDimension(), digit_decomp1);
   const auto& ct1107 = cc->ModReduce(ct1106);
   std::vector<double> v3138(std::begin(v3137), std::end(v3137));
   auto pt522_filled_n = cc->GetCryptoParameters()->GetElementParams()->GetRingDimension() / 2;
@@ -9424,8 +9429,8 @@ std::vector<CiphertextT> mnist(CryptoContextT cc, std::vector<float> v0, std::ve
   }
   auto pt522 = cc->MakeCKKSPackedPlaintext(pt522_filled);
   const auto& ct1108 = cc->EvalMult(ct1107, pt522);
-  std::vector<float> v3139(std::begin(v3106) + 3 * 16, std::begin(v3106) + 3 * 16 + 1024);
-  const auto& ct1109 = cc->EvalRotate(ct1100, 3);
+  std::vector<float> v3139(std::begin(v3106) + 3 * 1024, std::begin(v3106) + 3 * 1024 + 1024);
+  const auto& ct1109 = cc->EvalFastRotation(ct1100, 3, 2 * cc->GetRingDimension(), digit_decomp1);
   const auto& ct1110 = cc->ModReduce(ct1109);
   std::vector<double> v3140(std::begin(v3139), std::end(v3139));
   auto pt523_filled_n = cc->GetCryptoParameters()->GetElementParams()->GetRingDimension() / 2;
@@ -9440,7 +9445,7 @@ std::vector<CiphertextT> mnist(CryptoContextT cc, std::vector<float> v0, std::ve
   const auto& ct1112 = cc->EvalAdd(ct1102, ct1105);
   const auto& ct1113 = cc->EvalAdd(ct1108, ct1111);
   const auto& ct1114 = cc->EvalAdd(ct1112, ct1113);
-  std::vector<float> v3141(std::begin(v3106) + 4 * 16, std::begin(v3106) + 4 * 16 + 1024);
+  std::vector<float> v3141(std::begin(v3106) + 4 * 1024, std::begin(v3106) + 4 * 1024 + 1024);
   std::vector<float> v3142(1020);
   std::copy(v3141.begin() + 0, v3141.begin() + 0 + 1020, v3142.begin());
   std::vector<float> v3143(4);
@@ -9457,7 +9462,7 @@ std::vector<CiphertextT> mnist(CryptoContextT cc, std::vector<float> v0, std::ve
   }
   auto pt524 = cc->MakeCKKSPackedPlaintext(pt524_filled);
   const auto& ct1115 = cc->EvalMult(ct1101, pt524);
-  std::vector<float> v3147(std::begin(v3106) + 5 * 16, std::begin(v3106) + 5 * 16 + 1024);
+  std::vector<float> v3147(std::begin(v3106) + 5 * 1024, std::begin(v3106) + 5 * 1024 + 1024);
   std::vector<float> v3148(1020);
   std::copy(v3147.begin() + 0, v3147.begin() + 0 + 1020, v3148.begin());
   std::vector<float> v3149(4);
@@ -9474,7 +9479,7 @@ std::vector<CiphertextT> mnist(CryptoContextT cc, std::vector<float> v0, std::ve
   }
   auto pt525 = cc->MakeCKKSPackedPlaintext(pt525_filled);
   const auto& ct1116 = cc->EvalMult(ct1104, pt525);
-  std::vector<float> v3153(std::begin(v3106) + 6 * 16, std::begin(v3106) + 6 * 16 + 1024);
+  std::vector<float> v3153(std::begin(v3106) + 6 * 1024, std::begin(v3106) + 6 * 1024 + 1024);
   std::vector<float> v3154(1020);
   std::copy(v3153.begin() + 0, v3153.begin() + 0 + 1020, v3154.begin());
   std::vector<float> v3155(4);
@@ -9491,7 +9496,7 @@ std::vector<CiphertextT> mnist(CryptoContextT cc, std::vector<float> v0, std::ve
   }
   auto pt526 = cc->MakeCKKSPackedPlaintext(pt526_filled);
   const auto& ct1117 = cc->EvalMult(ct1107, pt526);
-  std::vector<float> v3159(std::begin(v3106) + 7 * 16, std::begin(v3106) + 7 * 16 + 1024);
+  std::vector<float> v3159(std::begin(v3106) + 7 * 1024, std::begin(v3106) + 7 * 1024 + 1024);
   std::vector<float> v3160(1020);
   std::copy(v3159.begin() + 0, v3159.begin() + 0 + 1020, v3160.begin());
   std::vector<float> v3161(4);
@@ -9512,7 +9517,7 @@ std::vector<CiphertextT> mnist(CryptoContextT cc, std::vector<float> v0, std::ve
   const auto& ct1120 = cc->EvalAdd(ct1117, ct1118);
   const auto& ct1121 = cc->EvalAdd(ct1119, ct1120);
   const auto& ct1122 = cc->EvalRotate(ct1121, 4);
-  std::vector<float> v3165(std::begin(v3106) + 8 * 16, std::begin(v3106) + 8 * 16 + 1024);
+  std::vector<float> v3165(std::begin(v3106) + 8 * 1024, std::begin(v3106) + 8 * 1024 + 1024);
   std::vector<float> v3166(1016);
   std::copy(v3165.begin() + 0, v3165.begin() + 0 + 1016, v3166.begin());
   std::vector<float> v3167(8);
@@ -9529,7 +9534,7 @@ std::vector<CiphertextT> mnist(CryptoContextT cc, std::vector<float> v0, std::ve
   }
   auto pt528 = cc->MakeCKKSPackedPlaintext(pt528_filled);
   const auto& ct1123 = cc->EvalMult(ct1101, pt528);
-  std::vector<float> v3171(std::begin(v3106) + 9 * 16, std::begin(v3106) + 9 * 16 + 1024);
+  std::vector<float> v3171(std::begin(v3106) + 9 * 1024, std::begin(v3106) + 9 * 1024 + 1024);
   std::vector<float> v3172(1016);
   std::copy(v3171.begin() + 0, v3171.begin() + 0 + 1016, v3172.begin());
   std::vector<float> v3173(8);
@@ -9546,7 +9551,7 @@ std::vector<CiphertextT> mnist(CryptoContextT cc, std::vector<float> v0, std::ve
   }
   auto pt529 = cc->MakeCKKSPackedPlaintext(pt529_filled);
   const auto& ct1124 = cc->EvalMult(ct1104, pt529);
-  std::vector<float> v3177(std::begin(v3106) + 10 * 16, std::begin(v3106) + 10 * 16 + 1024);
+  std::vector<float> v3177(std::begin(v3106) + 10 * 1024, std::begin(v3106) + 10 * 1024 + 1024);
   std::vector<float> v3178(1016);
   std::copy(v3177.begin() + 0, v3177.begin() + 0 + 1016, v3178.begin());
   std::vector<float> v3179(8);
@@ -9563,7 +9568,7 @@ std::vector<CiphertextT> mnist(CryptoContextT cc, std::vector<float> v0, std::ve
   }
   auto pt530 = cc->MakeCKKSPackedPlaintext(pt530_filled);
   const auto& ct1125 = cc->EvalMult(ct1107, pt530);
-  std::vector<float> v3183(std::begin(v3106) + 11 * 16, std::begin(v3106) + 11 * 16 + 1024);
+  std::vector<float> v3183(std::begin(v3106) + 11 * 1024, std::begin(v3106) + 11 * 1024 + 1024);
   std::vector<float> v3184(1016);
   std::copy(v3183.begin() + 0, v3183.begin() + 0 + 1016, v3184.begin());
   std::vector<float> v3185(8);
@@ -9584,7 +9589,7 @@ std::vector<CiphertextT> mnist(CryptoContextT cc, std::vector<float> v0, std::ve
   const auto& ct1128 = cc->EvalAdd(ct1125, ct1126);
   const auto& ct1129 = cc->EvalAdd(ct1127, ct1128);
   const auto& ct1130 = cc->EvalRotate(ct1129, 8);
-  std::vector<float> v3189(std::begin(v3106) + 12 * 16, std::begin(v3106) + 12 * 16 + 1024);
+  std::vector<float> v3189(std::begin(v3106) + 12 * 1024, std::begin(v3106) + 12 * 1024 + 1024);
   std::vector<float> v3190(1012);
   std::copy(v3189.begin() + 0, v3189.begin() + 0 + 1012, v3190.begin());
   std::vector<float> v3191(12);
@@ -9601,7 +9606,7 @@ std::vector<CiphertextT> mnist(CryptoContextT cc, std::vector<float> v0, std::ve
   }
   auto pt532 = cc->MakeCKKSPackedPlaintext(pt532_filled);
   const auto& ct1131 = cc->EvalMult(ct1101, pt532);
-  std::vector<float> v3195(std::begin(v3106) + 13 * 16, std::begin(v3106) + 13 * 16 + 1024);
+  std::vector<float> v3195(std::begin(v3106) + 13 * 1024, std::begin(v3106) + 13 * 1024 + 1024);
   std::vector<float> v3196(1012);
   std::copy(v3195.begin() + 0, v3195.begin() + 0 + 1012, v3196.begin());
   std::vector<float> v3197(12);
@@ -9618,7 +9623,7 @@ std::vector<CiphertextT> mnist(CryptoContextT cc, std::vector<float> v0, std::ve
   }
   auto pt533 = cc->MakeCKKSPackedPlaintext(pt533_filled);
   const auto& ct1132 = cc->EvalMult(ct1104, pt533);
-  std::vector<float> v3201(std::begin(v3106) + 14 * 16, std::begin(v3106) + 14 * 16 + 1024);
+  std::vector<float> v3201(std::begin(v3106) + 14 * 1024, std::begin(v3106) + 14 * 1024 + 1024);
   std::vector<float> v3202(1012);
   std::copy(v3201.begin() + 0, v3201.begin() + 0 + 1012, v3202.begin());
   std::vector<float> v3203(12);
@@ -9635,7 +9640,7 @@ std::vector<CiphertextT> mnist(CryptoContextT cc, std::vector<float> v0, std::ve
   }
   auto pt534 = cc->MakeCKKSPackedPlaintext(pt534_filled);
   const auto& ct1133 = cc->EvalMult(ct1107, pt534);
-  std::vector<float> v3207(std::begin(v3106) + 15 * 16, std::begin(v3106) + 15 * 16 + 1024);
+  std::vector<float> v3207(std::begin(v3106) + 15 * 1024, std::begin(v3106) + 15 * 1024 + 1024);
   std::vector<float> v3208(1012);
   std::copy(v3207.begin() + 0, v3207.begin() + 0 + 1012, v3208.begin());
   std::vector<float> v3209(12);
@@ -9658,40 +9663,39 @@ std::vector<CiphertextT> mnist(CryptoContextT cc, std::vector<float> v0, std::ve
   const auto& ct1138 = cc->EvalRotate(ct1137, 12);
   const auto& ct1139 = cc->EvalAdd(ct1114, ct1122);
   const auto& ct1140 = cc->EvalAdd(ct1130, ct1138);
-  std::vector<double> v3214(std::begin(v3125), std::end(v3125));
+  const auto& ct1141 = cc->EvalAdd(ct1139, ct1140);
+  const auto& ct1142 = cc->EvalRotate(ct1141, 256);
+  const auto& ct1143 = cc->EvalAdd(ct1141, ct1142);
+  const auto& ct1144 = cc->EvalRotate(ct1143, 128);
+  const auto& ct1145 = cc->EvalAdd(ct1143, ct1144);
+  const auto& ct1146 = cc->EvalRotate(ct1145, 64);
+  const auto& ct1147 = cc->EvalAdd(ct1145, ct1146);
+  const auto& ct1148 = cc->EvalRotate(ct1147, 32);
+  const auto& ct1149 = cc->EvalAdd(ct1147, ct1148);
+  const auto& ct1150 = cc->EvalRotate(ct1149, 16);
+  std::vector<float> v3214 = v20;
+  for (auto v3215 = 0; v3215 < 1024; ++v3215) {
+    size_t v3217 = v3215 + v18;
+    size_t v3218 = v3217 % v16;
+    bool v3219 = v3218 >= v18;
+    if (v3219) {
+      size_t v3221 = v3215 % v16;
+      float v3222 = v3[v3221];
+      v3214[v3215 + 1024 * (0)] = v3222;
+    } else {
+    }
+  }
+  std::vector<double> v3225(std::begin(v3214), std::end(v3214));
   auto pt536_filled_n = cc->GetCryptoParameters()->GetElementParams()->GetRingDimension() / 2;
-  auto pt536_filled = v3214;
+  auto pt536_filled = v3225;
   pt536_filled.clear();
   pt536_filled.reserve(pt536_filled_n);
   for (auto i = 0; i < pt536_filled_n; ++i) {
-    pt536_filled.push_back(v3214[i % v3214.size()]);
+    pt536_filled.push_back(v3225[i % v3225.size()]);
   }
   auto pt536 = cc->MakeCKKSPackedPlaintext(pt536_filled);
-  const auto& ct1141 = cc->EvalAdd(ct1140, pt536);
-  const auto& ct1142 = cc->EvalAdd(ct1139, ct1141);
-  const auto& ct1143 = cc->EvalRotate(ct1142, 512);
-  const auto& ct1144 = cc->EvalAdd(ct1142, ct1143);
-  const auto& ct1145 = cc->EvalRotate(ct1144, 256);
-  const auto& ct1146 = cc->EvalAdd(ct1144, ct1145);
-  const auto& ct1147 = cc->EvalRotate(ct1146, 128);
-  const auto& ct1148 = cc->EvalAdd(ct1146, ct1147);
-  const auto& ct1149 = cc->EvalRotate(ct1148, 64);
-  const auto& ct1150 = cc->EvalAdd(ct1148, ct1149);
-  const auto& ct1151 = cc->EvalRotate(ct1150, 32);
-  const auto& ct1152 = cc->EvalAdd(ct1150, ct1151);
-  const auto& ct1153 = cc->EvalRotate(ct1152, 16);
-  std::vector<float> v3215 = v20;
-  for (auto v3216 = 0; v3216 < 1024; ++v3216) {
-    size_t v3218 = v3216 + v8;
-    size_t v3219 = v3218 % v11;
-    bool v3220 = v3219 >= v8;
-    if (v3220) {
-      size_t v3222 = v3216 % v11;
-      float v3223 = v3[v3222];
-      v3215[v3216 + 1024 * (0)] = v3223;
-    }
-  }
-  std::vector<double> v3226(std::begin(v3215), std::end(v3215));
+  const auto& ct1151 = cc->EvalAdd(ct1149, pt536);
+  std::vector<double> v3226(std::begin(v3125), std::end(v3125));
   auto pt537_filled_n = cc->GetCryptoParameters()->GetElementParams()->GetRingDimension() / 2;
   auto pt537_filled = v3226;
   pt537_filled.clear();
@@ -9700,14 +9704,14 @@ std::vector<CiphertextT> mnist(CryptoContextT cc, std::vector<float> v0, std::ve
     pt537_filled.push_back(v3226[i % v3226.size()]);
   }
   auto pt537 = cc->MakeCKKSPackedPlaintext(pt537_filled);
-  const auto& ct1154 = cc->EvalAdd(ct1152, pt537);
-  const auto& ct1155 = cc->EvalAdd(ct1154, ct1153);
-  std::vector<CiphertextT> v3227(1);
-  const auto& ct1156 = cc->ModReduce(ct1155);
-  v3227[0] = ct1156;
+  const auto& ct1152 = cc->EvalAdd(ct1150, pt537);
+  const auto& ct1153 = cc->EvalAdd(ct1151, ct1152);
+  std::vector<MutableCiphertextT> v3227(1);
+  const auto& ct1154 = cc->ModReduce(ct1153);
+  v3227[0] = ct1154;
   return v3227;
 }
-std::vector<CiphertextT> mnist__encrypt__arg4(CryptoContextT cc, std::vector<float> v0, PublicKeyT pk) {
+std::vector<MutableCiphertextT> mnist__encrypt__arg4(CryptoContextT cc, std::vector<float> v0, PublicKeyT pk) {
   std::vector<float> v1(1024, 0);
   [[maybe_unused]] size_t v2 = 0;
   [[maybe_unused]] size_t v3 = 1;
@@ -9717,7 +9721,7 @@ std::vector<CiphertextT> mnist__encrypt__arg4(CryptoContextT cc, std::vector<flo
     float v8 = v0[v6 + 784 * (0)];
     v5[v6 + 1024 * (0)] = v8;
   }
-  std::vector<float> v10(std::begin(v5) + 0 * 1, std::begin(v5) + 0 * 1 + 1024);
+  std::vector<float> v10(std::begin(v5) + 0 * 1024, std::begin(v5) + 0 * 1024 + 1024);
   std::vector<double> v11(std::begin(v10), std::end(v10));
   auto pt_filled_n = cc->GetCryptoParameters()->GetElementParams()->GetRingDimension() / 2;
   auto pt_filled = v11;
@@ -9728,10 +9732,10 @@ std::vector<CiphertextT> mnist__encrypt__arg4(CryptoContextT cc, std::vector<flo
   }
   auto pt = cc->MakeCKKSPackedPlaintext(pt_filled);
   const auto& ct = cc->Encrypt(pk, pt);
-  std::vector<CiphertextT> v12{ct};
+  const std::vector<MutableCiphertextT> v12 = {ct};
   return v12;
 }
-std::vector<float> mnist__decrypt__result0(CryptoContextT cc, std::vector<CiphertextT> v0, PrivateKeyT sk) {
+std::vector<float> mnist__decrypt__result0(CryptoContextT cc, std::vector<MutableCiphertextT> v0, PrivateKeyT sk) {
   [[maybe_unused]] size_t v1 = 1024;
   [[maybe_unused]] size_t v2 = 16;
   [[maybe_unused]] size_t v3 = 6;
@@ -9754,6 +9758,7 @@ std::vector<float> mnist__decrypt__result0(CryptoContextT cc, std::vector<Cipher
       size_t v15 = v9 % v2;
       float v16 = v7[v9 + 1024 * (0)];
       v8[v15 + 10 * (0)] = v16;
+    } else {
     }
   }
   return v8;
