@@ -2,7 +2,7 @@ cmake_minimum_required(VERSION 3.18 FATAL_ERROR)
 project(mnist_openfhe)
 
 find_package(Torch REQUIRED)
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${TORCH_CXX_FLAGS}")
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${TORCH_CXX_FLAGS} -Wno-error=sign-compare")
 
 find_package(OpenFHE CONFIG REQUIRED)
 if (OpenFHE_FOUND)
@@ -16,7 +16,7 @@ else()
     message(FATAL_ERROR "PACKAGE OpenFHE NOT FOUND")
 endif ()
 
-set( CMAKE_CXX_FLAGS "${OpenFHE_CXX_FLAGS} -Werror")
+set( CMAKE_CXX_FLAGS "${OpenFHE_CXX_FLAGS} -Werror -Wno-error=sign-compare")
 add_link_options(-Wl,--no-as-needed)
 
 include_directories(${CMAKE_CURRENT_SOURCE_DIR}/include)
