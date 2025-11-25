@@ -1,4 +1,5 @@
 load("@heir//tests/Examples/openfhe:test.bzl", "openfhe_interpreter_test")
+load("@heir//bazel/openfhe:copts.bzl", "MAYBE_OPENFHE_LINKOPTS", "MAYBE_OPENMP_COPTS")
 
 # See README.md for setup required to run these tests
 load("@rules_cc//cc:cc_binary.bzl", "cc_binary")
@@ -36,6 +37,11 @@ cc_binary(
         "manual",
         "notap",
     ],
+    copts = select({
+        "@heir//:config_openfhe_enable_timing": ["-DOPENFHE_ENABLE_TIMING"],
+        "//conditions:default": [],
+    }) + MAYBE_OPENMP_COPTS,
+    linkopts = MAYBE_OPENFHE_LINKOPTS,
     deps = [
         "@bazel_tools//tools/cpp/runfiles",
         "@heir//lib/Target/OpenFhePke:Interpreter",

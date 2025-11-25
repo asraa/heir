@@ -510,8 +510,7 @@ void Interpreter::visit(arith::FloorDivSIOp op) {
   auto lhs = env.at(op.getLhs());
   auto rhs = env.at(op.getRhs());
   auto result = applyBinop(
-      op, lhs, rhs,
-      [](int a, int b) { return std::floor(static_cast<float>(a) / b); },
+      op, lhs, rhs, [](int a, int b) { return std::floor(static_cast<float>(a) / b); },
       [](float a, float b) { return std::floor(a / b); });
   env.insert_or_assign(op.getResult(), std::move(result));
 }
@@ -1465,6 +1464,8 @@ void Interpreter::visit(GenParamsOp op) {
   if (op.getScalingTechniqueFixedManual())
     params->SetScalingTechnique(FIXEDMANUAL);
 
+  params->SetSecurityLevel(HEStd_NotSet);
+  params->SetScalingTechnique(FIXEDMANUAL);
   params_.insert_or_assign(op.getResult(), std::move(params));
 }
 
