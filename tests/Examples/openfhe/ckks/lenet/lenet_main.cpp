@@ -54,7 +54,7 @@ int main(int argc, char* argv[]) {
   mlir::MLIRContext context;
   mlir::heir::openfhe::initContext(context);
   mlir::OwningOpRef<mlir::ModuleOp> module = parseSourceFile<mlir::ModuleOp>(
-      "tests/Examples/openfhe/ckks/lenet/lenet_fixed.openfhe.mlir", &context);
+      "/tmp/lenet.out.mlir", &context);
 
 #ifdef OPENFHE_ENABLE_TIMING
   std::cout << "Running with timing..." << std::endl;

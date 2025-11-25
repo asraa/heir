@@ -1464,7 +1464,11 @@ void Interpreter::visit(GenParamsOp op) {
   if (op.getScalingTechniqueFixedManual())
     params->SetScalingTechnique(FIXEDMANUAL);
 
+  params->SetRingDim(2048);
   params->SetSecurityLevel(HEStd_NotSet);
+  // first mod shouldn't exceed scaling mod size by too much
+  params->SetFirstModSize(60);
+  params->SetScalingModSize(55);
   params->SetScalingTechnique(FIXEDMANUAL);
   params_.insert_or_assign(op.getResult(), std::move(params));
 }

@@ -1605,8 +1605,9 @@ LogicalResult OpenFhePkeEmitter::printOperation(SetupBootstrapOp op) {
   auto contextName = variableNames->getNameForValue(op.getCryptoContext());
   os << contextName << "->EvalBootstrapSetup({";
   os << op.getLevelBudgetEncode().getValue() << ", ";
-  os << op.getLevelBudgetDecode().getValue();
-  os << "});\n";
+  os << op.getLevelBudgetDecode().getValue() << "}, ";
+  os << "{0, 0}, 0, 10" << 
+  os << ");\n";
   return success();
 }
 
