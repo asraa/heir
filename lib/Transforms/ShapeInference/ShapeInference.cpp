@@ -18,6 +18,7 @@ namespace heir {
 #include "lib/Transforms/ShapeInference/ShapeInference.h.inc"
 
 namespace {
+
 FailureOr<SmallVector<int64_t>> getShapeFromArrayAttr(ArrayAttr shapeAttr,
                                                       ShapedType shapedType,
                                                       Location loc) {
